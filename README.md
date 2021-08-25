@@ -10,4 +10,6 @@ My lecture notes during times at UCL. Each of the folder contains a note for tha
 
 In COMP0083, I also added some notes from [EE364a: Convex Optimization I](https://web.stanford.edu/class/ee364a/) to refresh some of my memory for convex optimization. STAT0027, on the other hands, is wholly based on John A. Rice's [Mathematical Statistics and Data Analysis](https://www.amazon.co.uk/Mathematical-Statistics-Data-Analysis-John/dp/0495110892). 
 
-Currently it is a **draft** i.e poorly worded, direct copy, bad grammar etc. If there is any mistakes on my notes, feels free to make and issue and/or create a pull request. 
+Currently it is a **draft** i.e poorly worded, direct copy, bad grammar etc. There are some more courses that I took, such as: *COMP0089: Reinforcement Learning*, *COMP0120: Numerical Optimisation* and *COMP0168: Machine Learning Seminar* that I haven't had time to edits my notes (to a more coherent degree), stay tune!!
+
+If there is any mistakes on my notes, feels free to make and issue and/or create a pull request. 
