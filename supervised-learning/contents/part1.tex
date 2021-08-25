@@ -1,0 +1,446 @@
+\section{Introduction to Machine Learning Problem}
+
+\begin{definition}{\textbf{(Machine Learning Problem)}}
+    Define input space and output space $\mathcal{X} \subseteq \mathbb{R}^d$ and $\mathcal{Y}$, respectively. Given the training data points:
+    \begin{equation*}
+        \brackc{(\boldsymbol x_1, y_1),\dots,(\boldsymbol x_m, y_m)} \subset \mathcal{X} \times \mathcal{Y}
+    \end{equation*}
+    The goal is to infer the function $f_S(\boldsymbol x_i)\approx y_i$, which we can use in the future data. There are $2$ types of problems, when: $y \in \brackc{-1, 1}$, the problem is classification and if $y \in \mathbb{R}$, the problem is regression.
+\end{definition}
+
+\begin{definition}{\textbf{(Learning Algorithm)}}
+    Given the training set $S = \brackc{(\boldsymbol x_i, y_i)}^m_{i=1} \subset \mathcal{X} \times \mathcal{Y}$. The learning algorithm perform a mapping $S \mapsto f_S$, where the new input can be predicted as $f_S(\boldsymbol x)$.
+\end{definition}
+
+\begin{definition}{\textbf{(Binary Classification)}}
+    Given the training domain to be $\mathcal{X} = \mathbb{R}^2$  for $\boldsymbol x = (x_1,x_2)$ and $\mathcal{Y} = \brackc{0, 1}$, our predictor is defined as:
+    \begin{equation*}
+        f(\boldsymbol x) = \begin{cases}
+            0 & \boldsymbol w^T\boldsymbol x + b > 0 \\
+            1 & \boldsymbol w^T\boldsymbol x + b \le 0 \\
+        \end{cases}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Mean Square Error)}}
+    In most of the machine learning problem, we would like to find the predictor to minimize the following loss (for $m$ size dataset):
+    \begin{equation*}
+        \frac{1}{m}\sum^m_{i=1}(y_i - \hat{y}_i)^2 = \frac{1}{m}\sum^m_{i=1}(y_i - \boldsymbol w^T\boldsymbol x)^2 
+    \end{equation*}
+    This is called mean-square error (MSE).
+\end{definition}
+
+\begin{lemma}
+    Given the input and output dataset, which can be represented in matrix and vector notation:
+    \begin{equation*}
+        \boldsymbol X = \begin{pmatrix}
+            x_{11} & x_{12} & \cdots & x_{1n} \\
+            x_{21} & x_{22} & \cdots & x_{2n} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            x_{n1} & x_{n2} & \cdots & x_{nn} \\
+        \end{pmatrix} \qquad \boldsymbol y = \begin{pmatrix}
+            y_1 \\ y_2 \\ \vdots \\ y_m
+        \end{pmatrix}
+    \end{equation*}
+    Given the predictor to be $f(\boldsymbol x) = \boldsymbol w^T\boldsymbol x$, then the mean-square error can be denoted as:
+    \begin{equation*}
+        \mathcal{E}_\text{emp}(S, \boldsymbol w) = \frac{1}{m} (\boldsymbol X^T\boldsymbol w - \boldsymbol y)^T(\boldsymbol X^T\boldsymbol w - \boldsymbol y)
+    \end{equation*}
+    where the dataset is $S = (\boldsymbol X, \boldsymbol w)$. 
+\end{lemma}
+\begin{proof}
+    Consider the MSE to be, which we can consider the matrix multiplication:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{m}\sum^m_{i=1} (y_i - \hat{y}_i)^2 &= \frac{1}{m}\sum^m_{i=1}(y_i - \boldsymbol w^T\boldsymbol x)^2 \\
+        &= \frac{1}{m}\sum^m_{i=1}\bracka{y_i - \sum^n_{j=1}w_jx_{ij}}^2 \\
+        &= \frac{1}{m}(\boldsymbol X^T\boldsymbol w - \boldsymbol y)^T(\boldsymbol X^T\boldsymbol w - \boldsymbol y)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    The solution to the mean-square error is given by:
+    \begin{equation*}
+        \boldsymbol w = (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol y
+    \end{equation*}
+    Assuming that $\boldsymbol X^T\boldsymbol X$ is invertible. 
+\end{proposition}
+\begin{proof}
+    Let's consider the derivative of $\nabla_{\boldsymbol w}\mathcal{E}_\text{emp}(S, \boldsymbol w)$, which is given as:
+    \begin{equation*}
+    \begin{aligned}
+        &\nabla_{\boldsymbol w} \Big[ (\boldsymbol X\boldsymbol w - \boldsymbol y)^T(\boldsymbol X\boldsymbol w - \boldsymbol y) \Big] = \boldsymbol 0 \\
+        \iff& \bracka{\sum^m_{i=1}\frac{\partial}{\partial w_1}\bracka{\sum^n_{j=1} x_{ij}w_j - y_i }^2, \dots, \sum^m_{i=1}\frac{\partial}{\partial w_n}\bracka{\sum^n_{j=1} x_{ij}w_j - y_i }^2}^T = \boldsymbol 0
+    \end{aligned}
+    \end{equation*}
+    Let's consider the derivative of each variable $w_k$
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial \mathcal{E}_\text{emp}(S, \boldsymbol w)}{\partial w_k} &= \frac{2}{m} \sum^m_{i=1} (\boldsymbol w^T\boldsymbol x_i - y_i)\frac{\partial }{\partial w_k}\boldsymbol w^T\boldsymbol x_i \\
+        &= \frac{2}{m}\sum^m_{i=1}(\boldsymbol w^T\boldsymbol x_i - y_i)\boldsymbol x_{ik}
+    \end{aligned}
+    \end{equation*}
+    Let's consider the simpler case in $2$ dimensions with $\boldsymbol w = (w_1, w_2)^T$, then setting this to zero gives us:
+    \begin{equation*}
+        \sum^m_{i=1} (x_{ij}x_{i1}w_1 + x_{ik}x_{i2}w_2) = \sum^m_{i=1}x_{ik}y_i
+    \end{equation*}
+    for $k=1,2$. In vector notation, this is equivalent to $\sum^m_{i=1}\boldsymbol x_i\boldsymbol x_i^T\boldsymbol w = \sum^m_{i=1}\boldsymbol x_iy_i$ or it is equivalent to matrix notation is: $\boldsymbol X^T\boldsymbol X\boldsymbol w = \boldsymbol X^T\boldsymbol y$, taking the inverse gives us the required answer. 
+\end{proof}
+
+\begin{proposition}
+    Bias term for the predictor can be added i.e $f(\boldsymbol x) = \boldsymbol w^T\boldsymbol x + b$. 
+    \begin{equation*}
+        \begin{bmatrix}
+            \boldsymbol X^T\boldsymbol X & \boldsymbol X^T\boldsymbol 1 \\
+            \boldsymbol 1^T\boldsymbol X & m 
+        \end{bmatrix}\begin{bmatrix}
+            \boldsymbol w \\ b
+        \end{bmatrix} = \begin{bmatrix}
+            \boldsymbol x^T\boldsymbol y \\
+            \boldsymbol 1^T\boldsymbol y
+        \end{bmatrix}
+    \end{equation*} 
+    For dataset of size $m$, and $\boldsymbol 1$ is the vector of elements $1$. 
+\end{proposition}
+\begin{proof}
+    This is equivalent to modify the dataset as $(\boldsymbol x^T, 1)$ with the same label $y$. Furthermore, the weight can be represented as $(\boldsymbol w^T, b)$. Now the linear equation (comes from the derivative) is:
+    \begin{equation*}
+    \begin{aligned}
+        &(\boldsymbol X^T\boldsymbol X)\boldsymbol w = \boldsymbol X^T\boldsymbol 1b = \boldsymbol X^T\boldsymbol y \\
+        &\boldsymbol 1^T\boldsymbol X\boldsymbol w + mb = \boldsymbol 1^T\boldsymbol y
+    \end{aligned}
+    \end{equation*}
+    This system of equation can be re-written as the matrix equation in the proposition, and so it is proven.
+\end{proof}
+
+\begin{definition}{\textbf{(Nearest Neighbour)}}
+    There are difference approach to training the predictor. We consider the set $N(\boldsymbol x; k)$ be the set of k-nearest (calculated using metrics) points to the point $\boldsymbol x$ and its associated index set $I_{\boldsymbol x}$ i.e:
+    \begin{equation*}
+        I_{\boldsymbol x} = \brackc{i : \boldsymbol x_i \in N(\boldsymbol x ; k)}
+    \end{equation*}
+    The predictor function (for classification) is given by:
+    \begin{equation*}
+        f(\boldsymbol x) = \begin{cases}
+            1 & \text{ if } \abs{\brackc{y_i = 1 : i \in I_{\boldsymbol x}}} > \abs{\brackc{y_i = 0 : i \in I_{\boldsymbol x}}} \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    On the other hand, the predictor for regression is defined by:
+    \begin{equation*}
+        f(\boldsymbol x) = \frac{1}{k}\sum_{i\in I_{\boldsymbol x}} y_i
+    \end{equation*}
+\end{definition}
+
+\subsection{Bayes Estimator}
+
+\begin{definition}{\textbf{(Expected Error)}}
+    Assuming data is obtained by sampling iid from a fixed and unknown probability density $p(\boldsymbol x, y)$. The expected error of the predictor is $f$ is given by:
+    \begin{equation*}
+        \mathcal{E}(f) = \mathbb{E}\brackb{\bracka{y - f(\boldsymbol x)}^2} = \iint (y - f(\boldsymbol x))^2p(\boldsymbol x, y)\dby \boldsymbol x\dby y
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    The goal of our learning algorithm is to compute the optimal solution $f^*$ as we have:
+    \begin{equation*}
+        f^* = \argmin{f} \mathcal{E}(f)
+    \end{equation*}
+    However, to compute $f^*$, we have to know $p$. Please note that for the binary classification i.e where $\mathcal{Y} = \brackc{0, 1}$ and for given predictor $f$, the error $\mathcal{E}(f)$ is the average number of mistake of $f$. 
+\end{remark}
+
+\begin{proposition}
+    The optiaml solution $f^*$ for regression problem $\mathcal{Y} = \mathbb{R}$, with square expected error. We can show that the it is:
+    \begin{equation*}
+        f^*(\boldsymbol x)  = \int_\mathcal{Y} y \dby p(y|\boldsymbol x)
+    \end{equation*}
+    We assume that the joint distribution $p(y, \boldsymbol x)$ can be decomposed as $p(y | \boldsymbol x)p(\boldsymbol x)$.
+\end{proposition}
+\begin{proof}
+    We have the following decomposition of the probability:
+    \begin{equation*}
+        \mathcal{E}(f) = \int_\mathcal{X} \brackc{\int_\mathcal{Y} (y - f(\boldsymbol x))^2 \dby p(y|\boldsymbol x) }\dby p(\boldsymbol x)
+    \end{equation*}
+    We consider fixed $\boldsymbol x = \boldsymbol x'$ and given the following stort-hand, we have $e = \mathcal{E}(f(\boldsymbol x'))$ and $z = f(\boldsymbol x')$, and so we have:
+    \begin{equation*}
+        e \propto \int_\mathcal{Y} (y-z)^2 \dby p(y | \boldsymbol x')
+    \end{equation*}
+    The differentiation and setting this to zero giving us:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial e}{\partial z} = -2\int_{\mathcal{Y}}(y - z)\dby p(y | \boldsymbol x') \\
+        \iff& \begin{aligned}[t]
+            0 &= \int_\mathcal{Y} y\dby p(y | \boldsymbol x')  - z\int_\mathcal{Y} \dby p(y | \boldsymbol x') \\
+            &= z - \int_\mathcal{Y} y \dby p(y | \boldsymbol x')
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This implies that $z = \int_\mathcal{Y}y\dby p(y | \boldsymbol x')$ and so the optimal predictor is equal to what we required.
+\end{proof}
+
+\subsection{Bias and Variance of Learning Algorithm}
+
+\begin{remark}
+    Assuming that there is a relationship between $(\boldsymbol x, y)$ in the dataset, which is given by $y = F(\boldsymbol x) + \varepsilon$ where $\mathbb{E}[\varepsilon] = 0$ and finite variance. Then the optimal predictor can be shown to be:
+    \begin{equation*}
+        f^*(\boldsymbol x) = \mathbb{E}[y | \boldsymbol x] = F(\boldsymbol x)
+    \end{equation*}
+\end{remark}
+
+\begin{remark} 
+    We want to consider the expected error by an arbitrary learner $A_\mathcal{S}(\boldsymbol x)$. The expected error is:
+    \begin{equation*}
+        \mathcal{E}(A_\mathcal{S}(\boldsymbol x')) = \mathbb{E}[(y' - A_\mathcal{S}(\boldsymbol x))^2]
+    \end{equation*}
+    where $y'$ is sample from the marginal $p(y | \boldsymbol x')$.
+\end{remark}
+
+\begin{lemma}
+    We can show that:
+    \begin{equation*}
+        \mathbb{E}[(Z - \mathbb{E}[X])^2] = \mathbb{E}[Z^2] + \mathbb{E}[Z]^2
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[(Z - \mathbb{E}[Z])^2] &= \mathbb{E}[Z^2 - 2Z + \mathbb{E}[Z]^2] \\
+        &= \mathbb{E}[Z^2] - 2 \mathbb{E}[Z]^2 + \mathbb{E}[Z]^2 \\
+        &= \mathbb{E}[Z^2] + \mathbb{E}[Z]^2
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}{\textbf{(Decomposing)}}
+    The square error $\mathcal{E}(A(\boldsymbol x'))$ can be decomposed to:
+    \begin{equation*}
+        \mathbb{E}[(y - f^*(\boldsymbol x'))^2] + (f^*(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2 + \mathbb{E}[(A_\mathcal{S}(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2]
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We can decomposed the error of the learner $\mathcal{E}(A_\mathcal{S}(\boldsymbol x'))$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[(y' - &A_\mathcal{S}(\boldsymbol x'))^2] = \mathbb{E}[(y')^2 - 2y'A_\mathcal{S}(\boldsymbol x') + A_\mathcal{S}(\boldsymbol x')^2] \\
+        &= \mathbb{E}[(y' - f^*(\boldsymbol x'))^2] + f^*(\boldsymbol x')^2 - 2f^*(\boldsymbol x')\mathbb{E}[A_\mathcal{S}(\boldsymbol x')] + \mathbb{E}[(A_\mathcal{S}(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2] + \mathbb{E}[A_\mathcal{S}(\boldsymbol x')]^2 \\
+        &= \mathbb{E}[(y - f^*(\boldsymbol x'))^2] + (f^*(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2 + \mathbb{E}[(A_\mathcal{S}(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2]
+    \end{aligned}
+    \end{equation*}
+    Let's show that the second equality is actually equal to the first equation:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{E}[(y' - \mathbb{E}[y' | \boldsymbol x'])^2] + \mathbb{E}[y' | \boldsymbol x']^2 - 2\mathbb{E}[y' | \boldsymbol x']\mathbb{E}[A_\mathcal{S}(\boldsymbol x')] + \mathbb{E}[(A_\mathcal{S}(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2] + \mathbb{E}[A_\mathcal{S}(\boldsymbol x')]^2 \\
+        =&\mathbb{E}[(y')^2] - \mathbb{E}[y' | \boldsymbol x]^2 + \mathbb{E}[y' | \boldsymbol x']^2 - 2\mathbb{E}[y' | \boldsymbol x']\mathbb{E}[A_\mathcal{S}(\boldsymbol x')] + \mathbb{E}[A_\mathcal{S}(\boldsymbol x')^2] - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')]^2  + \mathbb{E}[A_\mathcal{S}(\boldsymbol x')]^2 \\
+        =&\mathbb{E}[(y')^2] - 2\mathbb{E}[y' | \boldsymbol x']\mathbb{E}[A_\mathcal{S}(\boldsymbol x')] + \mathbb{E}[A_\mathcal{S}(\boldsymbol x')^2] \\
+        =&\mathbb{E}[(y' - A_\mathcal{S}(\boldsymbol x'))^2] \\
+    \end{aligned}
+    \end{equation*}
+    As required.
+\end{proof}
+
+\begin{remark}{\textbf{(Bias and Variance Tradeoff)}}
+    We can see that each term in the decomposition has the following contribution:
+    \begin{equation*}
+        \underbrace{\mathbb{E}[(y - f^*(\boldsymbol x'))^2]}_{\text{Bayes' Error}} + \underbrace{(f^*(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2}_{\text{Bias}^2} + \underbrace{\mathbb{E}[(A_\mathcal{S}(\boldsymbol x') - \mathbb{E}[A_\mathcal{S}(\boldsymbol x')])^2]}_\text{Variance}
+    \end{equation*}
+    The bias error describes the discrepancy between the algorithm and truth value. The Bayes error is the irreducible noise. Finally, variance capture the variance of the algorithm between training set. We can have the additional observation:
+    \begin{itemize}
+        \item Bias and Variance tends to trade-off against one another. 
+        \item Many parameter allows better flexibility to fit the data, which lower the bias. However, it also gives rise to high-variance, and vice versa.
+        \item This composition holds for square loss function.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Bayes Estimator for Classification)}}
+    For C-class classification (Bayes classifier), it is given by:
+    \begin{equation*}
+        f^*(\boldsymbol x) = \argmax{c \in [C]} p(y = c | \boldsymbol x)
+    \end{equation*} 
+    where the loss is $0$ if we predict correctly and $1$ otherwise. Furthermore, the Bayes optimal error rate is:
+    \begin{equation*}
+        \int \Big( 1-p(y = f^*(\boldsymbol x) | \boldsymbol x) \Big)\dby p(\boldsymbol x)
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    For $Z$ being a random variable with values $[0, 1]$ and let $\mathbb{E}[Z] = \mu$ for any $a\in(0, 1)$ we have:
+    \begin{equation*}
+        \mathbb{P}(Z > 1-a) > \frac{\mu - (1-a)}{a}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    Recall the Markov's inequality:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{P}(Z\ge a) \le \frac{\mathbb{E}[Z]}{a} \\
+        \implies&1 - \mathbb{P}(Z\ge a) \ge 1-  \frac{\mathbb{E}[Z]}{a} \\
+    \end{aligned}
+    \end{equation*}
+    We consider the following inequality, where we consider:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}(1 - Z < a) &\ge 1- \frac{\mathbb{E}[1-Z]}{a} \\
+        &= 1 - \frac{1-\mu}{a} = \frac{a-1+\mu}{a} = \frac{\mu - (1-a)}{a}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}{\textbf{(No Free-Lunch)}}
+    Let $A$ be any learning algorithm for binary classifier (where $\mathcal{Y} = \brackc{-1, 1}$) over domain $\mathcal{X}$. Let $m < |\mathcal{X}|/2$ being a training size. We define the loss of the function $f$ to be:
+    \begin{equation*}
+        \mathcal{E}_{p}(f) = \int_{\mathcal{X}\times\mathcal{Y}} \mathbb{I}[f(\boldsymbol x) \ne y] \dby p(\boldsymbol x, y)
+    \end{equation*}
+    Then there exists a distribution $p$ such that:
+    \begin{itemize}
+        \item There exists a function $f : \mathcal{X}\rightarrow\brackc{0, 1}$ with $\mathcal{E}_p(f) = 0$
+        \item For dataset $\mathcal{S} \sim p^m$, we have 
+        \begin{equation*}
+            \mathbb{P}_{\mathcal{S} \sim p^m}\Big[\mathcal{E}_p(A(\mathcal{S})) > 1/8\Big] \ge 1/7
+        \end{equation*}
+    \end{itemize}
+\end{theorem}
+\begin{proof}
+    This prove is abit more involved. Let's start with proving the first point (For now we assume the discrete distribution and finite value of $\mathcal{X}$). Let $C\subset \mathcal{X}$, where $|C| = 2m$. Denote $\mathcal{Y}^C$ being the set of all possible function $f : C \rightarrow \mathcal{Y}$ i.e $\brackc{f_1,\dots, f_T}$ where $T = 2^{2m}$. We can construct the distribution function $p_i$ such that:
+    \begin{equation*}
+        p_i(\brackc{\boldsymbol x, y}) = \begin{cases}
+            1/(2m) & \text{ if } y = f_i(\boldsymbol x) \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    for all $\boldsymbol x, y$. Let's consider $\mathcal{E}_{p_i}(f_i)$, which is:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{E}_{p_i}(f_i) &= \sum_{\boldsymbol x \in \mathcal{X}}\sum_{y \in \brackc{-1, 1}} \mathbb{I}[f_i(\boldsymbol x) \ne y] p_i(\brackc{\boldsymbol x, y}) \\
+        &= \sum_{\boldsymbol x \in C}\mathbb{I}[f_i(\boldsymbol x) \ne f_i(\boldsymbol x)] = 0
+    \end{aligned}
+    \end{equation*}
+    And so the first point is proven. Now, consider all possible combination of data points of size $m$ in $C$ i.e $C^m = \brackc{S_1,\dots,S_k}$ where $k = (2n)^n$. We construct the dataset from $f_i$ as $S_j^i = \brackc{(\boldsymbol x, f_i(\boldsymbol x)) : \boldsymbol x \in S_j}$. Now consider the expected error of an algorithm under correction function $f_i$ i.e 
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_{S \sim p_i^m}[\mathcal{E}_{p_i}(A(S))] &= \sum^k_{j=1} p_i(S^i_j)\mathcal{E}_{p_i}(A(S^i_j)) \\
+        &= \sum^k_{j=1}\frac{1}{(2n)^n}\mathcal{E}_{p_i}(A(S^i_j)) = \frac{1}{k}\sum^k_{j=1}\mathcal{E}_{p_i}(A(S^i_j))
+    \end{aligned}
+    \end{equation*}
+    Note that for scalar $\alpha_1,\dots,\alpha_m$ we have $\max_l \alpha_l \ge 1/m\sum^m_{i=1}\alpha_i$ and $\min_l \alpha_l \le 1/m\sum^m_{i=1}$. Consider the value of the function $f_i$ that maximizes the error of the learner (when everything is under $f_i$):
+    \begin{equation*}
+    \begin{aligned}
+        \max_{i \in [T]} \mathbb{E}_{S \sim p_i^m}[\mathcal{E}_{p_i}(A(S))] &\ge \frac{1}{T}\sum^T_{i=1} \frac{1}{k}\sum^k_{j=1}\mathcal{E}_{p_i}(A(S^i_j)) \\
+        &= \frac{1}{k}\sum^k_{j=1}\frac{1}{T}\sum^T_{i=1} \mathcal{E}_{p_i}(A(S^i_j)) \ge \min_{j \in [k]}\frac{1}{T}\sum^T_{i=1} \mathcal{E}_{p_i}(A(S^i_j)) \\
+    \end{aligned}
+    \end{equation*}
+    Now, denote a set $S'_j = \brackc{\boldsymbol v_1,\dots,\boldsymbol v_p} \subset C$ such that its element doesn't belong in $S_j$ for $j=1,\dots,k$, consider average expected risk:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{T}\sum^T_{i=1} \mathcal{E}_{p_i}(A(S^i_j)) &= \frac{1}{T}\sum^T_{i=1}\sum_{\boldsymbol x \in \mathcal{X}}\sum_{y \in \brackc{-1, 1}} \mathbb{I}[A(S^i_j)(\boldsymbol x) \ne y] \rho_i(\brackc{x, y})  \\
+        &\ge \frac{1}{T}\sum^T_{i=1}\sum_{\boldsymbol v \in S'_j}\sum_{y \in \brackc{-1, 1}} \mathbb{I}[A(S^i_j)(\boldsymbol v) \ne y] \rho_i(\brackc{\boldsymbol v, y})  \\
+        &= \frac{1}{T}\sum^T_{i=1}\sum_{\boldsymbol v\in S'_j} \mathbb{I}[A(S^i_j)(\boldsymbol v) \ne f_i(\boldsymbol v)] \rho_i(\brackc{\boldsymbol v, f_i(\boldsymbol v)})  \\
+        &= \frac{1}{T}\sum^T_{i=1}\sum_{\boldsymbol v \in S'_j} \frac{1}{2m} \mathbb{I}[A(S^i_j)(\boldsymbol v) \ne f_i(\boldsymbol v)] \\
+        &\ge \frac{1}{T}\sum^T_{i=1}\sum_{\boldsymbol v \in S'_j} \frac{1}{2p} \mathbb{I}[A(S^i_j)(\boldsymbol v) \ne f_i(\boldsymbol v)] \\
+        &= \frac{1}{2} \frac{1}{p}\sum_{\boldsymbol v \in S'_j} \frac{1}{T}\sum^T_{i=1}  \mathbb{I}[A(S^i_j)(\boldsymbol v) \ne f_i(\boldsymbol v)] \\
+        &= \frac{1}{2} \min_{r\in[p]} \frac{1}{T}\sum^T_{i=1}  \mathbb{I}[A(S^i_j)(\boldsymbol v_r) \ne f_i(\boldsymbol v_r)] \\
+    \end{aligned}
+    \end{equation*}
+    Note that $p\ge m$ because the dataset doesn't have to be unique. Before further analysis, for $\mathcal{Y}^C$, we can partion into $T/2$ pairs $(f_i, f_{i'})$ such that $f_i(\boldsymbol x) \ne f_{i'}(\boldsymbol x)$ iff $\boldsymbol x = \boldsymbol v_r$ for $r\in[p]$, by setting $f_{i'}(v_r) = \neg f_i(v_r)$ where 
+    \begin{equation*}
+        \neg a = \begin{cases}
+            1 & \text{ if } a = -1 \\
+            -1 & \text{ if } a = 1 \\
+        \end{cases}
+    \end{equation*}
+    Please note that $S^{i}_j = S^{i'}_j$ because the effect of $f_{i'}(x) \ne f_i(x)$ iff $x\not\in S^i_j$. Thus, we can see that:
+    \begin{equation*}
+        \mathbb{I}[A(S^i_j)(\boldsymbol v_r) \ne f_i(\boldsymbol v_r)] +  \mathbb{I}[A(S^{i'}_j)(\boldsymbol v_r) \ne f_{i'}(\boldsymbol v_r)] = 1
+    \end{equation*}
+    Let's consider the value inside, by the partion of list of all functions, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{T}\sum^T_{i=1} \mathbb{I}[A(S^i_j)(\boldsymbol v_r) \ne f_i(\boldsymbol v_r)] &= \frac{1}{T}\sum_{(i,i')} \mathbb{I}[A(S^i_j)(\boldsymbol v_r) \ne f_i(\boldsymbol v_r)] +  \mathbb{I}[A(S^{i'}_j)(\boldsymbol v_r) \ne f_{i'}(\boldsymbol v_r)] \\
+        &= \frac{1}{T}\sum_{(i,i')} 1 = \frac{1}{T}\frac{T}{2} = \frac{1}{2}
+    \end{aligned}
+    \end{equation*}
+    This implies that:
+    \begin{equation*}
+        \max_{i \in [T]} \mathbb{E}_{S \sim p_i^m}[\mathcal{E}_{p_i}(A(S))] \ge \min_{j\in[k]} \frac{1}{T}\sum^T_{i=1} \mathcal{E}_{p_i}(A(S^i_j)) \ge \frac{1}{4}        
+    \end{equation*}
+    This means that for all algorithm $A'$ getting a dataset $S$ of size $m$, there is a function $f$ and a distribution $p$ over $\mathcal{X}\times \brackc{0, 1}$ such that:
+    \begin{equation*}
+        \mathbb{E}_{S \sim p^m}[\mathcal{E}_{p}(A(S))] \ge \frac{1}{4}
+    \end{equation*}
+    and so, using the probabilistic inequality, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\brackb{\mathcal{E}_{p}(A(S)) \ge \frac{1}{8}} &= \mathbb{P}\brackb{\mathcal{E}_{p}(A(S)) \ge 1 - \frac{7}{8}} \ge \frac{\mathbb{E}_{S \sim p^m}[8\mathcal{E}_{p}(A(S))](1-7/8)}{7/8} \\
+        &\ge \frac{2- 1}{7} = \frac{1}{7}
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{theorem}
+    As the number of sample goes to infinity, the error rate is no more than twice of the Bayes error rate for the k-nearest neighbour. Please note that the k-nearest neighbour attemps to approximate:
+    \begin{equation*}
+        p(y = c | \boldsymbol x) \approx \frac{\abs{\brackc{i : y_i = c, i \in I_{\boldsymbol x}}}}{k}
+    \end{equation*}
+    We consider the points that are near the evaluation points and find the class of the neighbours that has the highest frequency. 
+\end{theorem}
+\begin{proof}{\emph{(Sketch)}}
+    We will shorten the notation as $p(c | \boldsymbol x) = p(y = c | \boldsymbol x)$. The expected Bayes classifier (at $\boldsymbol x$) is:
+    \begin{equation*}
+        1 - \max_{c \in [C]} p(c | \boldsymbol x)
+    \end{equation*}
+    The expected error rate of 1-NN at $\boldsymbol x$ is given by:
+    \begin{equation*}
+        \sum^C_{c=1} p_\text{nn}(c | \boldsymbol x)[1 - p(c | \boldsymbol x)]
+    \end{equation*}
+    As the number of sequence goes got infinity $m \rightarrow \infty$, we have $p(c | \boldsymbol x)\approx p_\text{nn}(c | \boldsymbol x)$. Now, we will show that:
+    \begin{equation*}
+        \sum^C_{c=1}p(c | \boldsymbol x)[1 - p(c | \boldsymbol x)] \le 2\brackb{1-\max_{c\in[C]} p(c | \boldsymbol x)}
+    \end{equation*}
+    Let $c^* = \arg\max_{c\in[C]} p (c | \boldsymbol x)$ and $p^* = p(c^* | \boldsymbol x)$ observe that $c \in [C]$:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^C_{c=1}p(c | \boldsymbol x)[1 - p(c | \boldsymbol x)] &= p^*(1-p^*) + \sum_{c \in [C]\backslash c^*} p(c|\boldsymbol x)[1-p(c|\boldsymbol x)] \\
+        &\le (C-1)\frac{1-p^*}{C-1}\brackb{1 - \frac{1-p^*}{C-1}} + p^*(1-p^*) \\
+        &= (1-p^*)\brackb{1 - \frac{1-p^*}{c-1} + p} \\
+        &\le (1-p^*)\brackb{1 + p} \le 2(1-p^*) \\
+    \end{aligned}
+    \end{equation*}
+    The second inequality comes from the fact that sum is maximized when all $p(c | \boldsymbol x)$ have the same value. And the last inequality comes from the fact that $p, p^* < 1$. Thus complete the proof.
+\end{proof}
+
+\begin{remark}
+    One can show that for $k = k(m)$ where $m$ is the size of the dataset, one can show that 
+    \begin{equation*}
+        \mathcal{E}(k-\text{NN}) \rightarrow \mathcal{E}(f^*)
+    \end{equation*}
+    note that $k$ depends on the data size, as $m\rightarrow\infty$ with the condition that $k(m)\rightarrow \infty$ and $k(m)/m\rightarrow\infty$.
+\end{remark}
+
+\begin{remark}{\textbf{(Curse of Dimensionality)}}
+    The rate of convergence depends exponentially on the input dimension. This problems occure thoughout the ML algorithms. The intuitive is that the volumn increases exponentially with the dimension implies that the number of data required to cover the space to perform estimate also increase exponentially: The ration between volumn unit $d$-dim ball centered at the origin and $1/2$-unit ball at the origin is $(1/2)^d$. 
+\end{remark}
+
+\begin{definition}{\textbf{(Empirical Risk)}} 
+    We are given only the sample from probability $p(\boldsymbol x, y)$. The natural approach is to approximate the expected error using empirical error:
+    \begin{equation*}
+        \mathcal{E}_\text{emp}(\mathcal{S}, f) = \frac{1}{|\mathcal{S}|}\sum_{(\boldsymbol x, y) : \mathcal{S}} (y_i f(\boldsymbol x_i))^2
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Empirical Risk Minimization (with reguarlizer))}}
+    If we consider all possible function, we can always find the function with $0$ empirical error (remember) this is known as overfitting. To solve this we have to restrict the function space to be $\mathcal{H}$ called hypothesis space, which ERM is defined as:
+    \begin{equation*}
+        f_\mathcal{S} = \argmin{f\in\mathcal{H}}\mathcal{E}_\text{emp}(\mathcal{S}, f)
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Example of Hypothesis Space)}}
+    We can consider the following increasing \correctquote{complexity} as for the regression in 1D as we have:
+    \begin{equation*}
+        \mathcal{H}_n = \brackc{f(x) = \sum^n_{l=1} a_lx^l + b : a_1,\dots,a_n,b\in \mathbb{R}}
+    \end{equation*}
+    Choosing the correct model requires a cross-validation. Unless the prior knowledge is avaliable on $f^*$, we can't expect $f^*\in \mathcal{H}$, while we can't allow too large $\mathcal{H}$ as it leads to the overfitting.
+\end{remark}
+
+

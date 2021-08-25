@@ -1,0 +1,308 @@
+\section{Variational Method}
+
+\subsection{Introduction}
+
+\begin{remark}{\textbf{(Limitations)}}
+    Out treatment of variational method has emphasis natural choices of variational family often factorized using some functional (exponential) form as a joint. They are mostly restricted to joint exponential family facilitates hieratical and distributional model but not non-linear and non-conjugate. 
+\end{remark}
+
+\begin{remark}{\textbf{(Using Unconstraint Optimization)}}
+    Consider parameteric variational approximation via a constrained family $q(\mathcal{Z};\boldsymbol \rho)$. The constrained variational E-step becomes
+    \begin{equation*}
+        q(\mathcal{Z}) = \argmax{q\in\brackc{q(\mathcal{Z};\rho)}} \mathcal{F}(q(\mathcal{Z}), \boldsymbol \theta^{(k-1)}) \implies \boldsymbol \rho^{(k)} = \argmax{\boldsymbol \rho}\mathcal{F}(q(\mathcal{Z};\boldsymbol \rho), \boldsymbol \theta^{(k-1)})
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Reparameterized Free Energy)}}
+    We can replace constrained optimization  $\mathcal{F}(q, \boldsymbol \theta)$ with unconstrained optimization of constrained $\mathcal{F}(\rho, \boldsymbol \theta)$:
+    \begin{equation*}
+        \mathcal{F}(\rho, \boldsymbol \theta) = \brackd{\log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta^{(k-1)})}_{q(\mathcal{Z};\boldsymbol \rho)} + H[\boldsymbol \rho]
+    \end{equation*}
+    We may use the coordinate ascent in $\boldsymbol \rho$ and $\boldsymbol \theta$ but this no longer necessary, as we have:
+    \begin{itemize}
+        \item In special case, the expectation of the log-joint under $q(\mathcal{Z};\boldsymbol \rho)$ can be expressed in closed form. We can follow $\nabla_{\boldsymbol \rho}\mathcal{F}$
+        \item This requires evaluation a high-dimensional expectation with respected to $q(\mathcal{Z};\boldsymbol \rho)$ as a function of $\boldsymbol \rho$ that isn't simple. 
+        \item There are $3$ solutions to this problem:
+        \begin{itemize}
+            \item \correctquote{Score Based} gradient estimate and Monte-Carlow. 
+            \item Recognition network training in separate place - not strictly variational. 
+            \item Recognition network training simultaneously with generative model using frozen sample. 
+        \end{itemize}
+    \end{itemize}
+\end{remark}
+
+\begin{proposition}
+    One can show that:
+    \begin{equation*}
+        \nabla_{\boldsymbol \rho} \mathcal{F}(\boldsymbol \rho, \boldsymbol \theta) = \brackd{ [\nabla_{\boldsymbol \rho}\log q(\mathcal{Z};\boldsymbol \rho)] \Big( \log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) - q(\mathcal{Z};\boldsymbol \rho) \Big) }_{q(\mathcal{Z}; \boldsymbol \rho)}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the following gradient:
+    \begin{equation*}
+    \begin{aligned}
+        \nabla_{\boldsymbol \rho}\mathcal{F}(\boldsymbol \rho, \boldsymbol \theta) &= \nabla_{\boldsymbol \rho}\int q(\mathcal{Z};) \Big[ \log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) - \log q(\mathcal{Z};\boldsymbol \rho) \Big]\dby\mathcal{Z} \\
+        &= \int [\nabla_{\boldsymbol \rho} q(\mathcal{Z};\boldsymbol \rho) ] \Big( \log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) - \log q(\mathcal{Z}; \boldsymbol \rho) \Big) + q(\mathcal{Z};\boldsymbol \rho) \nabla_{\boldsymbol \rho}\brackb{ \log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) - \log q(\mathcal{Z} ; \boldsymbol \rho) } \dby \mathcal{Z}
+    \end{aligned}
+    \end{equation*}
+    We have the following facts:
+    \begin{equation*}
+    \begin{aligned}
+        &\nabla_{\boldsymbol \rho} \log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) = 0 \\
+        &\int q(\mathcal{Z} ; \boldsymbol \rho)\nabla_{\boldsymbol \rho} q(\mathcal{Z}; \boldsymbol \rho) = \nabla_{\boldsymbol \rho}\int q(\mathcal{Z};\boldsymbol \rho)\dby\mathcal{Z} = 0 \\
+        &\nabla_{\boldsymbol \rho}q(\mathcal{Z};\boldsymbol \rho) = q(\mathcal{Z};\boldsymbol \rho) \nabla_{\boldsymbol \rho}\log q(\mathcal{Z};\boldsymbol \rho)
+    \end{aligned}
+    \end{equation*}
+    And so we have the solution as required
+\end{proof}
+
+\begin{remark}{\textbf{(Reducing Variance)}}
+    To reduce the expectation of gradient, due to the high-dimensional problem, we can evaluate by MC. 
+    \begin{itemize}
+        \item We can reduce by factorization, where $q(\mathcal{Z}) = \prod_iq(\mathcal{Z}_i | \boldsymbol \rho_i)$ factor over disjoint cliques. 
+        \item Let $\bar{\mathcal{Z}}_i$ be the minimal markov blancket of $\mathcal{Z}_i$ in the joint $P_{\bar{\mathcal{Z}}_i}$ be a product of joint factors that include element of $\mathcal{Z}_i$ and $P_{\neg \bar{\mathcal{Z}}_i}$
+    \end{itemize}
+    We have the following gradient:
+    \begin{equation*}
+    \begin{aligned}
+        \nabla_{\rho_i}\mathcal{F}(\brackc{\rho_j}, \boldsymbol \theta) &= \brackd{\brackb{\nabla_{\rho_i} \sum_j\log q(\mathcal{Z}_j ; \rho_j) } \bracka{\log P(\mathcal{X}, \mathcal{Z} | \boldsymbol \theta) - \sum_j \log q(\mathcal{Z}_j ; \rho_j)} }_{q(\mathcal{Z})} \\
+        &\begin{aligned}
+            = &\brackd{ [\nabla_{\rho_i} \log q(\mathcal{Z}_i;\boldsymbol \rho_i)] (\log P_{\bar{\mathcal{Z}}_i}(\mathcal{X}, \bar{\mathcal{Z}}_i ) - \log q(\mathcal{Z}_i ; \boldsymbol \rho_i) ) }_{q(\bar{\mathcal{Z}}_i)} \\
+            &+\brackd{ [\nabla_{\rho_i} \log q(\mathcal{Z}_i;\boldsymbol \rho_i)]\bracka{ \log P_{\neg \bar{\mathcal{Z}}_i}(\mathcal{X}, \bar{\mathcal{Z}}_{\neg i}) - \sum_{j\ne i} \log q(\mathcal{Z}_j ; \boldsymbol \rho_j) } }_{q(\mathcal{Z})}
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Please note that the second term is propositional to $\brackd{\nabla_{\rho_i}\log q(\mathcal{Z}_i; \boldsymbol \rho_i)}_{q(\mathcal{Z}_i)} = 0$ so we only need to consider the expectation with respected to $q(\bar{\mathcal{Z}}_i)$ which is variational message passing. 
+\end{remark}
+
+\begin{remark}{\textbf{(Sampling Methods)}}
+    We consider the following \correctquote{black-box} variational approach is as follows:
+    \begin{itemize}
+        \item Choose a parameteric (factored) variational family $q(\mathcal{Z}) = \prod_i q(\mathcal{Z}_i;\boldsymbol \theta)$
+        \item Initiate the factors. 
+        \item Repeat until convergence:
+        \begin{itemize}
+            \item Stochastic VE-step: Sample from $q(\bar{\mathcal{Z}}_i)$ and estimate expected gradient $\nabla \rho_i\mathcal{F}$, and we update $\rho_i$ along the gradient. 
+            \item Stochastic M-step: Sample from each $q(\bar{\mathcal{Z}}_i)$ as we can update the corresponding parameter. 
+        \end{itemize}
+        \item Stochastic may use Robbins Monro to promote convergence. 
+        \item Variance of the gradient estimate can also be controlled by MC techniques. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Batches of Data)}}
+    We have not distinguish between multi-variate models and iid data instances. As we group, all together in $\mathcal{Z}$; for example, large model such as HMM, we often make with multiple data draws and each instance requires a separate variational optimization. 
+\end{remark}
+
+\begin{definition}{\textbf{(Recognition Model)}}    
+    Suppose we have fixed length vector $\brackc{(\boldsymbol x_i, \boldsymbol z_i)}$ when $\boldsymbol z_i$ is latent:
+    \begin{itemize}
+        \item Optimal variational distribution $q^*(\boldsymbol z_i)$ will depends on $\boldsymbol x_i$
+        \item We want to learn the mapping from $q(\boldsymbol z_i;\boldsymbol \rho = f(\boldsymbol x_i;\boldsymbol \phi))$
+        \item Now $\boldsymbol \rho$ is output of a general function approximate $f$ parameterized by $\boldsymbol \phi$, training on map $\boldsymbol x_i$ to the variational parameter of $q(\boldsymbol z_i)$
+    \end{itemize}
+    The mapping function $f$ is called recognition model.
+\end{definition}
+
+\begin{definition}{\textbf{(Helmholtz Model)}}
+    It is a binary sigmoid belief-network with parallel recognition model. There are $2$ phase of learning:
+    \begin{itemize}
+        \item \emph{Wake Phase}: Given current $f$ estimate mean field representation from data: 
+        \begin{equation*}
+            q(z_i) = \operatorname{Bern}(\hat{z}_i)\qquad \hat{z}_i = f(x_i;\boldsymbol \phi)
+        \end{equation*}
+        We will update generative parameter $\boldsymbol \theta$ according to $\nabla_{\boldsymbol \theta} \mathcal{F}(\brackc{\hat{z}_i};\boldsymbol \theta)$
+        \item \emph{Sleep Phase}: Sample $\brackc{\boldsymbol z_i, \boldsymbol x_i}^S_{i=1}$ from the current generative model. Update recognition parameter $f(\boldsymbol x_i)$ toward $\boldsymbol z_i$:
+        \begin{equation*}
+            \Delta \boldsymbol \phi \propto \sum^S_{i=1} (\boldsymbol z_i - f(\boldsymbol x_i;\boldsymbol \phi))\nabla_{\boldsymbol \phi}f(\boldsymbol x_i;\boldsymbol \phi)
+        \end{equation*}
+        Please note that this step minimizes:
+        \begin{equation*}
+            \operatorname{KL}\brackb{P_\theta(\boldsymbol z|\boldsymbol x) \Big\| q(\boldsymbol z; f(\boldsymbol x;\boldsymbol \phi)) }
+        \end{equation*}
+        This is opposite to variational objective. Opposite to variational objective, but may not matter if divergence is small enough
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(Comments on Helmholtz Model Evaluation)}}
+    We have to sample $\boldsymbol z$ from recognition model rather than just evaluate means: 
+    \begin{itemize}
+        \item Expectation in free-energy can be computed directly rather than by means substuition. 
+        \item In hieratical model, output of higher recognition layer depends on sample at previous stages, which introduces correlation between sample at difference layer. 
+    \end{itemize}
+    Recognition model structure need not necessary exactly echo generative model. Please note that a more general approach is to train $f$ to yields the parameter of exponential family $q(\boldsymbol z)$. 
+\end{remark}
+
+\begin{definition}{\textbf{(Variational Autoencoder)}}
+    We fuses the wake and sleep phase. We generate the recognition sample used deterministic transformation of external random variable. If $f$ gives marginal $\mu_i$ and $\sigma_i$ for latent $z_i$ and $\boldsymbol \varepsilon^s_i \sim\mathcal{N}(0, 1)$ then:
+    \begin{equation*}
+        \boldsymbol z^s_i = \boldsymbol \mu_i + \sigma_i\boldsymbol \varepsilon^s_i
+    \end{equation*}
+    Given the generative and recognition model can be trained together with gradient descent. Holding $\boldsymbol \varepsilon^s$ fixed:
+    \begin{equation*}
+        \mathcal{F}_i(\boldsymbol \theta, \boldsymbol \phi) = \sum_s \log P(\boldsymbol x_i, \boldsymbol z^s_i;\boldsymbol \theta) - \log q(\boldsymbol z^s_i ; f(\boldsymbol x_i, \boldsymbol \phi))
+    \end{equation*}
+    We have the following derivative as:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial \boldsymbol \theta}\mathcal{F}_i = \sum_s \nabla_{\boldsymbol \theta}\log P(\boldsymbol x_i, \boldsymbol z_i^s ; \boldsymbol \theta) \\
+        &\frac{\partial}{\partial \boldsymbol \phi}\mathcal{F}_i = \sum_s \frac{\partial}{\partial z^s_i} \Big( \log P(\boldsymbol x_i, \boldsymbol z_i^s ; \boldsymbol \theta) - \log q(\boldsymbol z^s_i ; f(\boldsymbol x_i)) \Big)\frac{d\boldsymbol z_i^s}{d\phi} + \frac{\partial}{\partial f(\boldsymbol x_i)} \log q(\boldsymbol z^s_i ; f(\boldsymbol x_i))\frac{df(\boldsymbol x_i)}{d\phi}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Observations on Variational Auto-Encoder)}}
+    We consider the following observations on the training of VAE:
+    \begin{itemize}
+        \item We start by frozen sample $\boldsymbol \varepsilon^s$ can be redrawn that avoid overfitting. 
+        \item It maybe possible to evaluate the entropy and $\log P(\boldsymbol z)$ without sampling and reducing variance:
+        \item Differentiable reparameterization are avaliable for number of difference distribution
+        \item The conditional $P(\boldsymbol x|\boldsymbol z, \boldsymbol \theta)$ is often implemented as a neural network with additive noise at input.
+        \item In practice, hieratical model appear to be difficult to train. 
+    \end{itemize}
+\end{remark}
+
+\subsection{Additional Models to VAE}
+
+\begin{definition}{\textbf{(Importance Weigh Free Energy)}}
+    Consider another interpretation of free energy:
+    \begin{equation*}
+        \mathcal{F}(q;\boldsymbol \theta) = \brackd{\log \frac{P(\boldsymbol x, \boldsymbol z)}{q(\boldsymbol z)}}_{q}
+    \end{equation*}
+    We consider the jensen's inequality on importance sampled estimate:
+    \begin{equation*}
+        l(\boldsymbol \theta) = \log \mathbb{E}_{z\sim q}\brackb{\frac{P(\boldsymbol x, \boldsymbol z)}{q(\boldsymbol z)}} \le \mathbb{E}_{z\sim q}\brackb{\log \frac{P(\boldsymbol x, \boldsymbol z)}{q(\boldsymbol z)}} = \mathcal{F}(q;\boldsymbol \theta)
+    \end{equation*}
+    Suggest more accurate importance weight as we have:
+    \begin{equation*}
+        l(\boldsymbol \theta) = \log \mathbb{E}_{\boldsymbol z_1,\dots,\boldsymbol z_k \sim q} \brackb{\frac{1}{k}\sum_k \frac{P(\boldsymbol x_k, \boldsymbol z_k)}{q(\boldsymbol z_k)}} \ge  \mathbb{E}_{\boldsymbol z_1,\dots,\boldsymbol z_k \sim q} \brackb{\log \frac{1}{k}\sum_k \frac{P(\boldsymbol x_k, \boldsymbol z_k)}{q(\boldsymbol z_k)}}
+    \end{equation*}
+    This allows the tight-bound and reparameterization friendly but as $K\rightarrow\infty$, the signal for learning amortized $q$ grows weaker making VAE learning too slow. 
+\end{definition}
+
+\begin{definition}{\textbf{(Normalizing Flow)}}
+    We have the following free energy:
+    \begin{equation*}
+        \mathcal{F}(q, \boldsymbol \theta) = \brackd{\log P(\boldsymbol x, \boldsymbol z | \boldsymbol \theta)}_q - \brackd{\log q(\boldsymbol z)}_q
+    \end{equation*}
+    To evaluate $\mathcal{F}$, we need to be able to find expectation with respected to $q$ and evaluate the log-density, which usually restrict us to tractable inference families. We consider the followign recognition model $q(\boldsymbol z)$ implicitly by:
+    \begin{equation*}
+        \boldsymbol z_0 \sim q(\cdot ; \boldsymbol x)  \qquad \boldsymbol z = f_k(f_{k-1}(\cdots f_1(\boldsymbol z_0)))
+    \end{equation*}
+    where $q_0$ should be fixed and tractable. And so, we have the following evaluations:
+    \begin{equation*}
+        \brackd{F(\boldsymbol z)}_q = \brackd{F(f_k(f_{k-1}(\cdots f_1(\boldsymbol z_0))))}_{q_0} \qquad \log q(\boldsymbol z) = \log q_0(f^{-1}_1(\cdots f^{-1}_{k-1}(f^{-1}_k(\boldsymbol z)))) - \sum_k\log \abs{\nabla f_k}
+    \end{equation*}
+    where $\abs{\nabla f_k}$ being the determinant of the jacobian, where we use the following transformation of variables:
+    \begin{equation*}
+        \boldsymbol z_k = f_k(\boldsymbol z_{k-1}) \quad \implies \quad  q(\boldsymbol z_k) = q(f^{-1}_k(\boldsymbol z_k)) \abs{\frac{\partial \boldsymbol z_{k-1}}{\partial \boldsymbol z_k}} = q(f^{-1}_k(\boldsymbol z_k))\abs{\nabla f_k(\boldsymbol z_{k-1})}^{-1}
+    \end{equation*}
+    Given a sample $\boldsymbol z_0^i \sim q_0(\cdot ; \boldsymbol x)$ as we have:
+    \begin{equation*}
+        \mathcal{F}(q, \boldsymbol \theta) \approx \frac{1}{S}\sum_s \log p(\boldsymbol x, f_k(f_{k-1}(\cdots f_1(\boldsymbol z^i_0))) ) + h[q_0] + \frac{1}{S}\sum_s\sum_k \abs{\nabla f_k(f_{k-1}(\cdots f_1(\boldsymbol z^i_0)))}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Special $\boldsymbol f$ for Normalizing Flow)}}
+    Suppose we use the special $f$ and we have:
+    \begin{equation*}
+    \begin{aligned}
+        &f(\boldsymbol z) = \boldsymbol z + \boldsymbol uh(\boldsymbol w^T\boldsymbol z + b) \implies \abs{\nabla f} = \abs{1 + \boldsymbol u^T\boldsymbol \Psi(\boldsymbol z)} \quad \text{ where } \quad \Psi(\boldsymbol z)=h'(\boldsymbol x^T\boldsymbol z + b)\boldsymbol w \\
+        &f(\boldsymbol z) = \boldsymbol z + \frac{\beta}{\alpha + \abs{\boldsymbol z - \boldsymbol z_0}} \implies \abs{\nabla f} = [1 + \beta h]^{d-1}\brackb{1+\beta h + \beta h'r} \quad \text{ where }\quad r=\abs{\boldsymbol z-\boldsymbol z_0} \quad h = \frac{1}{\alpha + r}
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(DDC Helmholz Machine)}}
+    We define $q$ to be unnormalized exponential family with \emph{large} set of sufficient statistics:
+    \begin{equation*}
+        q(\boldsymbol z) \propto \exp\bracka{\sim_i \eta_i\psi_i(\boldsymbol z)}
+    \end{equation*}
+    and it is parameterized by mean parameter $\boldsymbol \mu = \brackd{\boldsymbol \psi(\boldsymbol z)}$, which we call distributed distribution code (DDC). Train recognition model using a sleep sample as we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol \mu = \brackd{\boldsymbol \psi(\boldsymbol z)}_q = f(\boldsymbol x^* ; \boldsymbol \phi) \\
+        &\Delta \boldsymbol \phi \propto \sum_s (\boldsymbol \psi(\boldsymbol z_s) - f(\boldsymbol x_s ; \boldsymbol \phi)) \nabla_{\boldsymbol \phi}f(\boldsymbol x_s ; \boldsymbol \phi)
+    \end{aligned}
+    \end{equation*}
+    Furthermore, we also learn linear approximation $\nabla \log P(\boldsymbol x, \boldsymbol z | \boldsymbol \theta) \approx \boldsymbol A\psi(\boldsymbol z)$, where 
+    \begin{equation*}
+        \boldsymbol A = \bracka{\sum_s \nabla \log P(\boldsymbol x_s, \boldsymbol z_s | \boldsymbol \theta)\psi(\boldsymbol z_s)}^T\bracka{\sum_s \psi(\boldsymbol z_s)\psi(\boldsymbol z_s)^T}^{-1}
+    \end{equation*}
+    Then we have $\brackd{\nabla \log P(\boldsymbol x, \boldsymbol z)}_q \approx \boldsymbol A\brackd{\boldsymbol \psi(\boldsymbol z)} \propto f(\boldsymbol x, \boldsymbol \phi)$ can be generalized into infinite dimension with kernel.
+\end{definition}
+
+\begin{definition}{\textbf{(Amortised Learning)}}
+    We aren't interested in inference. We can short-circled general recognition and compute expectation for learning directly, as we have:
+    \begin{equation*}
+        \nabla_{\boldsymbol \theta} l (\boldsymbol \theta) = \frac{\partial}{\partial \boldsymbol \theta} \mathcal{F}(q^*, \boldsymbol \theta) = \brackd{\nabla_{\boldsymbol \theta}\log P(\mathcal{X},\mathcal{Z}|\boldsymbol \theta)}_{q^*}
+    \end{equation*}
+    We can use the wake-sleep approach:
+    \begin{itemize}
+        \item Sample $\brackc{\boldsymbol x_s, \boldsymbol z_s} \sim P(\mathcal{X},\mathcal{Z}|\boldsymbol \theta^k)$
+        \item Train Regression $\hat{J}_{\boldsymbol \theta^k} : \boldsymbol x_k\mapsto \nabla_{\boldsymbol \theta} \log P(\boldsymbol x_s, \boldsymbol z_s)|_{\boldsymbol \theta^k}$ (Learning the mapping)
+        \item Set $\boldsymbol \theta^{k+1} = \boldsymbol \theta^k + \eta\sum_i \hat{J}_{\boldsymbol \theta^k}(\boldsymbol x_i)$
+    \end{itemize}
+    Derivate form works for (kernel and GP) regression for which regressor is linear in target. For conditional, exponential family model:
+    \begin{equation*}
+        \brackd{\log P(\mathcal{X},\mathcal{Z} | \boldsymbol \theta)}_{q^*} = \brackd{\boldsymbol \eta(\boldsymbol z, \boldsymbol \theta)}_{q^*}^T\boldsymbol T(\boldsymbol x) - \brackd{\boldsymbol \Phi(\boldsymbol z, \boldsymbol \theta) + \log P(\boldsymbol z|\boldsymbol \theta)}_{q^*}
+    \end{equation*}
+    and regressor can be trained to function of $\boldsymbol z$ alone, with $T(\boldsymbol x)$ evaluated on (wake-phase) data. 
+\end{definition}
+
+\begin{remark}{\textbf{(VAE Comments)}}
+    Much of the VAE and related work has common generative model as:
+    \begin{equation*}
+        \boldsymbol z \sim \mathcal{N}(\boldsymbol 0, \boldsymbol I) \qquad \boldsymbol x \sim\mathcal{N}(\boldsymbol g(\boldsymbol z ; \boldsymbol \theta), \psi\boldsymbol I)
+    \end{equation*}
+    where $\boldsymbol g$ is neural network. Let's consider the dimension of $\boldsymbol z$ as we have:
+    \begin{itemize}
+        \item Overcomplicated: If $\operatorname{dim}(\boldsymbol z)$ is large enough, the optimal solution has $\psi\rightarrow0$ as $\boldsymbol q(\boldsymbol z;\boldsymbol x) \rightarrow \delta(\boldsymbol z - \boldsymbol f(\boldsymbol x;\boldsymbol \phi))$. In effect, the generative model learns a flow to transform a model density to the target. 
+        \item Oversimplified: If $\operatorname{dim}(\boldsymbol z)$ is small as non-linear PCA.
+    \end{itemize}
+    Interesting latent representation are required more structured generative model. 
+\end{remark}
+
+\begin{definition}{\textbf{(Structured VAE)}}
+    Consider a model where $P(\mathcal{Z}|\boldsymbol \theta)$ has tractable joint exponential family potential and:
+    \begin{equation*}
+        P(\mathcal{X}|\mathcal{Z},\Gamma) = \prod_iP(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \gamma_i)
+    \end{equation*}
+    are interactable. conditional independent observation $\boldsymbol \gamma_i$ might be the same for all $i$. Consider factored variational inference $q(\mathcal{Z}) = \prod_iq(\boldsymbol z_i)$ with no further constriants:
+    \begin{equation*}
+    \begin{aligned}
+        \log q^*_i(\boldsymbol z_i) &= \brackd{\log P(\mathcal{Z},\mathcal{X})}_{q_{\neg i }} + \const \\
+        &= \brackd{\log P(\boldsymbol z_i | \mathcal{Z}_i) + \log P(\boldsymbol x_i | \boldsymbol z_i)}_{q_{\neg i}} + \const \\
+        &= \brackd{\boldsymbol \eta_{\neg i}}^T_{q_{\neg i}}\boldsymbol \psi_i(\boldsymbol z_i) + \log P(\boldsymbol x_i | \boldsymbol z_i)
+    \end{aligned}
+    \end{equation*}
+    Let's consider each variables (exploited the exponential family form of $P(\mathcal{Z})$):
+    \begin{itemize}
+        \item $\boldsymbol \psi_i$ are effective sufficient statistics included log-normalizer of children of DAG.
+        \item $\boldsymbol \eta_{\neg i}$ is function of $\mathcal{Z}_{\neg i}$
+    \end{itemize}
+    We will choose the parameteric form of $q_i(\boldsymbol z_i) = \exp(\tilde{\boldsymbol \eta}^T\boldsymbol \psi_i(\boldsymbol z_i) - \boldsymbol \Phi_i(\tilde{\boldsymbol \eta}_i))$ and so the optimum will have:
+    \begin{equation*}
+        \log q^*_i(\boldsymbol z_i) = \brackd{\boldsymbol \eta_{\neg i}}^T_{q_{\neg i}}\boldsymbol \psi_i(\boldsymbol z_i) + \boldsymbol \rho(\boldsymbol x_i)^T\boldsymbol \psi_i(\boldsymbol z_i)
+    \end{equation*}
+    where $\boldsymbol \rho(\boldsymbol x_i) = \boldsymbol f_i(\boldsymbol x_i;\boldsymbol phi)$ recognition function and it might be the same for all $i$. 
+\end{definition}
+
+\begin{remark}{\textbf{(Training of Structured VAE)}}
+    We consider the free energy:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{F}(\boldsymbol \theta, \boldsymbol \Gamma, \brackc{\boldsymbol \phi_i}) &= \brackd{\sum_i \log P(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \gamma_i) + \log P(\mathcal{Z}|\boldsymbol \theta)}_{q(\mathcal{Z} ; \boldsymbol \theta, \brackd{\boldsymbol \phi})} + \sum_i H[q_i] \\
+        &= \sum_i \underbrace{\brackd{\log P(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \gamma_i) + \log P(\mathcal{Z}|\boldsymbol \theta)}_{q_i(\boldsymbol z_i;\boldsymbol \theta, \boldsymbol \phi_i)} + H[q_i]}_{\mathcal{F}_i} + \brackd{\log P(\mathcal{Z}|\theta)}_{q(\mathcal{Z}, \boldsymbol \theta, \brackc{\boldsymbol \phi_i})}
+    \end{aligned}
+    \end{equation*}
+    Update $\boldsymbol \theta$ are just tractable model. To update each $\phi_i$ and $\gamma_i$, find $\brackd{\boldsymbol \eta_{\neg i}}_{q_{\neg i}}$ to give the prior-like in VAE, and we generated the reparameterization sample $\boldsymbol z^s_i \sim q_i$, then:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial\boldsymbol \gamma_i} \mathcal{F}_i = \sum_s \nabla_{\boldsymbol \gamma_i}\log P(\boldsymbol x_i, \boldsymbol z^s_i; \boldsymbol \gamma_i) \\
+        &\frac{\partial}{\partial \boldsymbol \phi_i}\mathcal{F}_i = \sum_{s}\frac{\partial}{\partial \boldsymbol z^s_i}\Big( \log P(\boldsymbol x_i, \boldsymbol z^s_i ; \boldsymbol \gamma_i) - \log q(\boldsymbol z^s_i ; f(\boldsymbol x_i)) \Big)\frac{d\boldsymbol z^s_i}{d\boldsymbol \phi} + \frac{\partial}{\partial f(\boldsymbol x_i)} \log q(\boldsymbol z^s_i ; f(\boldsymbol x_i))\frac{df(\boldsymbol x_i)}{d\boldsymbol \phi}
+    \end{aligned}
+    \end{equation*}
+    This is like standard VAE.
+\end{remark}
+

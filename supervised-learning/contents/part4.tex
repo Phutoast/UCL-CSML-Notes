@@ -1,0 +1,323 @@
+\section{Tree Based and Ensemble Model}
+
+\subsection{Tree Based Method}
+
+\begin{definition}{\textbf{(Tree Method)}}
+    We are interesting to partition the input space into retangles and fit simple model in each one; for example, we have the function:
+    \begin{equation*}
+        f(\boldsymbol x) = \sum^P_{p=1}c_p \mathbb{I}[\boldsymbol x \in R_p]
+    \end{equation*}
+    Where we hve the following:
+    \begin{itemize}
+        \item We partition the input space with hyper-retangle $R_1,R_2,\dots,R_p$ where: $\bigcup^P_{p=1} R_p = \mathcal{X}$ and $R_a\cap R_b = \emptyset$ if $a\ne b$
+        \item $\brackc{c_p}^P_{p=1}$ is some real parameter with a natural choice to be:
+        \begin{equation*}
+            c_p = \operatorname{avg}(y_i | \boldsymbol x_i \in R_p) = \frac{\sum^m_{i=1} y_i \mathbb{I}[\boldsymbol x_i \in R_p]}{\sum^m_{i=1} \mathbb{I}[\boldsymbol x_i \in R_p]}
+        \end{equation*}
+    \end{itemize}
+    We are interested to solving the following optimization problem:
+    \begin{equation*}
+        \min_{R_1,\dots,R_p}\brackc{\sum^m_{i=1}\bracka{y_i - \sum^P_{p=1} \operatorname{avg}(y_i | \boldsymbol x_i \in R_p) \mathbb{I}[\boldsymbol x_i \in R_p]}^2}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Heuristic Search)}}
+    It seem to be intractable, so we need heuristic approach. Let's find the way to split the tree. Define a pair of axis parallel half-spaces:
+    \begin{equation*}
+        R_1 (j, s) = \brackc{\boldsymbol x | x_j \le s} \qquad R_2(j, s) = \brackc{\boldsymbol x | x_j > s}
+    \end{equation*}
+    Then we search for optimal values $j^*$ and $s^*$, which solves the problem:
+    \begin{equation*}
+        \min_{j, s} \brackc{\min_{c_1} \sum_{\boldsymbol x_i \in R_1(j, s)} (y_i - c_1(\boldsymbol x_i))^2 + \min_{c_2}\sum_{\boldsymbol x_i \in R_2(j, s)} (y_i - c_2(\boldsymbol x_i))^2 }
+    \end{equation*}
+    The inner minimizer is solved by:
+    \begin{equation*}
+        c^*_1 = \operatorname{avg}(y_i | \boldsymbol x_i \in R_1(j, s)) \qquad c_2^* = \operatorname{avg}(y_i | \boldsymbol x_i \in R_2(j, s))
+    \end{equation*}
+    For each splitting variable $j$, the search for best split at point $s$ can be don by $\mathcal{O}(m)$ computation. Thus, the problem is solved in $\mathcal{O}(nm)$ computation. The decision tree can be solved by repeatedly splitting the tree branches. 
+\end{definition}
+
+\begin{remark}{\textbf{(Overfitting)}}
+    If we keep repeating the heuristic search process, we will overfit the data. There are several ways to fix this:
+    \begin{itemize}
+        \item The following the split only if it decreases the empirical error more than the threshold. However, this might be the best as we might find split below a bad mode. 
+        \item We might consider the maximal depth of split tree is reached. This could leads to an underfitting or overfitting. We need to look at the data to determine the size of tree. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Solving Overfitting)}}
+    We choose the tree adapting from the data. We grows the large tree $\hat{T}$ (stopping when the maximum number of data is assigned at each node). Now consider the prune the tree with cost complexity pruining i.e looks for subtree $T_\lambda\subseteq \hat{T}$ that minimizes:
+    \begin{equation*}
+        C_\lambda(T) = \sum^{|T|}_{p=1} m_pQ_p(T) + \lambda\abs{T}
+    \end{equation*}
+    where $T$ is the subtree of $\hat{T}$, where we have:
+    \begin{itemize}
+        \item $p$ runs over leaf nodes of $T$ (a subset of the nodes of $\hat{T}$)
+        \item $m_p$ is the number of data point assigned to node $p$
+        \item $Q_p$ is the training error given as:
+        \begin{equation*}
+            Q_p = \frac{1}{m_p}\sum_{\boldsymbol x_i \in R_p}(y_i - c_p)^2
+        \end{equation*}
+        At the first term in $C_\lambda$ is the training error. 
+    \end{itemize}
+    One can show that there is a unique $T_\lambda \subseteq \hat{T}$, with minimize $C_\lambda$, while a good value of $\lambda$ can be found by cross-validation. 
+\end{remark}
+
+\begin{definition}{\textbf{(Weakest Link Pruning)}}
+    We successively collapse the internal nodes that produces the smallest per node increase in:
+    \begin{equation*}
+        \sum^{|T|}_{p=1} m_pQ_p(T)
+    \end{equation*}
+    We continue until the root the tree is produce. As now, we have a list of prunned trees. We can search along this list for the one that miminizes the objective $C_\lambda$, and one can show that $T_\lambda$ is in the produced list of subtree, hence the algorithm gives the optimal solution.
+\end{definition}
+
+\begin{definition}{\textbf{(Classification Tree)}}
+    When the output is a categorical variable, we use the same algorithm above with $2$ important modification:
+    \begin{itemize}
+        \item For each region $R_n$, we define the empirical class probability, as we have:
+        \begin{equation*}
+            p_{nk} = \frac{1}{m_p}\sum_{(\boldsymbol x_i, y_i) \in R_n} \mathbb{I}[y_i=k]
+        \end{equation*}
+        \item We classify an input which falls in region $n$ in the class with new probability as we have:
+        \begin{equation*}
+            f(\boldsymbol x) = \argmax{k \in \brackc{1,\dots,K}}\sum^N_{n=1}p_{nk} \mathbb{I}[\boldsymbol x \in R_n]
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Impurity)}}
+    We consider the training error $Q_p(T)$ to be called impurity, which in can be one of these values:
+    \begin{itemize}
+        \item \emph{Misclassification Error}: $1 - p_{pk(n)}$ where $k(n) = \arg\max_{k\in\brackc{1,\dots,k}} p_{nk}$
+        \item \emph{Gini-Index}: $\sum_kp_{pk}(1-p_{pk})$
+        \item \emph{Cross-Entropy}: $\sum_kp_{pk}\log(1/p_{pk})$
+    \end{itemize}
+    The cross-entropy or gini-index are used to growing the tree, while the misclassification error are often used to prune the tree. 
+\end{definition}
+
+\subsection{Ensemble Methods + Bagging}
+
+\begin{theorem}{\textbf{(Chernoff-Bound)}}
+    Let $X_1,X_2,\dots,X_n$ be independent random variable. Assuning $0\le x_i \le 1$. We denote the $X = \sum^n_{i=1}X_i$ and $\mu = \mathbb{E}[X] = \sum^n_{i=1}\mathbb{E}[X_i]$, then for all $0\le k \le \mu$ :
+    \begin{equation*}
+        \mathbb{P}(X \le k) \le \exp\bracka{-\frac{(\mu - k)^2}{2\mu}}
+    \end{equation*}
+\end{theorem}
+
+\begin{remark}{\textbf{(Motivation - Wisdom of the Crowd)}}
+    A single individual might often wrong but the crowd majority may often be corrected. Suppose each individual in the crowd $h_1,h_2,\dots,h_{2T+1}$ of the size $2T+1$ predicts the outcome correctly with probability $1/2+\gamma$ independent from each other. We consider the vote of the crowd to be:
+    \begin{equation*}
+        H_T = \operatorname{sgn}\bracka{\sum^{2T+1}_{t=1}h_t}
+    \end{equation*}
+    The probability of $H_T$ being wrong is given as:
+    \begin{equation*}
+        \mathbb{P}(H_T \text{ is wrong }) = \sum^T_{i=1}\begin{pmatrix}
+            2T+1 \\ i
+        \end{pmatrix}\bracka{\frac{1}{2}+\gamma}^i\bracka{\frac{1}{2}-\gamma}^{2T+1-i}
+    \end{equation*}
+    We simplify the above using a Chernoff bound. We let $X_1,\dots,X_i,\dots,X_n$ be Bernoulli random variable where $X_i = 1$ if voter $i$ is correct and $0$ otherwise. Taking $k = T$ and $n=2T+1$ thus:
+    \begin{equation*}
+        \mu = (2T+1)\bracka{\frac{1}{2} + \gamma} = T + \frac{1}{2}+2T\gamma + \gamma
+    \end{equation*}
+    Now, we substuite the bound:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}(H_T \text{ is wrong }) &\le \exp\bracka{-\frac{(\mu - T)^2}{2\mu}} \\
+        &= \exp\bracka{-\frac{(1/2+2T\gamma + \gamma)^2}{2(T+1/2+2T\gamma + \gamma)}} \\
+        &\le \exp\bracka{-\frac{4T^2\gamma^2}{5T}} = \exp\bracka{-\frac{4\gamma^2}{5}T}
+    \end{aligned}
+    \end{equation*}
+    The bound may be too crude but the probability of getting wrong, exponentially decays to zero. 
+\end{remark}
+
+\begin{definition}{\textbf{(Bagging Algorithm)}}
+    The idea of bagging algorithm is to reduce the variance of a classifier by having many variances of the classifier and then voting. We have the following algorithm: 
+    \begin{itemize}
+        \item Training data: $S = \brackc{(\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m)} \subset \mathbb{R}^d \times \brackc{-1, 1}$
+        \item Ensemble of size $T$
+        \item Resample dataset of size $M$
+        \item Classifier function $h_\mathcal{S}(\boldsymbol x)$
+    \end{itemize} 
+    This leads to the following pseudocode:
+    \begin{algorithm}[H]
+        \caption{Bagging Algorithm}
+    	\begin{algorithmic}[1]
+    		\For {$t=1,2,\cdots, T$}
+    		    \State $S[t] = M$ examples sampled with repalcement from $S$ 
+    		\EndFor
+            \State \textbf{Return:} We perform the following prediction:
+            \begin{equation*}
+                H(\boldsymbol x) = \operatorname{sgm}\bracka{\sum^T_{t=1}h_{S[t]}(\boldsymbol x)}
+            \end{equation*}
+        \end{algorithmic} 
+    \end{algorithm}
+    We may set $M$ to be $m$. 
+\end{definition}
+
+\begin{remark}
+    If we set $M=m$, we can find the number of unique example from $S$ are in bag $S(t)$. The probability that a particular example doesn't appear in the bag is $(1-1/m)^m$, and please note that:
+    \begin{equation*}
+        \lim_{m\rightarrow\infty}\bracka{1-\frac{1}{m}}^m = \frac{1}{e}\approx 0.368..
+    \end{equation*}
+    so there will be around $63\%$ examples in each dataset $S[t]$.
+\end{remark}
+
+\begin{definition}{\textbf{(Random Forest)}}
+    We observe the wisdom  of the crowds argument. We can build a tree using a subset of size $k$ features, which is usually $\sqrt{d}$ or $\log d$.
+\end{definition}
+
+\subsection{Boosting}
+
+\begin{remark}{\textbf{(Concept of Boosting)}}
+    Some of the problem is easy to find the \correctquote{rule of thumb} that is usually correct. It is hard to find accurate prediction rule. To boosting algorithm is given by:
+    \begin{itemize}
+        \item Create a computer program for derriving rough rule of thumb. 
+        \item We can shoow a rule of thumb to fit a subset of example. 
+        \item Repeat $T$ times. 
+        \item Combined the classifier by weighted majority votes. 
+    \end{itemize}
+    There are two concerns: How do we choose the subset of examples ? At each round as we want to concentrate on the hardest example. How do we combine the weak learner ? This can be done by weighted majority. 
+\end{remark}
+
+\begin{definition}{\textbf{(Notation Used in Boosting)}}
+    We have the following variables, as we have:
+    \begin{itemize}
+        \item $D_t(i)$: Weight on example $i$ at time $t$ when $\sum^m_{i=1}D_t(i) = 1$
+        \item $\alpha_t$: Weight on weak learner $t$ where $\alpha_t \in \mathbb{R}$
+        \item $h_t(\cdot) : \mathbb{R}^d \rightarrow \brackc{-1, +1}$: Weak learner that is generated at time $t$. 
+        \item $f(\cdot)$: Weighted on weak learner. $\sum^T_{t=1}\alpha_th_t(\boldsymbol x)$
+        \item $H(\boldsymbol x) = \operatorname{sgn}(f(\boldsymbol x))$: Final classifier.
+        \item $\varepsilon_t$: Weight error of weak learner $h_t(\cdot)$ at time $t$:
+        \begin{equation*}
+            \varepsilon_t = \sum^m_{i=1}D_t(i)\mathbb{I}[h_t(\boldsymbol x_i) \ne y_i]
+        \end{equation*}
+        \item Weak learning will generate the output:
+        \begin{equation*}
+            D_t(1),\dots,D_t(m),(\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m)
+        \end{equation*}
+        The weak-learner will output a weaker learner $h_t(\cdot)$ such that $\varepsilon_t < 1/2$
+    \end{itemize} 
+\end{definition}
+
+\begin{definition}{\textbf{(Adaboost Algorithm)}}
+    We have the following pseudocode for the adaboost this is shown in the pseudocode \ref{algo:adaboost}.
+    \begin{algorithm}[H]
+        \caption{Adaboost}
+        \label{algo:adaboost}
+        \begin{algorithmic}[1]
+            \State \textbf{Input}: Training set $S = \brackc{(\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m)}$
+            \State \textbf{Initialize}: $D_1(1)=\cdots=D_1(m)=1/m$
+            \For {$i=1,2,\cdots, T$}
+                \State Fit the classifier $h_t : \mathbb{R}^d\rightarrow\brackc{-1, 1}$ using a distribution $D_t$
+                \State Choose $\alpha_t \in \mathbb{R}$:
+                \begin{equation*}
+                    \alpha_t = \frac{1}{2}\log\frac{1-\varepsilon_t}{\varepsilon_t}
+                \end{equation*}
+                \State Update for each $i \in [m]$, where $Z_t$ is normalization factor:
+                \begin{equation*}
+                    D_{t+1}(i) = \frac{D_t(i)\exp(-\alpha_ty_ih_t(\boldsymbol x_i))}{Z_t}
+                \end{equation*}
+            \EndFor
+            \State \textbf{Return}: Classifier is given as:
+            \begin{equation*}
+                H(\boldsymbol x) = \operatorname{sgn}\bracka{\sum^T_{t=1}\alpha_th_t(\boldsymbol x)}
+            \end{equation*}
+        \end{algorithmic} 
+    \end{algorithm}
+    Typically $\varepsilon_t \le 0.5$ hence $\alpha_t \ge 0$. Thus $f$ is a linear combination of $h_t$ with weights controlled by training error. The basic intuition for the adaboost assign a larger weight are assigned to hard examples, hence the weak learner will focus on those example. 
+\end{definition}
+
+\begin{theorem}
+    Given a training set $\brackc{(\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m)}$ and assume that each iteration of Adaboost the weak learner reutrns a hypothesis with a weighted error $1/2-\gamma\ge\varepsilon_t$, then training error of the output hypothesis is at most:
+    \begin{equation*}
+        \frac{1}{m}\sum^m_{i=1}\mathbb{I}[H(\boldsymbol x_i)\ne y_i]\le\exp(-2\gamma^2T)
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Please note that the training error is bounded as:
+    \begin{equation*}
+        \frac{1}{m}\sum^m_{i=1}\mathbb{I}[H(\boldsymbol x_i)\ne y_i] \le \frac{1}{m}\sum^m_{i=1}\exp(-y_if(\boldsymbol x_i))
+    \end{equation*}
+    where $f = \sum_t \alpha_t h_t$ so that $H(\boldsymbol x) = \operatorname{sgn}(f(\boldsymbol x))$. The inequality follows from $H(\boldsymbol x_i) \ne y_i$ implies that $\exp(-y_if(\boldsymbol x_i))\ge1$. Now consider the definition of $D_t$ where, recursively:
+    \begin{equation*}
+        D_{T+1}(i) = \frac{1}{m}\frac{\prod^T_{t=1}\exp(-\alpha_ty_ih_t(\boldsymbol x_i))}{\prod^T_{t=1}Z_t}
+    \end{equation*}
+    We can expand this equation, where we have:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{m}\sum^m_{i=1}\exp(-y_if(\boldsymbol x_i)) &= \frac{1}{m}\sum^m_{i=1}\exp\bracka{-y_i\sum^T_{t=1}\alpha_th_t(\boldsymbol x_i)} \\
+        &= \frac{1}{m}\sum^m_{i=1}\prod^T_{t=1}\exp(-y_i\alpha_th_t(\boldsymbol x_i)) \\
+        &= \sum^m_{i=1}D_{T+1}(i)\prod^T_{t=1}Z_t = \prod^T_{t=1}Z_t
+    \end{aligned} 
+    \end{equation*}
+    If at each iteration, we choose $\alpha_t$ and $h_t$ by minimizing $Z_t$, the final training error of $H$ will be reduced most rapidly. Recall that:
+    \begin{equation*}
+        Z_t = \sum^m_{i=1}D_t(i)\exp(-\alpha_ty_ih_t(\boldsymbol x_i))
+    \end{equation*}
+    Using the fact that $Z_t$ is a binary, we have that:
+    \begin{equation*}
+    \begin{aligned}
+        Z_t &= \exp(\alpha_t)\sum_{i : y_i \ne h_t(\boldsymbol x_i)}D_t(i) + \exp(-\alpha_t)\sum_{i: y_i = h_t(\boldsymbol x_i)}D_t(i) \\
+        &= \varepsilon_t\exp(\alpha_t) + (1-\varepsilon_t)\exp(-\alpha_t)
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative of $Z_t$ to zero with respected to $\alpha_t$, which gives us the weight:
+    \begin{equation*}
+        \alpha_t = \frac{1}{2}\log\frac{1-\varepsilon_t}{\varepsilon_t}
+    \end{equation*}
+    Placing $\alpha_t$ to the value $Z_t$, and we have:
+    \begin{equation*}
+    \begin{aligned}
+        Z_t &= \varepsilon_t\exp(\alpha_t) + (1-\varepsilon_t)\exp(-\alpha_t) \\
+        &= 2\sqrt{\varepsilon_t(1-\varepsilon_t)} = \sqrt{1-4\gamma^2_t}
+    \end{aligned}
+    \end{equation*}
+    Please note that $\gamma_t = 1/2-\varepsilon_t$. Hence we have:
+    \begin{equation*}
+        \frac{1}{m}\sum^m_{i=1}\mathbb{I}[H(\boldsymbol x_i) \ne y_i] \le \prod^T_{t=1}Z_t = \prod^T_{t=1}\sqrt{1-4\gamma^2_t} \le \exp\bracka{-2\sum^T_{t=1}\gamma_t^2}
+    \end{equation*}
+    The final inequality use the fact that $1-x\le\exp(x)$. If each weak classifier is slightly better than random guessing, the training drops exponentially fast. 
+\end{proof}
+
+\begin{remark}{\textbf{(Derivation of Adaboost)}}
+    The boosting can be seen as a greedy way to solve problem:
+    \begin{equation*}
+        \min\brackc{\sum^m_{i=1}V\bracka{y_i, \sum^T_{i=1}\alpha_th_t(\boldsymbol x_i)} : \alpha_1,\dots,\alpha_T\in \mathbb{R}^T, h_1,\dots,h_T \in \mathcal{H}^T}
+    \end{equation*} 
+    where $\mathcal{H}$ is hypothesis class which contains the weaker learner and the loss function is exponential for instance $V(y, \hat{y}) = \exp(-y\hat{y})$. At each iteration, a new basis function is added to the current basis expansion $f^{(t-1)} = \sum^{t-1}_{s=1}\alpha_sh_s$, which we have:
+    \begin{equation*}
+        (\alpha_t, h_t) = \argmin{\alpha_t, h_t} \sum^m_{i=1}V\Big( y_i, f^{(t-1)}(\boldsymbol x_i) + \alpha_th_t(\boldsymbol x_i) \Big)
+    \end{equation*}
+    unlike the decision tree, where each iteration in previous basis is re-adjusted. In statistics literature, this kind of model is called stagewise additive model. To derive the adaboost, substute $V(y, \hat{y}) = \exp(-y\hat{y})$ and we consider the followimg optimization problem:
+    \begin{equation*}
+        \min_{\alpha_t,h_t}\sum^m_{i=1}\exp\bracka{-y_i\bracka{f^{(t-1)}(\boldsymbol x_i) + \alpha_th_t(\boldsymbol x_i)}}
+    \end{equation*}
+    We define $\mathcal{D}_t(i) = \exp(-y_if^{(t-1)}(\boldsymbol x_i))$ as we have:
+    \begin{equation*}
+        \min_{\alpha_t, h_t} \sum^m_{i=1}\mathcal{D}_t(i)\exp(-\alpha_th_t(\boldsymbol x_i)y_i)
+    \end{equation*}
+    We can see that the This equation can be rewritten as:
+    \begin{equation*}
+    \begin{aligned}
+        \min_{\alpha_t, h_t}&\bracka{\exp(\alpha_t)\sum_{i : y_i \ne h_i(\boldsymbol x_i)} \mathcal{D}_t(i) + \exp(-\alpha_t)\sum_{i:y_i = h_t(\boldsymbol x_i)} \mathcal{D}_t(i) } \\
+        =&\min_{\alpha_t, h_t}\bracka{ (e^{\alpha_t} - e^{-\alpha_t})\sum^m_{i=1}\mathcal{D}_t(i)\mathbb{I}[y_i \ne h_t(\boldsymbol x_i)] + e^{-\alpha_t}\sum^m_{i=1}\mathcal{D}_t(i) }
+    \end{aligned}
+    \end{equation*}
+    This is similar to the adaboost, which we have: $h_t$ minimizes the weight misclassification error weight by $\mathcal{D}_t$ that is is propotional to adaboost $D_t$. Finally, minimization of $\alpha_t$ is the same as adaboost. 
+\end{remark}
+
+\begin{remark}{\textbf{(Classification and Regression)}}
+    In the typical setup of classification as we have:
+    \begin{equation*}
+        \min_{f\in\mathcal{F}} \sum^m_{i=1}V(y_i, f(\boldsymbol x_i)) + \lambda \ \text{complexity}(f)
+    \end{equation*}
+    There are some problems with classification as we use the exponential loss. To make the class of function $\mathcal{F}$ both rich and smooth, we have the function $f$ that maps to $\mathbb{R}$ rather than $\brackc{-1, 1}$ then predict the sign. We have the typical loss function, where we have for $y \in \brackc{-1, +1}$:
+    \begin{itemize}
+        \item Misclassification Loss: $V_\text{mc}(y, \hat{y}) = \mathbb{I}[y = \operatorname{sgn}(\hat{y})]$. It isn't continuous.
+        \item Hinge Loss: $V_\text{hinge}(y, \hat{y}) = \max(0, 1-y\hat{y})$. It punishes the negative margin but not positive margin, but it isn't differetiable everywhere.
+        \item Square Loss: $V_\text{sq}(y, \hat{y}) = (y-\hat{y})^2$. It unnecessary punishes predicting with increasing positive margin.
+        \item Exponential Loss: $V_\text{exp}(y, \hat{y}) = \exp(-y\hat{y})$. It punishes negative margine and promote large positve margin.
+    \end{itemize}
+    Thus the exponential loss is choosen.
+\end{remark}
+

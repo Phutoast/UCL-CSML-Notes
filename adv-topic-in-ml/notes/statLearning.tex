@@ -1,0 +1,2014 @@
+\section{Formulating Learning Problem}
+
+\subsection{Problem}
+
+\begin{definition}{\textbf{(Learning Problem)}}
+    We have the following components for learning problems:
+    \begin{itemize}
+        \item $\mathcal{X}$: input space. 
+        \item $\mathcal{Y}$: output space. 
+        \item $\rho$: unknown distribution on $\mathcal{X}\times\mathcal{Y}$
+        \item $l : \mathcal{Y}\times\mathcal{Y}\rightarrow \mathbb{R}$: loss function that measure discrepancy between $y,y'\in\mathcal{Y}$
+    \end{itemize}
+    We want to minimize the expected risk:
+    \begin{equation*}
+        \inf_{f:\mathcal{X}\rightarrow\mathcal{Y}}\mathcal{E}(f) \qquad \text{ where } \mathcal{E}(f) = \int_{\mathcal{X}\times\mathcal{Y}} l(f(x), y)\dby\rho(x, y)
+    \end{equation*}
+    The relation between $ \mathcal{X} $ and $\mathcal{Y}$ are determined by unknown $\rho$, while we can only access via finite sample. 
+\end{definition}
+
+\begin{remark}{\textbf{(Loss Function for Regression)}}
+    The loss function for regression would be in the form of 
+    \begin{equation*}
+        L(y, y') = L(y-y')
+    \end{equation*}
+    The examples of this kind of loss is:
+    \begin{itemize}
+        \item Square Loss: $(y-y')^2$
+        \item Absolute Loss: $\abs{y-y'}$
+        \item $\varepsilon$-sensitive Loss: $\max(\abs{y-y'}-\varepsilon, 0)$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Loss Function for Classification)}}
+    The loss function for classification would be 
+    \begin{equation*}
+        L(y,y') = L(yy')
+    \end{equation*}
+    The examples of this kind of loss is:
+    \begin{itemize}
+        \item 0-1 Loss: $\boldsymbol 1_{-yy'>0}$
+        \item Square loss Loss: $(1-yy')^2$
+        \item Hinge Loss: $\max(1-yy',0)$
+        \item Logistic Loss: $\log(1+\exp(-yy'))$
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Realistic Learning Problem)}}
+    We have the following components:
+    \begin{itemize}
+        \item $\mathcal{S} = \bigcup_{n\in\mathbb{N}}(\mathcal{X}\times\mathcal{Y})^n$ be set of finite dataset on $\mathcal{X}\times\mathcal{Y}$
+        \item $\mathcal{F}$ be set of all measurable function $f:\mathcal{X}\rightarrow\mathcal{Y}$
+        \item $A:\mathcal{S}\rightarrow\mathcal{F}$ be a learning algorithm where $S \mapsto A(S) : \mathcal{X} \rightarrow \mathcal{Y}$
+    \end{itemize}
+    We will study the relation between the size of training set and corresponding predictor $f_n = A((x_i, y_n)^n_{i=1})$.
+\end{definition}
+
+\begin{remark}
+    We can consider the stochastic algorithm. In this case, given a dataset $S\in\mathcal{S}$, the algorithm can be seen as a distribution over $\mathcal{F}$ and its output is simpily one sample of $A(S)$. Note that the deterministic is simpily a Direc's delta distribution.
+\end{remark}
+
+\subsection{Risk}
+
+\begin{definition}{\textbf{(Excess Risk)}}
+    We define an excess risk of function $f_n$ as 
+    \begin{equation*}
+        \mathcal{E}(f_n) - \inf_{f\in\mathcal{F}}\mathcal{E}(f)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Consistency)}}
+    The algorithm is consistence
+    \begin{equation*}
+        \lim_{n\rightarrow\infty} \mathcal{E}(f_n) - \inf_{f\in\mathcal{F}}\mathcal{E}(f) = 0
+    \end{equation*}
+    Ideally, we want algorithm to behave like this.
+\end{definition}
+
+\begin{definition}{\textbf{(Notion of Convergence)}}
+    However, as $f_n=A(S)$ being stochastic or random variable because the training set $S$ is sampled from $\rho$, there are difference notions of convergence:
+    \begin{itemize}
+        \item Convergence in expectation
+        \begin{equation*}
+            \lim_{n\rightarrow\infty}\mathbb{E}\brackb{\mathcal{E}(f_n) - \inf_{f\in\mathcal{F}} \mathcal{E}(f) } = 0
+        \end{equation*}
+        \item Convergence in probability. For all $\varepsilon>0$:
+        \begin{equation*}
+            \lim_{n\rightarrow\infty}\mathbb{P}\bracka{\mathcal{E}(f_n) - \inf_{f\in\mathcal{F}} \mathcal{E}(f) > \varepsilon } = 0
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{remark}
+    We only interested in the risk of our estimator to be the best i.e $\mathcal{E}(f_n) \rightarrow \inf_{f\in\mathcal{F}}\mathcal{E}(f)$. However, we don't care about finding the best fucntion $f^*$, where it is minimizer of expected risk i.e $\mathcal{E}(f^*) = \inf_{f\in\mathcal{F}}\mathcal{E}(f)$
+\end{remark}
+
+\begin{remark}
+    The existence of $f^*$ can be useful in several loss function. As the closer the function $f$ to $f^*$, the closer the risk $ \mathcal{E}(f) $ to $\mathcal{E}(f^*)$: 
+    \begin{itemize}
+        \item For least square function: $l(f(x), y) = (f(x)-y)^2$:
+        \begin{equation*}
+            \mathcal{E}(f) - \mathcal{E}(f^*) = \norm{f-f^*}_{L^2(\mathcal{X}, \rho)}
+        \end{equation*}
+        \item For any $L$-Lipschitz loss function, where $\abs{l(z, y)-l(z', y)}\le L\norm{z-z'}$, we have:
+        \begin{equation*}
+            \mathcal{E}(f) - \mathcal{E}(f^*) \le \norm{f-f^*}_{L^1(\mathcal{X}, \rho)}
+        \end{equation*}
+    \end{itemize}
+    This guarantee that the algorithm is consistency when $f\rightarrow f^*$.
+\end{remark}
+
+\begin{definition}{\textbf{(Learning Rate)}}
+    We can measure the \correctquote{speed} in which the excess risk goes to zero:
+    \begin{equation*}
+        \mathbb{E}\brackb{\mathcal{E}(f_n) - \inf_{f\in\mathcal{F}}\mathcal{E}(f) } = \mathcal{O}(n^{-\alpha})
+    \end{equation*}
+    where the learning rate is $\alpha$, which we can compare $2$ algorithms via this value.
+\end{definition}
+
+\begin{definition}{\textbf{(Probabilistic Bound)}}
+    We would like to consider the following probabilistic bounds on various values:
+    \begin{itemize}
+        \item \textbf{Sample Complexity: } A number $n(\varepsilon,\delta)$ of training points that the algorithm needs to achieve excess risk lower than $\varepsilon$ with a least probability $1-\delta$
+        \begin{equation*}
+            \mathbb{P}\bracka{\mathcal{E}(f_{n(\varepsilon, \delta)}) - \inf_{f\in\mathcal{F}}\mathcal{E}(f)\le\varepsilon } \ge 1-\delta
+        \end{equation*}
+        \item \textbf{Error Bound: } An upperbound $\varepsilon(\delta, n)$ on the excess risk $f_n$, which holds with probability larger than $1-\delta$:
+        \begin{equation*}
+            \mathbb{P}\bracka{\mathcal{E}(f_{n}) - \inf_{f\in\mathcal{F}}\mathcal{E}(f)\le\varepsilon(\delta, n) } \ge 1-\delta 
+        \end{equation*}
+        \item \textbf{Tail Bound: } A lower bound $\delta(\varepsilon, n)\in(0, 1)$ on the probability that $f_n$ will have excess risk larger than $\varepsilon$:
+        \begin{equation*}
+            \mathbb{P}\bracka{\mathcal{E}(f_{n}) - \inf_{f\in\mathcal{F}}\mathcal{E}(f)\le\varepsilon } \ge 1-\delta(\varepsilon, n)  
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\subsection{Empirical Risks}
+
+\begin{definition}{\textbf{(Empirical Risk)}}
+    Given a finite sample of data $(x_i, y_i)^m_{i=1}$, we can use empirical risk to gather the information about $\mathcal{E}(f)$ as:
+    \begin{equation*}
+        \mathcal{E}_n(f) = \frac{1}{n}\sum^n_{i=1}l(f(x_i), y_i)
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The expected empirical risk is expected risk $\mathbb{E}_{S\sim\rho^n}\brackb{\mathcal{E}_n(f)} = \mathcal{E}(f)$. 
+\end{proposition}
+\begin{proof}
+    We have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_{S\sim\rho^n}\brackb{\frac{1}{n}\sum^n_{i=1}l(f(x_i), y_i)} = \frac{1}{n}\sum^n_{i=1}\mathbb{E}_{(x_i, y_i)}\brackb{l(f(x_i), y)} = \frac{1}{n}\sum^n_{i=1}\mathcal{E}(f) = \mathcal{E}(f)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{lemma}
+    \label{lem:sample-var}
+    Let's consider an iid variables $(x_i)^n_{i=1}$ and let 
+    \begin{equation*}
+        \bar{x}_n = \frac{1}{n}\sum^n_{i=1} x_i
+    \end{equation*}
+    One can show that 
+    \begin{equation*}
+        \operatorname{Var}(\bar{x}_n) = \frac{\operatorname{Var}(x)}{n}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\brackb{\bracka{\bar{x}_n - \mu}^2} &= \mathbb{E}\brackb{\bracka{\frac{1}{n}\sum^n_{i=1}x_i - \mu}^2} = \mathbb{E}\brackb{\bracka{\frac{1}{n}\sum^n_{i=1} x_i - \mu}\bracka{\frac{1}{n}\sum^n_{i=1} x_i - \mu}} \\
+        &= \mathbb{E}\brackb{\bracka{\frac{1}{n}\sum^n_{i=1} x_i}\bracka{\frac{1}{n}\sum^n_{i=1} x_i} - \frac{2\mu}{n}\sum^n_{i=1} x_i + \mu^2 } \\
+        &= \mathbb{E}\brackb{\bracka{\frac{1}{n}\sum^n_{i=1} x_i}\bracka{\frac{1}{n}\sum^n_{i=1} x_i}} - \frac{2\mu}{n}\sum^n_{i=1}\mathbb{E}[x_i] + \mu^2 \\
+        &= \frac{1}{n^2}\Big(n\mathbb{E}[x^2] + (n^2-n)\mu^2\Big) - \mu^2 = \frac{\mathbb{E}[x^2] + \mu^2}{n} = \frac{\operatorname{Var}(x)}{n}
+    \end{aligned}
+    \end{equation*}
+    where we have
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\brackb{\bracka{\frac{1}{n}\sum^n_{i=1} x_i}\bracka{\frac{1}{n}\sum^n_{i=1} x_i}} &= \frac{1}{n^2}\begin{aligned}[t]
+            \mathbb{E}\Big[&x_1x_1 + x_1x_2 + \cdots + x_1x_n \\
+            &x_2x_1 + x_2x_2 + \cdots + x_2x_n \\
+            &\vdots \\
+            &x_nx_1 + x_nx_2 + \cdots + x_nx_n \Big]    
+        \end{aligned} \\
+        &= \frac{1}{n^2}\Big(n\mathbb{E}[x^2] + (n^2-n)\mathbb{E}[x]\mathbb{E}[x]\Big)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    The expected absolute difference between empirical risk and expected risk is:
+    \begin{equation*}
+        \mathbb{E}\brackb{\abs{\mathcal{E}_n(f) - \mathcal{E}(f)}} \le \sqrt{\frac{\operatorname{var}(l(f(x_i), y_i))}{n}}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Let's apply the lemma \ref{lem:sample-var} to the empirical risk, after Jensen's ineqalities:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[|\mathcal{E}_n(f) - \mathcal{E}(f)|] &= \mathbb{E}[\sqrt{(\mathcal{E}_n(f) - \mathcal{E}(f))^2}] \\
+        &\le \sqrt{\mathbb{E}[(\mathcal{E}_n(f) - \mathcal{E}(f))^2]} \\
+        &= \sqrt{\frac{\operatorname{var}(l(f(x_i), y))}{n}}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}{\textbf{(Markov's Inequality)}}
+    Let $X$ be non-negative random variable and $a>0$, then
+    \begin{equation*}
+        \mathbb{P}(X\ge a)\le\frac{\mathbb{E}[X]}{a}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We consider the expectation of $X$:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[X] &= \int^\infty_{-\infty} xp(x)\dby x = \int^\infty_0 xp(x)\dby x \\
+        &= \int^a_0 xp(x)\dby x +\int^\infty_a xp(x)\dby x \\
+        &\ge \int^\infty_a xp(x)\dby x \ge \int^\infty_a ap(x)\dby x \\
+        &=aP(X\ge a)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}{\textbf{(Chebyshev's inequality)}}
+    Let $X$ be random variable with finite expected value $\mu$ and non-zero variance $\sigma^2$. For any real number $k>0$:
+    \begin{equation*}
+        \mathbb{P}(|X - \mu|\ge k) \le \frac{\sigma^2}{k^2} 
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We will consider the use of Markov's inequality where the random variable be $|X-\mu|$ and the constant be $k\sigma$, then we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}(|X-\mu|\ge k) = \mathbb{P}(|X-\mu|^2\ge k^2) &\le \frac{\mathbb{E}[|X-\mu|^2]}{k^2} = \frac{\sigma^2}{k^2} 
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    The probability of expected risk is greater than some number $\varepsilon\ge0$ is 
+    \begin{equation*}
+        \mathbb{P}\Big( \mathcal{E}_n(f) - \mathcal{E}(f) \ge\varepsilon \Big) \le \frac{\operatorname{var}(l(f(x_i), y_i))}{n\varepsilon^2}
+    \end{equation*}
+    This follows directly from the Chebyshev's inequality.
+\end{proposition}
+
+\section{Generalization Bound}
+
+\subsection{Generalization Error}
+
+\begin{proposition}
+    We will consider the bound of the excess risk, where we assume $f^*$ where $\mathcal{E}(f^*) = \inf_{f\in\mathcal{F}}\mathcal{E}(f)$:
+    \begin{equation*}
+        \mathbb{E}\Big[\mathcal{E}(f_n) - \mathcal{E}(f^*)\Big] \le \mathbb{E}\Big[ \mathcal{E}(f_n) - \mathcal{E}_n(f_n) \Big]
+    \end{equation*}
+    where $f_n = \arg\min_{f\in\mathcal{F}}\mathcal{E}_n(f)$
+\end{proposition}
+\begin{proof}
+    We consider the following risk decomposition:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\Big[\mathcal{E}(f_n) &- \mathcal{E}(f^*)\Big] \\
+        &= \mathbb{E}\Big[\mathcal{E}(f_n) - \mathcal{E}_n(f_n) + \underbrace{\mathcal{E}_n(f_n) - \mathcal{E}_n(f^*)}_{\le 0} + \mathcal{E}_n(f^*) - \mathcal{E}(f^*)\Big] \\
+        &\le \mathbb{E}\Big[\mathcal{E}(f_n) - \mathcal{E}_n(f_n)\Big] + \mathbb{E}\Big[\mathcal{E}_n(f^*) - \mathcal{E}(f^*)\Big] \\
+        &= \mathbb{E}\Big[\mathcal{E}(f_n) - \mathcal{E}_n(f_n)\Big] + 0
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Generalization Error)}}
+    We can focus on the generalization error:
+    \begin{equation*}
+        \mathbb{E}\Big[ \mathcal{E}(f_n) - \mathcal{E}_n(f_n) \Big]
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The generalization won't go to zero for some reasonable algorithm (that try to minimize empirical error) as $n\rightarrow\infty$
+\end{proposition}
+\begin{proof}
+    We construct such an algorithm. We assume $\mathcal{X} = \mathcal{Y} = \mathbb{R}$, and $\rho$ with dense support. The loss function $l(y,y)=0$ for all $y\in\mathcal{Y}$. Given a dataset $(x_i, y_i)^n_{i=1}$ such that $x_i \ne x_j$ for all $i\ne j$, if we have $f_n:\mathcal{X}\rightarrow\mathcal{Y}$ such that:
+    \begin{equation*}
+        f_n(x) = \begin{cases}
+            y_i & \text{ if } \exists i \in [n] : x_i = x \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    This is clear that the algorithm above have $\mathbb{E}[\mathcal{E}_n(f_n)] = 0 $ but $\mathbb{E}[\mathcal{E}(f_n)] = \mathcal{E}(0)\ge0$. Thus, the generalization error won't go to zero as $n\rightarrow\infty$
+\end{proof}
+
+\begin{remark}
+    The algorithm constructed is an extream form of memorization, which leads to \emph{overfitting}.
+\end{remark}
+
+\begin{definition}{\textbf{(Overfitting)}}
+    An estimator $f_n$ is said to be overfit the training data if for any $n\in\mathbb{N}$:
+    \begin{itemize}
+        \item $\mathbb{E}[\mathcal{E}(f_n) - \mathcal{E}(f_*)]> C$ for constant $C>0$
+        \item $\mathbb{E}[\mathcal{E}_n(f_n) - \mathcal{E}(f_*)]\le0$
+    \end{itemize}
+    This is where the estimator $f_n$ does better in \correctquote{practice} than in the real data. 
+\end{definition}
+
+\subsection{Bound For Generalization}
+
+\begin{theorem}{\textbf{(Finite Hypothesis Case)}}
+    For finite $\mathcal{X}$ and $\mathcal{Y}$, we have a space of functions:
+    \begin{equation*}
+        \mathcal{F} = \mathcal{Y}^\mathcal{X} = \brackc{f : \mathcal{X} \rightarrow \mathcal{Y}}
+    \end{equation*}
+    which is also finite, then:
+    \begin{equation*}
+        \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|} \le |\mathcal{F}|\sqrt{\frac{V_\mathcal{F}}{n}}
+    \end{equation*}
+    where $V_\mathcal{F} = \sup_{f\in\mathcal{F}}\operatorname{var}(l(f(x_i), y))$ 
+\end{theorem}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|}&\le \mathbb{E} \brackb{\sup_{f\in\mathcal{F}}\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big|}  \\
+        &\le \sum_{f\in\mathcal{F}} \brackb{\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big|}  \\
+        &\le | \mathcal{F} |\sqrt{\frac{V_\mathcal{F}}{n}}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    Empirical risk minimization still works in finite case as 
+    \begin{equation*}
+        \lim_{n\rightarrow\infty}\mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|} = 0
+    \end{equation*}
+\end{remark}
+
+\begin{remark}
+    This finite hypothesis case still works when considering the subset $\mathcal{H}\subset\mathcal{F}$ as we have (LHS) and if $f_*\in\mathcal{H}$, we can see that (RHS)
+    \begin{equation*}
+        \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|} \le |\mathcal{H}|\sqrt{\frac{V_\mathcal{H}}{n}}
+        \quad,\quad \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_*) \Big|} \le |\mathcal{H}|\sqrt{\frac{V_\mathcal{H}}{n}}
+    \end{equation*}
+    \begin{equation*}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Threshold Function)}}
+    Threshold function of paramter $a\in(-1, 1]$ is 
+    \begin{equation*}
+        f_a(x) = \boldsymbol 1_{x\in[a, \infty)}
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}{\textbf{(Popoviciu's Inequality)}}
+    For any random varaible $X$ bounded variance $m\le\sigma^2 \le M$
+    \begin{equation*}
+        \sigma^2 \le \frac{(M-m)^2}{4}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Setting $g(t) = \mathbb{E}[(X-t)^2]$, then when doing the derivative, we can see that 
+    \begin{equation*}
+        g'(t) = 2t-2\mathbb{E}[X]
+    \end{equation*}
+    when setting to zero, we can see that $t = \mathbb{E}[X]$, which is the minimum as $g''(t) = 2$. Now, setting $t = (M+m)/2$, we have 
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{var}(X) &\le \mathbb{E}\brackb{\bracka{X - \frac{M+m}{2}}^2} \\
+        &=\frac{1}{4}\mathbb{E}\Big[((X-m)+(X-M))^2\Big] \\
+        &\le\frac{1}{4}\mathbb{E}\Big[((X-m)-(X-M))^2\Big] =\frac{(M-m)^2}{4}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    We consider a binary classification problem $\mathcal{Y}=\{0, 1\}$. We know in advanced that the minimizer would be a threshold with parameter $a^*$. It is clear that the hypothesis space is $\mathcal{F}=\brackc{f_a | a \in \mathbb{R}} = (-1, 1]$. However, computer can only represent a finite set of number($a$), given a precision $p$, we have:
+    \begin{equation*}
+        \mathcal{H}_p = \brackc{f_a | a\in(-1, 1], a10^p = [a10^p]}
+    \end{equation*}
+    where $[\cdot]$ represents an integer part of the number. For example:
+    \begin{equation*}
+        \mathcal{H}_1 = \brackc{f_a : a \in\brackc{-\frac{9}{10}, \cdots, \frac{9}{10}, 1}}
+    \end{equation*}
+    We can see that $|\mathcal{H}_p| = 2\cdot10^p$, and so we have 
+    \begin{equation*}
+        \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|} \le \abs{\mathcal{H}_p}\sqrt{\frac{V_\mathcal{H}}{n}} = \frac{10^p}{\sqrt{n}}
+    \end{equation*}
+    where the varaince is $V_\mathcal{H}\le1/4$ via Popoviciu's inequality as our loss is bounded by $[0, 1]$. The bound isn't good enough as we need a large $n$ to make the bound being reasonable.
+\end{remark}
+
+\begin{remark}{\emph{(Chernoff Bounding Technique)}}
+    Given a random varaibel $X$ and $\varepsilon>0$, we have, for $t>0$
+    \begin{equation*}
+        \mathbb{P}(X\ge\varepsilon) = \mathbb{P}(\exp(tX)\ge\exp(t\varepsilon)) \le \frac{\mathbb{E}[\exp(tX)]}{\exp(t\varepsilon)}
+    \end{equation*}
+    where we apply the Markov's inequality and use $t$ to make the bound tight.
+\end{remark}
+
+\begin{lemma}{\textbf{(Hoeffding's Lemma)}}
+    Let $X$ be a random varaible with $\mathbb{E}[X] = 0$ and $a\le X \le b$ with $b>a$. For any $t>0$, we have 
+    \begin{equation*}
+        \mathbb{E}[\exp(tX)] \le \exp\bracka{\frac{t^2(b-a)^2}{8}}
+    \end{equation*}     
+\end{lemma}
+
+\begin{theorem}{\textbf{(Hoeffding's Ineqality)}}
+    Consider $X_1, X_1,\dots,X_n$ independent random varaible where $X_i\in[a_i, b_i]$ and let $\bar{X}=1/n\sum^n_{i=1}X_i$, then 
+    \begin{equation*}
+        \mathbb{P}\bracka{\Big| \bar{X} - \mathbb{E}[\bar{X}] \Big|\ge\varepsilon} \le 2 \exp\bracka{-\frac{2n^2\varepsilon^2}{\sum^n_{i=1}(b_i-a_i)^2}}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Since we have:
+    \begin{equation*}
+        \mathbb{P}\bracka{\Big| \bar{X} - \mathbb{E}[\bar{X}] \Big|\ge\varepsilon} = 2 \mathbb{P}\bracka{\bar{X} - \mathbb{E}[\bar{X}] \ge\varepsilon}
+    \end{equation*}
+    Please note that $\mathbb{E}[X_i - \mathbb{E}[X_i]] = 0$, thus we can use Hoeffding lemma, now we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\bracka{ \bar{X} - \mathbb{E}[\bar{X}] \ge\varepsilon} &\le \exp(-t\varepsilon)\mathbb{E}\brackb{\exp\bracka{\frac{t}{n}\bracka{\sum^n_{i=1}X_i - \mathbb{E}\brackb{\sum^n_{i=1}X_i}}}} \\
+        &= \exp(-t\varepsilon)\prod^n_{i=1}\mathbb{E}\brackb{\exp\bracka{\frac{t(X_i - \mathbb{E}[X_i])}{n}}} \\
+        &\le \exp(-t\varepsilon)\prod^n_{i=1}\exp\bracka{\frac{t^2}{8n^2}(b_i-a_i)^2}\\
+        &= \exp\bracka{\frac{t^2}{8n^2}\sum_{i=1}^n(b_i-a_i)^2 - t\varepsilon}
+    \end{aligned}
+    \end{equation*}
+    We will find $t$ that would tighten the bound assuming setting $a = (\sum_{i=1}^n(b_i-a_i)^2)/(8n^2)$ and we have the following equation
+    \begin{equation*}
+        f(t) = at^2 - t\varepsilon \qquad f'(t) = 2at - \varepsilon
+    \end{equation*}
+    which mean $t^* = \varepsilon/(2a)$ plugging back and we have $f(t^*) = -\varepsilon^2/(4a)$, and so:
+    \begin{equation*}
+        \mathbb{P}\bracka{ \bar{X} - \mathbb{E}[\bar{X}] \ge\varepsilon} \le \exp\bracka{-\frac{2\varepsilon^2n^2}{\sum_{i=1}^n(b_i-a_i)^2}}
+    \end{equation*}
+    as required.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:gen-bound}
+    For any $\delta\in(0, 1]$ and bounded loss $0\le|l(f(x), y)|<M$, for all $f\in \mathcal{H} $, $x\in\mathcal{X}$ and $y\in\mathcal{Y}$, we have:
+    \begin{equation*}
+        \Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big| \le \sqrt{\frac{2M^2\log(2|\mathcal{H}|/\delta)}{n}}
+    \end{equation*}
+    for probability of at least $1-\delta$
+\end{theorem}
+\begin{proof}
+    Starting by applying Hoeffding's inequality, for any function $f$:
+    \begin{equation*}
+        \mathbb{P}\bracka{\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big| \ge \varepsilon} \le 2\exp\bracka{-\frac{2n^2\varepsilon^2}{4M^2}}
+    \end{equation*}    
+    Now, let's try to bound the generalization error:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\bracka{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big| \ge \varepsilon} &\le \mathbb{P}\bracka{\sup_{f\in\mathcal{H}}\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big| \ge \varepsilon} = \mathbb{P}\bracka{\bigcup_{f\in\mathcal{H}} \brackc{\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big| \ge \varepsilon} } \\
+        &\le \sum_{f\in\mathcal{H}}\mathbb{P}\bracka{\Big| \mathcal{E}_n(f) - \mathcal{E}(f) \Big| \ge \varepsilon} \le |\mathcal{H}|2\exp\bracka{-\frac{n^2\varepsilon^2}{2M^2}}
+    \end{aligned}
+    \end{equation*}
+    We have used union bound, since at least one of $f$ will achieves a suprenum. To find the form above, we simply set $\delta$ to the bound we just derived.
+\end{proof}
+
+\begin{remark}
+    Recalling the threshold function, our new bound is as follows:
+    \begin{equation*}
+    \begin{aligned}
+        \Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big| &\le \sqrt{\frac{4 + 6p-2\log\delta}{n}}
+    \end{aligned}
+    \end{equation*}
+    as $M =1$ amd $\log2|\mathcal{H}| = \log 4\cdot10^p = \log 4 + p\log 10 \le 2+3p$
+\end{remark}
+
+\begin{proposition}
+    Let $X$ be a random variable such that $|X|<M$ for some constant $M>0$, then for any $\varepsilon>0$, we have 
+    \begin{equation*}
+        \mathbb{E}[|X|] \le \varepsilon\mathbb{P}(|X|\le\varepsilon) + M\mathbb{P}(|X|>\varepsilon)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Let's consider the expectation of $|X|$, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[|X|] &= \int^\infty_\varepsilon p(X)|X|\dby X + \int^{-\varepsilon}_{-\infty} p(X)|X|\dby X + \int^\varepsilon_{-\varepsilon} p(X)|X|\dby X  \\
+        &\le M(P(X>\varepsilon) + P(X<-\varepsilon)) + \varepsilon P(-\varepsilon\le X \le \varepsilon) \\
+        &= MP(|X|>\varepsilon) + \varepsilon P(|X|\le\varepsilon)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+\begin{corollary}
+    Using the proposition above and the generalization bound that we have derived, we have, for any $\delta\in(0, 1]$:
+    \begin{equation*}
+        \mathbb{E}\brackb{\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big|} \le (1-\delta)\sqrt{\frac{2M^2\log(2|\mathcal{H}|/\delta)}{n}} + \delta M
+    \end{equation*}
+\end{corollary}
+
+\begin{remark}
+    \label{remark:first-reg}
+    The case where $f_*\in \mathcal{H}\backslash\mathcal{H}_p$ for any $p>0$, then ERM on $\mathcal{H}_p$ will never minimizes the expected risk and tere will be a gap between $\mathcal{E}(f_{n,p}) - \mathcal{E}(f_*)$. As $p\rightarrow\infty$, we expect the gap to decrease. However, if $p$ increases too fast:
+    \begin{equation*}
+        \Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big| \le \sqrt{\frac{4 + 6p-2\log\delta}{n}} \rightarrow\infty
+    \end{equation*}
+    as we can't control the generalization error. We will need to increase $p$ gradually. This process is called regularization.
+\end{remark}
+
+\begin{proposition}
+    The error decomposition of excess risk is 
+    \label{prop:gen-error-bound-approx}
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{E}(f_n) - \mathcal{E}(f_*) &= \underbrace{\mathcal{E}(f_n) - \mathcal{E}_n(f_n)}_{\text{\emph{Generalization Error}}} + \underbrace{\mathcal{E}_n(f_n) - \mathcal{E}_n(f_p)}_{\le0} + \underbrace{\mathcal{E}_n(f_p) - \mathcal{E}(f_p)}_{\text{\emph{Generalization Error}}} + \underbrace{\mathcal{E}(f_p) - \mathcal{E}(f_*)}_{\text{\emph{Approximation Error}}} \\
+        &\le \mathcal{E}(f_n) - \mathcal{E}_n(f_n) + \mathcal{E}_n(f_p) - \mathcal{E}(f_p) + \mathcal{E}(f_p) - \mathcal{E}(f_*) \\
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{lemma}
+    The approximation error of threshold function is 
+    \begin{equation*}
+        \mathcal{E}(f_p) - \mathcal{E}(f_*)  \le\abs{a_p-a_*}\le10^{-p}
+    \end{equation*}
+    Where we assume a distribution on $[-1, 1]$ together with least square loss $l=(y-f_a(x))^2$
+\end{lemma}
+\begin{proof}
+    We would like to note that, if $b \ge a$, $f_b(x)f_a(x) = f_b(x)$. WLOG, assume that $a_* \ge a_p$
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{E}(f_p) - \mathcal{E}(f_*) &= \int^1_{-1} (f_*(x) - f_p(x))^2\dby p(x) \\
+        &= \int^1_{-1}f_*^2(x)\dby p(x) - \int^1_{-1}2f_*(x)f_p(x)\dby p(x) + \int^1_{-1}f^2_p(x)\dby p(x) \\
+        &= \int^1_{a^*}p(x)\dby x - 2\int^1_{a^*}p(x)\dby x + \int^1_{a_p}p(x)\dby x \\
+        &= \int^1_{a_p}p(x)\dby x - \int^1_{a^*}p(x)\dby x = \int^{a^*}_{a_p}p(x)\dby x \le |a^*-a_p|
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    We can find the excess risk of threshold function to be bounded by, following proposition \ref{prop:gen-error-bound-approx}:
+    \begin{equation*}
+        \mathcal{E}(f_n) - \mathcal{E}(f_*) \le 2\sqrt{\frac{4 + 6p-2\log\delta}{n}} + 10^{-p} =\phi(n,\delta,p)
+    \end{equation*}
+    This holds with probability greater than $1-\delta$. We can shoow the precidion to be 
+    \begin{equation*}
+        p(n,\delta) = \argmin{p\ge0}\phi(n,\delta,p)
+    \end{equation*}
+    Thus leading to error bound as $\varepsilon(n,\delta)=\phi(n,\delta,p(n,\delta))$. 
+\end{remark}
+
+\subsection{Regularization}
+\begin{remark}
+    The idea of regularization, which has been discussed early in remark \ref{remark:first-reg}, is to parameterize $ \mathcal{H} $ where $\mathcal{H} = \bigcup_{\gamma>0}\mathcal{H}_\gamma$ of hypothesis space, where $\mathcal{H}_\gamma\subset\mathcal{H}_{\gamma'}$ iff $\gamma\le\gamma'$. We perform this to prevent overfitting as we called $\gamma$ regularization parameter.
+\end{remark}
+
+\begin{definition}{\textbf{(Regularized Algorithm)}}
+    Given $n$ training points, the regularized algorithm returns $f_{\gamma, n}$ on $\mathcal{H}_\gamma$, while we let $\gamma=\gamma(n)$ as $n\rightarrow\infty$
+\end{definition}
+
+\begin{proposition}
+    We can decompose the excess risk as
+    \begin{equation*}
+        \mathcal{E}(f_{\gamma,n}) - \mathcal{E}(f_*) = \underbrace{\mathcal{E}(f_{\gamma, n}) - \mathcal{E}(f_\gamma)}_{\text{\emph{Sample Error}}} + \underbrace{\mathcal{E}(f_\gamma) - \inf_{f\in\mathcal{H}} \mathcal{E}(f)}_{\text{\emph{Approximation Error}}} + \underbrace{\inf_{f\in\mathcal{H}}\mathcal{E}(f) - \mathcal{E}(f_*)}_{\text{\emph{Irreducible Error}}} 
+    \end{equation*}
+    where we let $\gamma>0$ and $f_\gamma=\arg\min_{f\in\mathcal{H}_\gamma}\mathcal{E}(f)$.
+\end{proposition}
+
+\begin{remark}
+    Let's explore the definition of each error:
+    \begin{itemize}
+        \item \textbf{Irreducible Error: } If the irreducible error is zero, then we call $ \mathcal{H} $ universal.
+        \item \textbf{Approximation Error: } This doesn't depend on the dataset, but it depends on $\rho$, and we call it bias.
+        \item \textbf{Sample Error: } This random quantity depends on data. We can study it by capacity or stability.
+    \end{itemize}
+    We can show, under a mild assumption:
+    \begin{equation*}
+        \lim_{\gamma\rightarrow\infty}\mathcal{E}(f_\gamma) - \inf_{f\in\mathcal{H}}\mathcal{E}(f) = 0
+    \end{equation*}
+    Combining this with universal space: $\lim_{\gamma\rightarrow\infty}\mathcal{E}(f_\gamma) - \mathcal{E}(f_*)=0$. Finally, we can have an approximation error to be bounded as:
+    \begin{equation*}
+        \mathcal{E}(f_\gamma) - \inf_{f\in\mathcal{H}}\mathcal{E}(f) \le \mathcal{A}(\rho,\gamma)
+    \end{equation*}
+    Please note that there will be no rate without any assumption, which is related to no-free launch theorem. If $f_*$ is in Sobolev space $W^{S, 2}$ then $\mathcal{A}(\rho, \gamma)=c\gamma^{-s}$
+\end{remark}
+
+\begin{proposition}
+    We can decompose the sample error to be:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{E}(f_{\gamma, n}) - \mathcal{E}(f_\gamma) &= \underbrace{\mathcal{E}(f_{\gamma, n}) - \mathcal{E}_n(f_{\gamma, n})}_{\text{\emph{Generalization Error}}} + \underbrace{\mathcal{E}_n(f_{\gamma, n}) - \mathcal{E}_n(f_{\gamma})}_{\text{\emph{Excess Empirical Risk }} (\le 0) } + \underbrace{\mathcal{E}_n(f_{\gamma}) - \mathcal{E}(f_\gamma)}_{\text{\emph{Generalization Error}}} \\ 
+        &\le \mathcal{E}(f_{\gamma, n}) - \mathcal{E}_n(f_{\gamma, n}) + \mathcal{E}_n(f_{\gamma}) - \mathcal{E}(f_\gamma) \\ 
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}
+    The generalization error can be controlled by study the empirical process of 
+    \begin{equation*}
+        \sup_{f\in\mathcal{H}_\gamma}| \mathcal{E}_n(f) - \mathcal{E}(f)|
+    \end{equation*}
+    as we have shown in theorem \ref{thm:gen-bound} (and union bound). 
+    \begin{equation*}
+        \mathbb{P}\bracka{\sup_{f\in\mathcal{H}_\gamma}\Big| \mathcal{E}_n(f) - \mathcal{E}(f)\Big| \ge \varepsilon} \le 2|\mathcal{H}|\exp\bracka{-\frac{n^2\varepsilon^2}{2M^2}}
+    \end{equation*}
+    However, it is hard to find empirical risk minimizer for arbitarty $ \mathcal{H}_p$ as we need to calculate the expected risk. Good news, in some spaces, it might be easier to do such computation i.e convex or discretization in special dense hypothesis space.
+\end{remark}
+
+\begin{definition}{\textbf{(Infinite Norm of Function)}}
+    Let $\mathcal{X}\subset \mathbb{R}^d$ be a compact space and $C(\mathcal{X})$ is a space of continous function, we define a norm 
+    \begin{equation*}
+        \norm{f}_\infty = \sup_{x\in\mathcal{X} }|f(x)|
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    If the loss function $l : \mathcal{Y}\times \mathcal{Y}\rightarrow \mathbb{R}$, where $l(\cdot, y)$ is uniformly $L$-Lipschitz. Then, we have
+    \begin{equation*}
+        \abs{\mathcal{E}(f_1) - \mathcal{E}(f_2)} \le L\norm{f_1-f_2}_\infty
+        \qquad \abs{\mathcal{E}_n(f_1) - \mathcal{E}_n(f_2)} \le L\norm{f_1-f_2}_\infty
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Starting with the first one, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \abs{\mathcal{E}(f_1) - \mathcal{E}(f_2)} &= \abs{\int l(f_1(x), y) - l(f_2(x), y)\dby\rho(x, y)} \\
+        &\le \int \Big| l(f_1(x), y) - l(f_2(x), y) \Big|\dby\rho(x, y) \\
+        &\le L\int \Big| f_1(x) - f_2(x) \Big|\dby\rho_\mathcal{X}(x) \\
+        &= L\norm{f_1-f_2}_{L^1(\mathcal{X}, \rho_\mathcal{X})} \le L\norm{f_1-f_2}_\infty
+    \end{aligned}
+    \end{equation*}
+    For the second one, we have 
+    \begin{equation*}
+    \begin{aligned}
+        \abs{\mathcal{E}_n(f_1) - \mathcal{E}_n(f_2)} &= \frac{1}{n}\abs{\sum^n_{i=1} l(f_1(x_i), y_i) - l(f_2(x_i, y_i)) } \\ \
+        &\le \frac{1}{n}\sum^n_{i=1}\Big| l(f_1(x_i), y_i) - l(f_2(x_i, y_i)) \Big| \\
+        &\le L\frac{1}{n}\sum^n_{i=1}|f_1(x) - f_2(x)| \le L\frac{1}{n}\sum^n_{i=1}\norm{f_1-f_2}_\infty = L\norm{f_1-f_2}_\infty
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    The function that are closed in $\norm{\cdot}_\infty$ have similar expected and empirical risks.
+\end{remark}
+
+\begin{remark}
+    If $\mathcal{H}\subset C(\mathcal{X})$ admits a finite discretization $\mathcal{H}_p=\brackc{h_1,\dots,h_N}$ with respecte to $\norm{\cdot}_\infty$. Then, the generalization error can be controlled by:
+    \begin{equation*}
+    \begin{aligned}
+        \sup_{f\in\mathcal{H}} &\Big| \mathcal{E}_n(f)-\mathcal{E}(f) \Big|  \\
+        &\le \sup_{f\in\mathcal{H}}\Big| \mathcal{E}_n(f) - \mathcal{E}_n(h_f) \Big| + \Big|\mathcal{E}_n(h_f) - \mathcal{E}(h_f)\Big| + \Big|\mathcal{E}(h_f) - \mathcal{E}(f)\Big| \\
+        &\le 2L\norm{h_f - f}_\infty + \sup_{h\in\mathcal{H}_p}\Big| \mathcal{E}_n(h) - \mathcal{E}(h) \Big|
+    \end{aligned}
+    \end{equation*}
+    where $h_f = \arg\min_{h\in\mathcal{H}_p}\norm{h-f}_\infty$. Now, we will only have to control the $\sup_{h\in\mathcal{H}_p}| \mathcal{E}_n(h) - \mathcal{E}(h)|$ since $\mathcal{H}_p$ is finite.
+\end{remark}
+
+\begin{definition}{\textbf{(Covering Number)}}
+    We define the covering number of $ \mathcal{H} $ of radius $\eta>0$ as the cardinality of minimal cover of $\mathcal{H}$ with ball of radius $\eta$:
+    \begin{equation*}
+        \mathcal{N}(H, \eta) = \inf\brackc{m \left| \mathcal{H} \subseteq \bigcup^m_{i=1} B_\eta(h_i), h_i \in \mathcal{H} \right.}
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    For any $\delta\in[0, 1)$ and $L>0$ being Lipschitz constant of $l(\cdot, y)$, for all $x, y$ and $|l(f(x), y)|<M$, we have:
+    \begin{equation*}
+        \sup_{f\in\mathcal{H}}\Big| \mathcal{E}_n(f_n) - \mathcal{E}(f_n) \Big| \le \sqrt{\frac{2M^2\log(2\mathcal{N}(\mathcal{H}, n)/\delta)}{n}} 
+    \end{equation*}
+    holds with probability $1-\delta$, and where exists an $\eta(x)$ for which bounds tends to $0$ as $n\rightarrow\infty$.
+\end{theorem}
+
+\begin{remark}
+    The proptotypical results i.e Bias/Variance tradeoff:
+    \begin{equation*}
+        \mathcal{E}(f_{\gamma, n}) - \mathcal{E}(f^*) \le \underbrace{\mathcal{E}(f_{\gamma, n}) - \mathcal{E}(f_\gamma)}_{<\gamma^\beta n^{-\alpha} \text{(Variance)}} + \underbrace{\mathcal{E}(f_\gamma) - \mathcal{E}(f^*)}_{<\gamma^{-\tau}\text{(Bias)}}
+    \end{equation*}
+    We will have to choose $\gamma(n)$ to get best bias-variance tradeoff.
+\end{remark}
+
+\section{Tikhonov Regularization}
+
+\subsection{Regularized Space}
+
+\begin{definition}{\textbf{(Normed Regularized Space)}}
+    Let $\mathcal{H}$ be a normed vector space of hypothesis. For $\gamma\ge0$, we consider 
+    \begin{equation*}
+        \mathcal{H}_\gamma = \brackc{f\in\mathcal{H} \Big| \norm{f}_\mathcal{H}\le \gamma}
+    \end{equation*}
+    As we have $\mathcal{H}_\gamma = B_\gamma(0)\subset\mathcal{H}$. The empirical risk minimization corresponds to:
+    \begin{equation*}
+        f_{\gamma, n} = \argmin{\norm{f}_\mathcal{H}\le\gamma}\frac{1}{n}\sum^n_{i=1}l(f(x_i), y_i)
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    If $l(\cdot, y)$ is convex, then empirical risk minimization induces convex program, which we can find the solution in polynomal time.
+\end{remark}
+
+\begin{definition}{\textbf{(Space of Linear Function)}}
+    \label{def:space-lin-funct}
+    We will focus $ \mathcal{H} $ to be a space of linear function. Let $\mathcal{X}\subset \mathbb{R}^d$ and $\mathcal{Y}\subset \mathbb{R}$, where 
+    \begin{equation*}
+        \mathcal{H} = \brackc{ f : \mathbb{R}^d \rightarrow \mathbb{R} \Big| \exists w \in \mathbb{R}^d \text{ s.t. } f(x) = w^Tx, \forall x \in \mathbb{R}^d }
+    \end{equation*}
+    We will set the norm to be $\norm{f}_\mathcal{H} = \norm{w}$ as $w$ is the parameter corresponding to $f$. Thus, we have the empirical risk minimization to be:
+    \begin{equation*}
+        w_{n,\gamma} = \argmin{\norm{w}_2\le\gamma}\frac{1}{n}\sum^n_{i=1}l(x^T_iw, y_i)
+    \end{equation*}
+    where the empirical risk minimizer being $f_{n,\gamma} : \mathbb{R}^d\rightarrow \mathbb{R}$ is defined as $f_{n, \gamma}(x) = x^Tw_{n,\gamma}$ for all $x\in \mathbb{R}^d$
+\end{definition}
+
+\begin{definition}{\textbf{(Non-Linear Function Extension)}}
+    We expand the space of linear function to richer space of functions using the collection of non-linear function (feature extractor) $\psi_1,\dots,\psi_k : \mathbb{R}^d\rightarrow \mathbb{R}$ swhere:
+    \begin{equation*}
+        \mathcal{H} = \brackc{ f : \mathbb{R}^d\rightarrow \mathbb{R} \left| \exists (w_i)^k_{i=1} \in \mathbb{R} \text{ s.t } f(x) = \sum^k_{i=1} \psi_i(x)w_i \ \forall x \in \mathbb{R}^d \right.}
+    \end{equation*} 
+    we will consider $\norm{f}_\mathcal{H} = \norm{w}_2$ where $w\in \mathbb{R}^k$. Furthermore, we can construct a non-linear map $\Psi:\mathbb{R}^d\rightarrow \mathbb{R}^k$ where $\Psi(x) = (\psi_1(x),\dots,\psi_k(x))$.
+\end{definition}
+
+\begin{theorem}
+    The covering number of $\mathcal{H}_\gamma$ is: 
+    \begin{equation*}
+        \mathcal{N}(\mathcal{H}_\gamma, n)\le\bracka{\frac{4\gamma}{\eta}}^d
+    \end{equation*}
+    for all $\eta>0$
+\end{theorem}
+\begin{proof}
+    For any $\gamma\ge0$ and $B_\gamma(0)\subset \mathbb{R}^d$, which is a ball of radius $\gamma$ centered in $0$. Then for all $\eta>0$:
+    \begin{equation*}
+        \mathcal{N}(B_\gamma(0), \eta) \le \bracka{\frac{4\gamma}{\eta}}^d
+    \end{equation*}
+    But since $ \mathcal{H} $, is isomorphic to $\mathbb{R}^d$, we have the sampe covering number.
+\end{proof}
+
+\begin{definition}{\textbf{(Tikhonov Regualrization Problem)}}
+    We define the Tikhonov Regualrization problem to be, instead of constrained optimization problem.
+    \begin{equation*}
+        w_{\lambda, n} = \argmin{w\in \mathbb{R}^d} \frac{1}{n}\sum^n_{i=1} l(x_i^Tw, y_i) + \lambda\norm{w}^2_\mathcal{H}
+    \end{equation*}
+    We can show that this problem and problem in definition \ref{def:space-lin-funct} are the same as we can find $\lambda(\gamma)$ such that $w_{n, \gamma} = w_{\lambda(\gamma), n}$. 
+\end{definition}
+
+\begin{definition}
+    The directional derivative is defined by:
+    \begin{equation*}
+        \nabla_{v} f(x) = \lim_{t\rightarrow 0} \frac{f(x + tv) - f(x)}{t} 
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    $\nabla_{v} f(x) = v^T\nabla f(x)$
+\end{lemma}
+\begin{proof}
+    One can use a Taylor's expansion to proof this, but we are going derive it via chain rule. We will prove in 2D but this can be extended easily. Let's define a single variable function $g(t) = f(x + at, y+ bt)$. Let's consider $g'(0)$
+    \begin{equation*}
+    \begin{aligned}
+        &g'(t) = \lim_{h\rightarrow0} \frac{g(t + h) - g(t)}{h}   \\
+        \iff& \begin{aligned}[t]
+            g'(0) &= \lim_{h\rightarrow0} \frac{g(h) - g(0)}{h}   \\
+            &=\lim_{h\rightarrow0} \frac{f(x+ah, y+bh) - f(x, y)}{h} = \nabla_{v}g(x)
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $v = (a, b)$. Now, we can apply the chain rule, which gives us 
+    \begin{equation*}
+        \nabla_{v}g(x) = g'(0) = \frac{\partial g}{\partial x}\frac{dx}{dt} + \frac{\partial g}{\partial y}\frac{dy}{dt} = \frac{\partial g}{\partial x}a+\frac{\partial g}{\partial y}b = v^T\nabla g(x)
+    \end{equation*}
+\end{proof}
+
+\subsection{Introduction to Convex + Finding Weights}
+
+\begin{theorem}
+    \label{thm:cvx-first-order}
+    Let $f:\mathbb{R}^n\rightarrow \mathbb{R}$ and $S$ be a convex subset of $\mathbb{R}^n$. Then $f$ is convex iff 
+    \begin{equation*}
+        f(y) \ge f(x) + \nabla f(x)^T(y-x)
+    \end{equation*}
+    for all $y, x \in \mathbb{R}$
+\end{theorem}
+\begin{proof}
+    \textbf{($\boldsymbol \implies$)} If $f$ is convex. Then we have, by convexity:
+    \begin{equation*}
+    \begin{aligned}
+        f(\lambda y &+ (1-\lambda)x) \le \lambda f(y) + (1-\lambda)f(x)  \\
+        &\iff \frac{f(\lambda y + (1-\lambda)x) - f(x)}{\lambda} = \frac{f(x - (y-x)\lambda) - f(x)}{\lambda} \le  f(y) - f(x)\\
+    \end{aligned}
+    \end{equation*}
+    Then, by setting $\lambda \rightarrow 0$, we have 
+    \begin{equation*}
+        \lim_{\lambda\rightarrow0} \frac{f(x - (y-x)\lambda) - f(x)}{\lambda} = \nabla f(x)^T(y-x) \le f(y) - f(x)
+    \end{equation*}
+    By the definiton of directional derivative.
+
+    \textbf{($\boldsymbol \impliedby$)} We consider $2$ points, where we set $z = \lambda y + (1-\lambda)x$ :
+    \begin{equation*}
+        f(y) \ge f(z) + \nabla f(z)^T(y-z) \qquad f(x) \ge f(z) + \nabla f(z)^T(x-z)
+    \end{equation*} 
+    Then we have:
+    \begin{equation*}
+    \begin{aligned}
+        \lambda f(y) + (1-\lambda)f(x) &\ge f(z) + \lambda \nabla f(z)^T(y-z) + (1-\lambda) \nabla f(z)^T(x-z)\\ 
+        &= f(z) + \nabla f(z)^T\Big[ \lambda(y-z) + (1-\lambda)(x-z) \Big] \\
+        &= f(z) + \nabla f(z)^T\Big[ \lambda y - \lambda^2y - x\lambda + \lambda^2 x + x - \lambda x - \lambda y + \lambda^2y - x + 2\lambda x - \lambda^2x \Big] \\
+        &= f(z) = f(\lambda y + (1-\lambda)x)
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:cvx-global-min}
+    Any differentiable convex function $F:\mathbb{R}^d\rightarrow \mathbb{R}$ where $w_*\in \mathbb{R}^d$ is global optimizer iff $\nabla f(w_*) = 0$ 
+\end{theorem}
+\begin{proof}
+    \textbf{($\boldsymbol \implies$)} As the directional derivative measures the rate in which the function grows, we want to find the direction that decrease $f$ the most. It is clear from the dot production that this would be $-\nabla f(x)$. Thus, if $\nabla f(w_*) \ne 0$, then for some $\varepsilon \in \mathbb{R}$, $f(w_* - \varepsilon \nabla f(x)) \le f(w_*)$, thus contradicts the assumption that $w_*$ is global optimizer.
+    
+    \textbf{($\boldsymbol \impliedby$)} We will show that if $\nabla f(w_*) = 0$ then $w_*$ is global optimizer. Following the theorem \ref{thm:cvx-first-order}, we can see that for all $y$, we have 
+    \begin{equation*}
+    \begin{aligned}
+        f(y) &\ge f(w_*) + \nabla f(w_*)^T(y - w_*) \\
+        &= f(w_*)
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{proposition}
+    If we set $l(f(x), y) = (y-f(x))^2$ then:
+    \begin{equation*}
+    \begin{aligned}
+        w_{\lambda, n} &= \argmin{w\in \mathbb{R}^d} \norm{y-Xw}^2_2 + n\lambda\norm{w}^2_2 \\ 
+        &= (X^TX+n\lambda I)^{-1}X^Ty
+    \end{aligned}
+    \end{equation*}
+    where $y \in \mathbb{R}^n$ is a collection of labels, while $\mathbb{R}^{n\times d}$ is the collection of data. 
+\end{proposition}
+\begin{proof}
+    Since the objective is convex (norm is convex and addition + multiplcation of positive number), we can find the global minima according to theorem \ref{thm:cvx-global-min} by finding the derivative and set to $0$, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\nabla \Big[\norm{y-Xw}^2_2 + n\lambda\norm{w}^2_2 \Big] = 2X^TXw - 2X^Ty + 2n\lambda w = 0 \\
+        \iff& w = (X^TX+n\lambda I)^{-1}X^Ty
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{remark}
+    The total cost of solving the regression is $\mathcal{O}(nd^2 + d^2)$ and if $d>n$, then the complexity becomes $\mathcal{O}(d^3)$. However, if we use a representor's theorem, then we are able to have $\mathcal{O}(n^3)$. 
+\end{remark}
+
+\subsection{Gradient Descent}
+
+\begin{definition}{\textbf{(Gradient of Weight)}}
+    In general if $l(\cdot,y) : \mathbb{R}\rightarrow \mathbb{R}$ is differentiable, for any $y\in \mathcal{Y}$, then we have:
+    \begin{equation*}
+        \nabla( \mathcal{E}_n(w) + \lambda\norm{w}^2_2 ) = \frac{1}{n}\sum^n_{i=1} \frac{\partial}{\partial w} l(x^T_iw, y_i) + 2\lambda w
+    \end{equation*}
+    We can solve the minima by setting the above equation to zero.
+\end{definition}
+
+\begin{remark}
+    In most cases, we aren't able to solve the gradient equation analytically, so we need iterated descent optimization, which provided us with $(w^{(k)})_{k\in\mathbb{N}}$ that converges to global minimizer.
+\end{remark}
+
+\begin{definition}{\textbf{(Gradient Descent Algorithm)}}
+    Let $F : \mathbb{R}^d\rightarrow \mathbb{R}$ be differentiable. Set $w^{(0)} \in \mathbb{R}^d$. For any $k\in\mathbb{N}$, we define $w^{(t+1)}\in \mathbb{R}^d$ as:
+    \begin{equation*}
+        w_{k+1} = w_{k} - \gamma \nabla F(w_{k})
+    \end{equation*}
+    where $\gamma>0$ represents the step size of the descent.
+\end{definition}
+
+\begin{definition}{\textbf{(Lipschitz Gradient)}}
+    A function $f$ with Lipschitz gradient with constant $L$ is where, for all $x, y \in \operatorname{dom}(f)$:
+    \begin{equation*}
+        \norm{\nabla f(x) - \nabla f(y)} \le L\norm{x-y} 
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    \label{lem:smooth-ineq}
+    For $2$ points $x, y \in \mathbb{R}^d$ and function $f:\mathbb{R}^d\rightarrow \mathbb{R}$ with Lipschitz gradient with constant $L$, then:
+    \begin{equation*}
+        f(y) \le f(x) + \nabla f(x)^T(y-x) + \frac{L}{2}\norm{y-x}^2
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We consider the function $g(t) = f(x + t(y-x))$ and; therefore, $h'(t)=\brackd{\nabla f(x+t(y-x)), y-x}$. Following from fundamental theorem of calculus 
+    \begin{equation*}
+        h(1) - h(0) = \int^1_0 h'(t)\dby t
+    \end{equation*}
+    as we have $h(1) = f(y)$ and $h(0) = f(x)$:
+    \begin{equation*}
+    \begin{aligned}
+        f(y) &= f(x) + \int^1_0 \brackd{\nabla f(x+t(y-x)), y-x}\dby t \\
+        &= f(x) + \brackd{\nabla f(x), y-x} + \int^1_0 \brackd{\nabla f(x+t(y-x))- \nabla f(x), y-x}\dby t \\
+        &\le f(x) + \brackd{\nabla f(x), y-x} + \int^1_0 \norm{\nabla f(x+t(y-x))- \nabla f(x)}\cdot\norm{y-x}\dby t \\
+        &\le f(x) + \brackd{\nabla f(x), y-x} + L\norm{y-x}\int^1_0 \norm{t(y-x)}\cdot \dby t \\
+        &= f(x) + \brackd{\nabla f(x), y-x} + L\norm{y-x}^2\int^1_0 t\cdot \dby t \\
+        &= f(x) + \brackd{\nabla f(x), y-x} + \frac{L}{2}\norm{y-x}^2 \\
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    \label{prop:gd-prop1}
+    Given the gradient descent algorithm, with update weight of $\gamma$:
+    \begin{equation*}
+        \bracka{\frac{1}{\gamma} - \frac{L}{2}} \norm{x_k - x_{k+1}}^2 \le f(x_k) - f(x_{k+1})
+    \end{equation*}
+    for all $\gamma > 0$
+\end{proposition}
+\begin{proof}
+    Using the result from lemma above and definition of gradient descent
+    \begin{equation*}
+    \begin{aligned}
+        f(x_{k+1}) &\le f(x_k) + \frac{1}{\gamma}\brackd{\gamma\nabla f(x_k), x_{k+1} - x_k} + \frac{L}{2}\norm{x_{k+1}-x_k}^2 \\
+        &= f(x_k) - \frac{1}{\gamma}\norm{x_{k+1} - x_k}^2 + \frac{L}{2}\norm{x_{k+1}-x_k}^2 \\
+        &= f(x_k) - \bracka{\frac{1}{\gamma} - \frac{L}{2}}\norm{x_{k+1}-x_k}^2 \\
+    \end{aligned}
+    \end{equation*}
+    Rearrange and we finish the proof.
+\end{proof}
+
+\begin{remark}
+    We can see that the evaluation $(f(x_k))_{k=1}$ is decreasing iff $\gamma\le 2L$, as the norm is positive.
+\end{remark}
+
+\begin{lemma} 
+    \label{lem:all-sum}
+    For convex function $f$, given that $\gamma \le 2/L$:
+    \begin{equation*}
+        \sum^\infty_{i=0} \norm{x_i - x_{i+1}}^2 \le \frac{2\gamma}{2-\gamma L} \Big( f(x_0) - \min_x f(x) \Big)
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We can perform the telescoping sum, assuming that the evaluation of convex function is decreasing, thus having:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^\infty_{i=0} \norm{x_i - x_{i+1}}^2 &\le \bracka{\frac{2\gamma}{2-\gamma L}}\sum^\infty_{i=0} f(x_i) - f(x_{i+1}) \\ 
+        &= \frac{2\gamma}{2-\gamma L} \Big( f(x_0) - \min_x f(x) \Big)
+    \end{aligned}
+    \end{equation*}
+    Please note that since $f$ is convex, the minima is global.
+\end{proof}
+
+\begin{proposition}
+    \label{prop:gd-prop2}
+    For all $x\in\operatorname{dom}(f)$, we have
+    \begin{equation*}
+        2\gamma\Big( f(x_{k+1})-f(x) \Big) \le \norm{x_k - x}^2 - \norm{x_{k+1} - x}^2 + (\gamma L - 1)\norm{x_{k+1} - x_k}^2
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    From proposition \ref{prop:gd-prop1}:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma\Big(f(x_{k+1}) - f(x_k)\Big) &\le 2\gamma(f(x_k) - f(x)) - (2-\gamma L)\norm{x_{k+1}-x_k}^2 \\
+        &= 2\gamma(\nabla f(x_k)^T(x_k-x)) - (2-\gamma L)\norm{x_{k+1}-x_k}^2 \\
+        &\le 2\Big( (x_k-x_{k+1})^T(x_k - x) \Big) - (2-\gamma L)\norm{x_{k+1}-x_k}^2 \\
+        &= \norm{x_k-x_{k+1}}^2 + \norm{x_k - x}^2 - \norm{x-x_{k+1}}^2- (2-\gamma L)\norm{x_{k+1}-x_k}^2 \\
+        &= \norm{x_k - x}^2 - \norm{x-x_{k+1}}^2- (\gamma L-1)\norm{x_{k+1}-x_k}^2 \\
+    \end{aligned}
+    \end{equation*}
+    The first equality comes from $x_k - x_{k-1} = \gamma\nabla f(x_k)$
+    The second ineqality comes from lemma \ref{thm:cvx-first-order}, where we set $x=x_k$ and $y=x$. The second equality comes from:
+    \begin{equation*}
+        2u^Tv = \norm{u}^2 + \norm{v}^2 - \norm{u-v}^2
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}
+    Suppose that $x_{*} = \arg\min_{x} f(x)$ (and it exists) and $\gamma < 2/L$ then, for all $k>1$:
+    \begin{equation*}
+        f(x_k) - \min_{x} f(x) \le \frac{1}{k}\brackb{\frac{\norm{x_0- x_*}^2}{2\gamma} + \frac{(\gamma L - 1)_+}{2-\gamma L} \Big( f(x_0) - \min_{x} f(x) \Big) }
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We recall proposition \ref{prop:gd-prop2}, we we set $x = x_*$, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^n_{i=0}\Big(f(x_{i+1})-f(x_*)\Big) &\le \frac{1}{2\gamma}\sum^n_{i=0}\Big(\norm{x_i - x_*}^2 - \norm{x_{i+1} - x_*}^2 + (\gamma L - 1)\norm{x_{i+1} - x_i}^2\Big) \\
+        &= \frac{1}{2\gamma}\sum^n_{i=0} \Big(\norm{x_i - x_*}^2 - \norm{x_{i+1} - x_*}^2\Big) + \frac{(\gamma L - 1)_+}{2\gamma}\sum^n_{i=1}\norm{x_{i+1} - x_i}^2 \\
+        &\le \frac{1}{2\gamma}\sum^n_{i=0} \Big(\norm{x_i - x_*}^2 - \norm{x_{i+1} - x_*}^2\Big) + \frac{(\gamma L - 1)_+}{2-\gamma L}\sum^n_{i=1} \Big( f(x_0) - \min_{x} f(x) \Big) \\
+        &= \frac{1}{2\gamma}\Big(\norm{x_0 - x_*}^2 - \norm{x_n - x_*}^2\Big) + \frac{(\gamma L - 1)_+}{2-\gamma L}\sum^n_{i=1} \Big( f(x_0) - \min_{x} f(x) \Big) \\
+        &= \frac{\norm{x_0 - x_*}^2}{2\gamma} + \frac{(\gamma L - 1)_+}{2-\gamma L}\sum^n_{i=1} \Big( f(x_0) - \min_{x} f(x) \Big) \\
+    \end{aligned}
+    \end{equation*}
+    We use the lemma \ref{lem:all-sum}. For the last equality, we have, a telescoping sum and $\norm{x_n - x_*}^2 \ge 0$. Now we can see that 
+    \begin{equation*}
+        \sum^n_{i=0}\Big(f(x_{i+1})-f(x_*)\Big) \ge k\Big(f(x_{i+1})-f(x_*)\Big)
+    \end{equation*}
+    as we shown in lemma \ref{lem:all-sum} that the evaluation will keep decreasing. 
+    % and so, we have 
+    % \begin{equation*}
+    %     k\Big(f(x_{i+1})-f(x_*)\Big) \le \frac{\norm{x_0 - x_*}^2}{2\gamma} + \frac{(\gamma L - 1)_+}{2-\gamma L}\sum^n_{i=1} \Big( f(x_0) - \min_{x} f(x) \Big) 
+    % \end{equation*}
+    Rearrange and we finish the proof.
+\end{proof}
+
+\begin{corollary}
+    It is clear that the best value of $\gamma$ is $1/L$ and so, the rate in which the gradient descent is:
+    \begin{equation*}
+        f(x_k) - \min_{x} f(x) \le \frac{L}{2k}\norm{x_0- x_*}^2
+    \end{equation*}
+\end{corollary}
+
+\begin{definition}{\textbf{(Strongly Convex)}}
+    The function $f$ is strongly convex with modulus $\mu>0$ if, for all $x, y\in\operatorname{dom}(f)$ :
+    \begin{equation*}
+        f(y) \ge f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\norm{y-x}^2
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    For all $x\in\operatorname{dom}(f)$ with $f$ being $\mu$-strongly convex:
+    \begin{equation*}
+        f(x) - \min_{x} f(x) \le \frac{1}{2\mu}\norm{\nabla f(x)}^2
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We start off by recalling strongly convex function, and minimize both side of ineqalities:
+    \begin{equation*}
+    \begin{aligned}
+        \min_{y} f(y) &\ge \min_{y}\bracka{f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\norm{y-x}^2} \\
+        &\ge f(x) + \frac{1}{2\mu}\min_y\bracka{2\nabla f(x)^T(\mu(y-x)) + \norm{\mu(y-x)}^2} \\
+        &= f(x) + \frac{1}{2\mu}\min_y\bracka{\norm{\nabla f(x)}^2 + 2\norm{\mu(y-x)}^2 - \norm{\nabla f(x) - \mu(y-x)} } \\
+        &= f(x) + \frac{1}{2\mu}\min_y\bracka{\norm{\nabla f(x) + \mu(y-x)}^2 - \norm{\nabla f}^2 } \\
+        &\ge f(x) + \frac{1}{2\mu}\norm{\nabla f(x)}^2\\
+    \end{aligned}
+    \end{equation*}
+    The last equality can be show as: suppose $a = \mu(y-x)$ and $b =\nabla f(x)$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{a}^2 + 2\norm{b}^2 - \norm{a-b} &= 2a^Ta + b^Tb -\Big[ a^Ta - 2a^Tb + b^Tb \Big] \\
+        &= a^Ta + 2a^Tb + b^Tb - b^Tb = \norm{a+b}^2 - \norm{b}^2
+    \end{aligned}
+    \end{equation*}
+    Regarrange and we finish the proof.
+\end{proof}
+
+\begin{remark}
+    From the definition of strongly convex, we can see that
+    \begin{equation*}
+    \begin{aligned}
+        f(y) &\ge f(x_*) + \nabla f(x_*)^T(y-x_*) + \frac{\mu}{2}\norm{y-x_*}^2 \\
+        &= f(x_*) + \frac{\mu}{2}\norm{y-x_*}^2 \\ 
+    \end{aligned}
+    \end{equation*}
+    where $x_* = \arg\min_x f(x)$. 
+\end{remark}
+
+\begin{theorem}
+    For $\mu$-strongly convex function with $\gamma < 2/L$, we have:
+    \begin{equation*}
+        f(x_k) - \min_x f(x) \le \Big( 1-\gamma\mu (2-\gamma L) \Big)^k\Big( f(x_0) - \min_x f(x) \Big)
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    First, we will show that 
+    \begin{equation*}
+        f(x_{k+1}) - \min_x f(x) \le \Big( 1-\gamma\mu (2-\gamma L) \Big)\Big( f(x_k) - \min_x f(x) \Big) 
+    \end{equation*}
+    Following proposition\ref{prop:gd-prop1}, we have the following ineqalities:
+    \begin{equation*}
+    \begin{aligned}
+        f(x_{k+1}) - \min_x f(x) &\le f(x_k) - \bracka{\frac{2-\gamma L}{2\gamma}}\norm{x_{k} - x_{k-1}}^2 + \min_x f(x)\\
+        &= f(x_k) - \bracka{2\mu\gamma-\gamma^2 L\mu}\norm{\nabla F(x_k)}^2- \min_x f(x) \\
+        &\le f(x_k)- \min_x f(x) - \bracka{2\mu\gamma-\gamma^2 L\mu}\Big( f(x_k) - \min_xf(x) \Big) \\
+        &= \bracka{1 - \bracka{2\mu\gamma-\gamma^2 L\mu} }\Big( f(x_k) - \min_xf(x) \Big)
+    \end{aligned}
+    \end{equation*}
+    And so, by repeating the ineqalities, we have the exponential as required.
+\end{proof}
+
+\begin{remark}
+    For the best value of $\gamma$, we should have $\gamma = 2/(\mu+L)$
+\end{remark}
+
+\begin{definition}{\textbf{(Projected Gradient)}}
+    The problem such as Tikhonov regularization can be solved using projected gradient descent:
+    \begin{equation*}
+        w_{k+1} = \Pi_{\mathcal{H}_\gamma} \Big( w_k - \gamma\nabla F(w_k) \Big)
+    \end{equation*}
+    where $\Pi_{\mathcal{H}_\gamma} : \mathbb{R}^d\rightarrow \mathbb{R}^d$ dentoes the Euclidian projection onto $\mathcal{H}_\gamma$ as 
+    \begin{equation*}
+        \Pi_{\mathcal{H}_\gamma}(w) = \argmin{w'\in\mathcal{H}_\gamma}\norm{w-w'}^2_2 = \gamma\frac{w}{\norm{w}_2}
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    For point $y\in \mathbb{R}$ and $x\in\Omega$:
+    \begin{equation*}
+        (y-\Pi_\Omega(y))^T(x - \Pi_\Omega(y)) \le 0
+    \end{equation*}
+\end{lemma}
+
+\begin{lemma}
+    Given the projected gradient descent algorithm, with the update weight of $\gamma$:
+    \begin{equation*}
+        f(x_k) - f(x_{k+1}) \ge \bracka{\frac{1}{\gamma} - \frac{L}{2}}\norm{x_{k+1} - x_k}^2
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    From lemma we have:
+    \begin{equation*}
+    \begin{aligned}
+        \bracka{x_k - \gamma\nabla f(x_k) - x_{k+1}}^T(x_k - x_{k+1} ) \le 0
+    \end{aligned}
+    \end{equation*}
+    which implies that 
+    \begin{equation*}
+        \nabla F(x_k)^T(x_{k+1} - x_k) \le \frac{1}{\gamma}\norm{x_k - x_{k+1}}
+    \end{equation*}
+    Therefore:
+    \begin{equation*}
+    \begin{aligned}
+        f(x_{k+1}) &\le f(x_k) + \nabla f(x_k)^T(x_{k+1} - x_k) + \frac{L}{2}\norm{x_{k+1} - x_k}^2 \\ 
+        &\le f(x_k) + \bracka{\frac{L}{2} - \frac{1}{\gamma}}\norm{x_{k+1} - x_k}^2
+    \end{aligned}
+    \end{equation*}
+    By rearranging, we got the statement above.
+\end{proof}
+
+\begin{theorem}
+    The convergence rate of projected gradient is the same as normal gradient descent.
+\end{theorem}
+
+\begin{remark}
+    The gradient step of Tikhonov's regularization:
+    \begin{equation*}
+        w_{k+1} = w_k - \gamma(X^TX + \lambda I)w_k + \gamma X^Ty
+    \end{equation*}
+    has the total time complexity as $\mathcal{O}((k+n)d^2)$ operations for $k$ steps. To achieve the same excess risk as ERM, we will need a total time complexity of $\mathcal{O}(nd^2)$. 
+\end{remark}
+
+\begin{proposition}
+    We can decompose the sample error of the estimator after $k$ iterations:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{E}(w_k) - \mathcal{E}(w_\gamma)  &= \mathcal{E}(w_k) - \mathcal{E}_n(w_k) + \mathcal{E}_n(w_k) - \mathcal{E}_n(w_{\gamma, n}) + \underbrace{\mathcal{E}_n(w_{\gamma, n}) - \mathcal{E}_n(w_\gamma)}_{\le0} +\mathcal{E}_n(w_{\gamma}) - \mathcal{E}(w_\gamma) \\
+        &\le \underbrace{\mathcal{E}(w_k) - \mathcal{E}_n(w_k)}_{\text{\emph{Sample Error on }} \mathcal{H}_\gamma } + \underbrace{\mathcal{E}_n(w_k) - \mathcal{E}_n(w_{\gamma, n})}_{\text{\emph{Optimization Error}}} +\underbrace{\mathcal{E}_n(w_{\gamma}) - \mathcal{E}(w_\gamma)}_{\text{\emph{Sample Error on }} \mathcal{H}_\gamma}
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}
+    Since we know the generalization error, we can control the optimization error to match this i.e if the generalization error is $\varepsilon(n,\gamma,\delta)$ with probabilistic no less than $1-\delta$, then we have to perfrom 
+    \begin{equation*}
+        k = \mathcal{O}\bracka{\frac{1}{\varepsilon(n,\gamma,\delta)}}
+    \end{equation*}
+    To get the same accurary as empirical risk minimization.
+\end{remark}
+
+\subsection{Stability}
+
+\begin{definition}{\textbf{(Modified Set)}}
+    Let $Z$ be a set, for any set $S=\brackc{z_1,\dots,z_n}\in Z^n$ for any $z\in Z$ and $i = 1,\dots,n$ we denote
+    \begin{equation*}
+        S^{i, z} = \brackc{z_1, \dots, z_{i-1}, z, z_{i+1},\dots, z_n}\in Z^n
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Uniformed Stability)}}
+    We denote a dataset $z = (x, y) \in \mathcal{Z} = \mathcal{X}\times\mathcal{Y}$ and for any $f : \mathcal{X}\rightarrow \mathcal{Y}$, we denote $l(f, z) = l(f(x), y)$. For an algorithm $\mathcal{A}$ and any dataset $S=(z_i)^n_{i=1}$, we write $f_S = \mathcal{A}(S)$. The algorithm $\mathcal{A}$ is $\beta(n)$-stable with $n\in\mathbb{N}$ and $\beta(n)>0$, if for all $S\in\mathcal{Z}^n$, $z\in\mathcal{Z}$ and $i=1,\dots,n$:
+    \begin{equation*}
+        \sup_{\bar{z}\in\mathcal{Z}}\abs{l(f_S, \bar{z}) - l(f_{S^{i, z}}, \bar{z})} \le \beta(n)
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    Let $\mathcal{A}$ be uniform $\beta(n)$-stable algorithm. For any dataset $S\in\mathcal{Z}^n$, define $f_S = \mathcal{A}(s)$, then 
+    \begin{equation*}
+        \abs{\mathbb{E}_{S\sim\rho^n}\brackb{\mathcal{E}(f_S) - \mathcal{E}_n(f_S) } } \le \beta(n)
+    \end{equation*}
+    This means that we can directly control the generalization error with stablility of an algorithm.
+\end{theorem}
+\begin{proof}
+    Starting with the empirical risk:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_S[\mathcal{E}_n(f_S)] &= \mathbb{E}_S\brackb{\frac{1}{n}\sum^n_{i=1}l(f_S, z_i)} = \frac{1}{n}\sum^n_{i=1}\mathbb{E}_S[l(f_S, z_i)] = \frac{1}{n}\sum^n_{i=1}\mathbb{E}_S\mathbb{E}_{z_i'}[l(f_S, z_i)] \\
+        &= \frac{1}{n}\sum^n_{i=1}\mathbb{E}_S\mathbb{E}_{z_i'}[l(f_{S^{i, z_i'}}, z_i')] = \mathbb{E}_S\mathbb{E}_{S'}\brackb{\frac{1}{n}\sum^n_{i=1}l(f_{S^{i, z_i'}}, z_i')}
+    \end{aligned}
+    \end{equation*}
+    For the expected risk, we have 
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_S[\mathcal{E}(f_S)] = \mathbb{E}_S\mathbb{E}_{S'}[l(f_S, z')]] = \mathbb{E}_S\mathbb{E}_{S'}\brackb{\frac{1}{n}\sum^n_{i=1}l(f_S, z_i')}
+    \end{aligned}
+    \end{equation*}
+    Let's consider the differences:
+    \begin{equation*}
+    \begin{aligned}
+        \abs{\mathbb{E}_{S\sim\rho^n}\brackb{\mathcal{E}(f_S) - \mathcal{E}_n(f_S) }} &= \abs{ \mathbb{E}_{S'}\brackb{\frac{1}{n}\sum^n_{i=1}l(f_{S^{i, z_i'}}, z_i') -\frac{1}{n}\sum^n_{i=1}l(f_S, z_i')} }\\
+        &\le \mathbb{E}_{S'}\frac{1}{n}\sum^n_{i=1} \Big|l(f_{S^{i, z_i'}}, z_i')-l(f_S, z_i')\Big| \le \beta(n)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{lemma}
+    The norm $\norm{\cdot}_\mathcal{H}$ of RKHS $\mathcal{H}$ is strongly convex i.e for any $g, h\in\mathcal{H} $ and $\theta\in[0, 1]$, we have:
+    \begin{equation*}
+        \norm{\theta g + (1-\theta) h}_\mathcal{H}^2 < \theta\norm{g}^2_\mathcal{H} + (1-\theta)\norm{h}^2_\mathcal{H}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We consider expanding the norm, and then find the differences between the left hand side and the right hand side:
+    \begin{equation*}
+    \begin{aligned}
+        (\theta g + (1-\theta)h)^T(\theta g + (1-\theta)h) &= \theta^2 g^Tg + 2\theta(1-\theta)g^Th + (1-\theta)(1-\theta)h^Th \\
+        &= \theta^2g^Tg + 2\theta(1-\theta)g^Th + h^Th - 2\theta h^Th + \theta^2 h^Th
+    \end{aligned}
+    \end{equation*}
+    Now we will minus it with $\theta g^Tg + (1-\theta)h^Th$, which gives us:
+    \begin{equation*}
+    \begin{aligned}
+        \theta^2g^Tg + 2\theta(1-\theta)g^Th &+ h^Th - 2\theta h^Th + \theta^2 h^Th - \theta g^Tg - (1-\theta)h^Th \\
+        &= \theta(\theta-1)g^Tg + 2\theta(1-\theta)g^Th + \theta(1-\theta)h^Th \\
+        &= \theta(\theta - 1)\norm{g-h}^2_\mathcal{H}
+    \end{aligned}
+    \end{equation*}
+    Since $\theta < 1$, the inequality holds.
+\end{proof}
+
+\begin{lemma}
+    For any convex function $F':\mathcal{H}\rightarrow \mathbb{R}$ and $F(\cdot) = F'(\cdot) + \lambda\norm{\cdot}$. Given the minimizer $f=\arg\min_{f'\in\mathcal{H}}F(f')$, then for some $g\in\mathcal{H}$:
+    \begin{equation*}
+        F(g) - F(f) \ge \frac{\lambda}{2}\norm{f-g}^2_\mathcal{H} 
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    By definition of $F$, we can see that:
+    \begin{equation*}
+    \begin{aligned}
+        &F(\theta f + (1-\theta)g) \le \theta F(f) + (1-\theta)F(g) -\lambda\theta(1-\theta)\norm{f-g}^2_\mathcal{H}\\
+        \iff&  2F\bracka{\frac{f+g}{2}} \le F(f) + F(g) - \frac{\lambda}{2}\norm{f-g}^2_\mathcal{H} \\
+        \iff&  \begin{aligned}[t]
+            F(g) - F(f) &\ge 2F\bracka{\frac{f+g}{2}} + \frac{\lambda}{2}\norm{f-g}^2_\mathcal{H} - 2F(f) \\
+            &\ge\frac{\lambda}{2}\norm{f-g}^2_\mathcal{H}
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:stability-RKHS}
+    Let $\mathcal{H}$ be RKHS with associated kernel $K: \mathcal{H} \times \mathcal{H} \rightarrow \mathbb{R}$. We can show that for any $S\in\mathcal{Z}^n$, $z'\in\mathcal{H}$ and $i=1,\dots,i$:
+    \begin{equation*}
+        \sup_{z\in\mathcal{Z}}\Big| l(f_S, z) - l(f_{S^{i, z'}}, z') \Big| \le \frac{2L^2k^2}{n\lambda}
+    \end{equation*}
+    where $L>0$ is Lipschitz constant of $l(\cdot, y)$ and $k^2 = \sup_{x\in\mathcal{X}}K(x,x)$
+\end{theorem}
+\begin{proof}
+    We consider the following functions:
+    \begin{equation*}
+        F_1(\cdot) = \mathcal{E}_S(\cdot) + \lambda\norm{\cdot}^2_\mathcal{H} \qquad F_2(\cdot) = \mathcal{E}_{S^{i, z'}}(\cdot) + \lambda\norm{\cdot}^2_\mathcal{H}
+    \end{equation*}
+    We will simply the notation $f_1 = f_S$ and $f_2 = f_{S^{i, z'}}$ and by definition, we have:
+    \begin{equation*}
+        f_1 = \argmin{f\in\mathcal{H}}F_1(f) \qquad f_2 = \argmin{f\in\mathcal{H}} F_2(f)
+    \end{equation*}
+    Using the lemma above:
+    \begin{equation*}
+        F_1(f_2) - F_1(f_1) \ge \frac{\lambda}{2}\norm{f_1 - f_2}^2_\mathcal{H} \qquad F_2(f_1) - F_2(f_2)\ge \frac{\lambda}{2}\norm{f_2 - f_1}^2_\mathcal{H}
+    \end{equation*}
+    Summing them yields:
+    \begin{equation*}
+    \begin{aligned}
+        \lambda\norm{f_1-f_2}^2_\mathcal{H} &\le F_1(f_2) - F_1(f_1) + F_2(f_1)-F_2(f_2) \\
+        &=\mathcal{E}_S(f_2) - \mathcal{E}_{S^{i ,z'}}(f_2) + \mathcal{E}_{S^{i, z'}}(f_1) - \mathcal{E}_S(f_1) \\
+        &= \frac{1}{n} l(f_2, z_i) - l(f_1,z_i) + l(f_1, z_i') - l(f_2, z_i') \\
+        &\le\frac{2}{n}\sup_{z}\Big| l(f_1, z) - l(f_2, z) \Big|
+    \end{aligned}
+    \end{equation*}
+    We can see that $l$ is Lipschitz:
+    \begin{equation*}
+    \begin{aligned}
+        \sup_{z}\Big| l(f_1, z) - l(f_2, z) \Big| &= \sup_{x\in\mathcal{X}, y\in\mathcal{Y}}\Big| l(f_1(x), y) - l(f_2(x), y) \Big| \\
+        &\le L\sup_{x\in\mathcal{X}}\Big| f_1(x) - f_2(x) \Big| \\
+        &\le Lk\norm{f_1 - f_2}_\mathcal{H}
+    \end{aligned}
+    \end{equation*}
+    The last equality comes from the fact that $|f(x)| \le \sqrt{k(x, x)}\norm{f}^2_\mathcal{H}$. Thus, we have 
+    \begin{equation*}
+        \norm{f_1-f_2}^2_\mathcal{H} \le\frac{2Lk}{n\lambda}
+    \end{equation*}
+    Plugging this back and we yields the ineqality above.
+\end{proof}
+
+\begin{theorem}
+    The excess risk for Tikhonov regularization is 
+    \begin{equation*}
+        \mathbb{E}\Big[ \mathcal{E}(f_S) - \mathcal{E}(f_*) \Big] \le \mathcal{O}\bracka{n^{-\frac{s}{s+1}}}
+    \end{equation*}    
+\end{theorem}
+\begin{proof}
+    We will define $f_\lambda = \arg\min_{f\in\mathcal{H}}\mathcal{E}(f) + \lambda\norm{f}^2_\mathcal{H}$, and define the following excess risk decomposition:
+    \begin{equation*}
+        \mathcal{E}(f_S) - \mathcal{E}(f_*) = \mathcal{E}(f_S) - \mathcal{E}_S(f_S) + \mathcal{E}_S(f_S) - \mathcal{E}_S(f_\lambda) + \mathcal{E}_S(f_\lambda) - \mathcal{E}(f_*) +\lambda\norm{f_\lambda}^2_\mathcal{H} -\lambda\norm{f_\lambda}^2_\mathcal{H}
+    \end{equation*}
+    Please note that 
+    \begin{itemize}
+        \item $\mathcal{E}(f_S) - \mathcal{E}(f_*) \le \mathcal{E}(f_S) - \mathcal{E}(f_*) + \lambda\norm{f_S}^2_\lambda$
+        \item $f_S$ is the minimizer of empirical risk, which means:
+        \begin{equation*}
+            \mathcal{E}_S(f_S) +\lambda\norm{f_S}^2_\mathcal{H} - \mathcal{E}_S(f_\lambda) - \lambda\norm{f_\lambda}^2_\mathcal{H} \le 0
+        \end{equation*}
+        \item $\mathbb{E}_S[\mathcal{E}_S(f_\lambda)] = \mathcal{E}(f_\lambda)$
+    \end{itemize}
+    And, so we have 
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[\mathcal{E}(f_S) - \mathcal{E}(f_*)] &\le \mathbb{E}\Big[\mathcal{E}(f_S) - \mathcal{E}_S(f_S) + \mathcal{E}_S(f_S) - \mathcal{E}_S(f_\lambda) + \mathcal{E}_S(f_\lambda) - \mathcal{E}(f_*) +\lambda\norm{f_\lambda}^2_\mathcal{H} -\lambda\norm{f_\lambda}^2_\mathcal{H} + \lambda\norm{f_S}^2_\lambda\Big] \\
+        &= \mathbb{E}\Big[\mathcal{E}(f_S) - \mathcal{E}_S(f_S) + \underbrace{\mathcal{E}_S(f_S) + \lambda\norm{f_S}^2_\lambda - \mathcal{E}_S(f_\lambda) -\lambda\norm{f_\lambda}^2_\mathcal{H}}_{\le0} + \mathcal{E}_S(f_\lambda) - \mathcal{E}(f_*) +\lambda\norm{f_\lambda}^2_\mathcal{H}\Big] \\
+        &\le \mathbb{E}\Big[\mathcal{E}(f_S) - \mathcal{E}_S(f_S) +   \mathcal{E}_S(f_\lambda) - \mathcal{E}(f_*) +\lambda\norm{f_\lambda}^2_\mathcal{H} \Big] \\
+        &= \underbrace{\mathbb{E}\Big[\mathcal{E}(f_S) - \mathcal{E}_S(f_S) \Big]}_{\text{Generalization Error}} + \underbrace{\mathcal{E}(f_\lambda) - \mathcal{E}(f_*) +\lambda\norm{f_\lambda}^2_\mathcal{H} }_\text{Interpolation and Approximation Error}\\
+    \end{aligned}
+    \end{equation*}
+    Since we know the stability of Tikhonov regualrization, which is $\mathcal{O}(1/(n\lambda))$. If we assume the interpolation and approximation error to be $\lambda^s$, for some $s>0$, then:
+    \begin{equation*}
+        \mathbb{E}[\mathcal{E}(f_S) - \mathcal{E}(f_*)] \le \mathcal{O}\bracka{\frac{1}{n\lambda}} + \lambda^s
+    \end{equation*}
+    We can choose the optimal $\lambda$ to be $n^{-1/(s+1)}$, and we concluded the proof.
+\end{proof}
+
+\begin{remark}
+    It is easy to show that $s=1$ when $f^*\in\mathcal{H}$ and the expected excess risk decrease with rate $\mathcal{O}(n^{-1/2})$
+\end{remark}
+
+\begin{theorem}{\textbf{(McDiarmid's Inequality)}}
+Let $F: \mathcal{Z}^n \times \mathcal{Z}^n \rightarrow \mathbb{R} $ such that for any $i=1,\dots,n$, there is $c_i>0$, where 
+\begin{equation*}
+    \sup_{S\in\mathcal{Z}^n, z\in\mathcal{Z}} \Big|F(S) - F(S^{i, z})\Big| < c_i
+\end{equation*}
+Then we have following bounds:
+\begin{equation*}
+    \mathbb{P}_{S\sim\rho^n}\Big( \Big| F(S) - \mathbb{E}_{S'\sim\rho^n}[F(S')] \Big| \ge\varepsilon \Big) \le 2\exp\bracka{-\frac{2\varepsilon^2}{\sum^n_{i=1}c^2_i}}
+\end{equation*}
+\end{theorem}
+
+\begin{theorem}
+    For a $\beta(n)$ uniformly stable algorithm $\mathcal{A}$, where for any $S\in\mathcal{Z}^n$, we have $f_S = \mathcal{A}(S)$, then:
+    \begin{equation*}
+        \Big|\mathcal{E}_S(f_S)-\mathcal{E}(f_S)\Big| \le \beta(n)+(n\beta(n) + M) \sqrt{\frac{2\log(2/\delta)}{n}}
+    \end{equation*}
+    with probabbilty less than $1-\delta$, where 
+    \begin{equation*}
+        M \ge \sup_{S\in\mathcal{Z}^n, i=1,\dots,n}|l(S, z_i)|
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We would set $F(S)$ to be $\mathcal{E}(f_S) - \mathcal{E}_S(f_S)$, and the apply the McDiarmid's ineqality, which we know that $|\mathbb{E}_{S'}F(S')|\le\beta(n)$, thus we have:
+    \begin{equation*}
+        \Big|\mathcal{E}_S(f_S)-\mathcal{E}(f_S)\Big| \le \beta(n) + \sqrt{\frac{\sum^n_{i=1}c_i\log(2/\delta)}{2}}
+    \end{equation*}
+    Now, to consider the bound, for $F(S) - F(S^{i, z})$
+    \begin{equation*}
+    \begin{aligned}
+        \Big|F(S) - F(S^{i, z})\Big| &\le \Big|\mathcal{E}(f_S) - \mathcal{E}(f_{S^{i, z}}) \Big| + \Big| \mathcal{E}_S(f_S) - \mathcal{E}_{S^{i, z}} (f_{S^{i, z}})\Big| \\
+        &\le\frac{1}{n}\sum_{j\ne i}\Big|l(f_1(x_j), y_j) - l(f_2(x_j), y_j)\Big| + \frac{1}{n}\Big| l(f_1(x_i), y_i) - l(f_2(x_i'), y_i') \Big| + \beta(n) \\
+        &= \frac{(n-1)\beta(n)}{n} + \frac{2M}{n} + \beta(n) \le 2\beta(n)+ \frac{2M}{n}
+    \end{aligned}
+    \end{equation*}
+    Plugging back, and we have the statement above.
+\end{proof}
+
+\begin{proposition}
+    The value $M$ for Tikhonov's regualrization is:
+    \begin{equation*}
+        \sup_{S\in\mathcal{Z}^n, i=1,\dots,n}|l(S, z_i)| \le kL\sqrt{\frac{c_0}{\lambda}} + c_0
+    \end{equation*}
+    where $l(0, y)\le c_0$ for all $y\in\mathcal{Y}$ as $l$ is $L$-Lipschitz and $k^2 = \sup_x k(x, x)$
+\end{proposition}
+\begin{proof}
+    For the empirical minimizer $f_S$, we have 
+    \begin{equation*}
+        \mathcal{E}_S(f_S) + \lambda\norm{f_S} \le \mathcal{E}_S(0) \le c_0
+    \end{equation*}
+    This means that, since the loss is negative
+    \begin{equation*}
+        \norm{f_S} \le \sqrt{\frac{c_0}{\lambda}} -\mathcal{E}_S(f) \le  \sqrt{\frac{c_0}{\lambda}}
+    \end{equation*}
+    Then, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \abs{l(f_S, z)} &\le \abs{l(f_S, z) - l(0, z)} - \abs{l(0, z)} \\
+        &\le \abs{l(f_S, z) - l(0, z)} - c_0 \\
+        &\le kL\norm{f_S} + c_0 = kL\sqrt{\frac{c_0}{\lambda}} + c_0
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{corollary}
+    The generalization bound for Tikhonov's regualrization is 
+    \begin{equation*}
+        \Big| \mathcal{E}_S(f_S) - \mathcal{E}(f_S) \Big| \le \frac{2k^2L^2}{n\lambda} + \bracka{ \frac{2k^2L^2}{\lambda} + kL\sqrt{\frac{c_0}{\lambda}} + c_0 }\sqrt{\frac{2\log(2/\delta)}{n}}
+    \end{equation*}
+    with the probabbilty less than $1-\delta$
+\end{corollary}
+
+\begin{remark}
+    Or, we have
+    \begin{equation*}
+        \Big| \mathcal{E}_S(f_S) - \mathcal{E}(f_S) \Big| \le \mathcal{O}\bracka{\frac{1}{\sqrt{n}\lambda}}
+    \end{equation*}
+    We, now, can find a suitable $\lambda$.
+\end{remark}
+
+\section{Early Stopping}
+\begin{remark}
+    We consider an iterated algorithm and apply to unregularized ERM with $n$ training points. Let $f_n$ be a solution of ERM and $f^{(t)}_n$ be sequence of function obtained by the gradient descent. We would like to find a spot where the algorithm isn't trained too few or too much.
+\end{remark}
+
+\begin{remark}
+    The intuition here is that every step of gradient descent allows the points to move from previous state in certain amount i,e $f^{(t)}_n \in \mathcal{H}_{r(t)}$ for some radius $r(t)$. To set an early stop means that we regularize the space of $\mathcal{H}$.
+\end{remark}
+
+\begin{lemma}
+    \label{lem:stability-gd-1}
+    For $L$-Lipschitz, convex, and differentiable function $f:\mathcal{H}\rightarrow \mathbb{R}$. Then 
+    \begin{equation*}
+        \norm{\nabla F(f)} \le L
+    \end{equation*}
+    for some $f\in\mathcal{H}$.
+\end{lemma}
+\begin{proof}
+    We consider, where we set $y = x + \nabla F$:
+    \begin{equation*}
+        L\norm{\nabla F} = L\norm{y - x} \ge \norm{f(y) - f(x)} = \norm{\nabla F^T(y - x)} = \norm{\nabla F}^2
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    At step $t$ of gradient descent with step size $\gamma>0$ on $F$, we have:
+    \begin{equation*}
+        \norm{f_t}_\mathcal{H} \le t\gamma L
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    \begin{equation*}
+        \norm{f_t}_\mathcal{H} = \norm{f_{t-1} - \gamma\nabla F(f_{t-1})}_\mathcal{H} \le \norm{f_{t-1}}_\mathcal{H} + \gamma\norm{\nabla F(f_{t-1})}_\mathcal{H} = \norm{f_{t-1}}_\mathcal{H} + \gamma L 
+    \end{equation*}
+    Repeat the process and and we that we have.
+\end{proof}
+
+\begin{lemma}
+    For a function $F:\mathcal{H}\rightarrow \mathbb{R}$ convex, $M$-smooth with minimizer $w_*\in\mathcal{H}$, we have:
+    \begin{equation*}
+        F(w) - F(w_*) \ge \frac{1}{2M}\norm{\nabla F(w)}^2_\mathcal{H}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We consider the lemma \ref{lem:smooth-ineq}
+    \begin{equation*}
+    \begin{aligned}
+        \inf_{v\in\mathcal{H}} f(v) &\le \inf_{v\in\mathcal{H}} f(w) + \nabla f(w)^T(v-w) + \frac{L}{2}\norm{v-w}^2_\mathcal{H}\\ 
+    \end{aligned}
+    \end{equation*}
+    Let's consider the derivative with respect to $v$:
+    \begin{equation*}
+    \begin{aligned}
+        \nabla_v \brackb{\nabla_w f(w)^T(v-w) + \frac{L}{2}\norm{v-w}^2_\mathcal{H} } &= \nabla_v \brackb{\nabla_w f(w)^Tv - \nabla_w f(w)^Tw + \frac{L}{2} (v^Tv - 2v^Tw + w^Tw)  } \\
+        &= \nabla_w f(w) - 0 + \frac{L}{2}2v - \frac{L}{2}2w + 0 \\
+        &= \nabla_w f(w) + L(v - w)
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative to zero gives us:
+    \begin{equation*}
+    \begin{aligned}
+        v = w - \frac{1}{L} \nabla_w f(w)
+    \end{aligned}
+    \end{equation*}
+    Plugging it back, and we have:
+    \begin{equation*}
+    \begin{aligned} 
+        f(w_*) &\le f(w) + \nabla f(w)^T\bracka{ w - \frac{1}{L} \nabla_w f(w)-w} + \frac{L}{2}\norm{ w - \frac{1}{L} \nabla_w f(w)-w}^2_\mathcal{H}\\ 
+        &= f(w) -\frac{1}{L}\norm{\nabla_w f(w)}^2_\mathcal{H} + \frac{1}{2L}\norm{\nabla_w f(w)}^2_\mathcal{H}\\
+        &= f(w) - \frac{1}{2L}\norm{\nabla_w f(w)}^2_\mathcal{H}\\
+    \end{aligned}
+    \end{equation*}
+    Rearrange and we have what required.
+\end{proof}
+
+\begin{proposition}
+    Givne a function $F:\mathcal{H} \rightarrow \mathbb{R}$ convex $M$-smooth, then for all $v, w$, we have:
+    \begin{equation*}
+        \brackd{\nabla F(w) - \nabla F(v),w-v }_\mathcal{H} \ge \frac{1}{M}\norm{\nabla F(w) - \nabla F(v)}^2_\mathcal{H}
+    \end{equation*}
+\end{proposition}
+
+\begin{proof}
+    First, we constructed a function:
+    \begin{equation*}
+        F_w(z) = F(z) - \brackd{\nabla_w F(w), z}_\mathcal{H} \qquad 
+        F_v(z) = F(z) - \brackd{\nabla_v F(v), z}_\mathcal{H} 
+    \end{equation*}
+    We can see that both functions are $M$-smooth, as we have:
+    \begin{equation*}
+        \nabla_z F_w(z) = \nabla_z F(z) - \nabla_w F(w)
+    \end{equation*}
+    Furthermore, from this, we can see that $z = w$ is the optima, and same for $F_v(z)$ where $z = v$ is also an optima. Apply the previous lemma, we have:
+    \begin{equation*}
+        F_w(v) - F_w(w) \ge \frac{1}{2M}\norm{\nabla F_w(v)}^2_\mathcal{H}
+        \qquad F_v(w) - F_v(v) \ge \frac{1}{2M}\norm{\nabla F_v(w)}^2_\mathcal{H}
+    \end{equation*}
+    where:
+    \begin{equation*}
+    \begin{aligned}
+        F_w(v) = F(v) - \brackd{\nabla_w F(w), v}_\mathcal{H} 
+        &\qquad F_v(w) = F(w) - \brackd{\nabla_v F(v), w}_\mathcal{H} \\
+        F_w(w) = F(w) - \brackd{\nabla_w F(w), w}_\mathcal{H} 
+        &\qquad F_v(v) = F(v) - \brackd{\nabla_v F(v), v}_\mathcal{H} \\ 
+    \end{aligned}
+    \end{equation*}
+    And, so we have:
+    \begin{equation*}
+    \begin{aligned}
+        F(v) - F(w) - \brackd{\nabla_w F(w), v - w}_\mathcal{H} &\ge \frac{1}{2M}\norm{\nabla F_w(v)}^2_\mathcal{H} \\
+        F(w) - F(v) - \brackd{\nabla_v F(v), w - v}_\mathcal{H} &\ge \frac{1}{2M}\norm{\nabla F_v(w)}^2_\mathcal{H}
+    \end{aligned}
+    \end{equation*}
+    Adding them together, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{\nabla_w F(w) - \nabla_v F(v), w - v}_\mathcal{H} &\ge \frac{1}{2M}\norm{\nabla F_w(v)}^2_\mathcal{H} + \frac{1}{2M}\norm{ \nabla F_v(w) }^2_\mathcal{H} \\
+        &\ge\frac{1}{M}\norm{\nabla F_w(v) + \nabla F_v(w)}^2_\mathcal{H} \\
+        &= \frac{1}{M}\norm{\nabla F(w) - \nabla F(v)}^2_\mathcal{H} \\
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{lemma}
+    \label{lem:stability-gd-2}
+    Let $l : \mathcal{H} \rightarrow \mathbb{R} $ be convex differentiable and $M$-smooth. Let $0 \ge \gamma \ge 2/M$ and $G: \mathcal{H}\rightarrow \mathcal{H}$ be the gradient step operator: $G(f) = f - \gamma\nabla l(f)$ for $f\in\mathcal{H}$, then:
+    \begin{equation*}
+        \norm{G(f) - G(g)}_\mathcal{H} \le \norm{f-g}_\mathcal{H}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We have:
+    \begin{equation*}
+    \begin{aligned}
+        \Big\| G(f) - G(g) \Big\|^2_\mathcal{H} &= \Big\| f - \gamma\nabla l(f) - g + \gamma\nabla l(g) \Big\|^2_\mathcal{H} \\
+        &= \Big\| f - g + \gamma\Big( \nabla l(g) - \nabla l(f) \Big) \Big\|_\mathcal{H}^2 \\
+        &= \Big\| f-g \Big\|^2_\mathcal{H} + \Big\| \gamma\Big( \nabla l(g) - \nabla l(f) \Big) \Big\|^2_\mathcal{H} - 2\gamma \Big\langle f - g, \nabla l(f) - \nabla l(g) \Big\rangle \\
+        &\le \Big\| f-g \Big\|^2_\mathcal{H} + \gamma^2\| \nabla l(g) - \nabla l(f) \|^2_\mathcal{H} - \frac{2\gamma}{M}\norm{\nabla l(f) - \nabla l(g)}^2_\mathcal{H} \\
+        &= \norm{f-g}^2_\mathcal{H}  - \gamma\bracka{\frac{2}{M} - \gamma}\norm{\nabla l(f) - \nabla l(g)}^2_\mathcal{H} \le \norm{f-g}^2_\mathcal{H}
+    \end{aligned}
+    \end{equation*}
+    Since $\gamma(2/M - \gamma)\le1$ since $\gamma\in[0, 2/M]$.
+\end{proof}
+
+\begin{theorem}
+    Let $l(\cdot, y):\mathcal{H}\rightarrow \mathbb{R}$ be convex, $L$-Lipschitz and $M$-smooth uniform. For training set $S\in\mathcal{Z}^n$, let $f^{(T)}_S$ be obtained by applying gradient descent with step size $1/M$ on empirical risk to $S$. The corresponding algorithm is $\beta(n, T)$-stable where:
+    \begin{equation*}
+        \beta(n, T) \le \frac{2L^2k^2}{M}\frac{T}{n}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Let $S\in\mathcal{Z}^n, z \in \mathcal{Z}$ and $i\in[n]$. We will denote $f_t$ to be function after $t$ iteration with gradient step $\gamma$ on $S$. On the other hand, we denote $f_t'$ to be a function after $t$ iteration with same learning on $S^{i, z}$. Recall the result from the proof of theorem \ref{thm:stability-RKHS}, that 
+    \begin{equation*}
+        \sup_{\bar{z}\in\mathcal{Z}}\Big| l(f_T, \bar{z}) - l(f_T', \bar{z}) \Big| \le Lk\norm{f_T - f_T'}_\mathcal{H}
+    \end{equation*}
+    We want to control this value. For any $t\in[n]$ by construction:
+    \begin{equation*}
+    \begin{aligned}
+        f_{t+1} = f_t - \gamma\nabla \mathcal{E}_S(f_t) \qquad f_{t+1}' = f_t' - \gamma\nabla \mathcal{E}_{S^{i, z}}(f_t) \\ 
+    \end{aligned}
+    \end{equation*}
+    Then, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{f_{t+1} - f_{t+1}'}_\mathcal{H} &= \norm{ f_t - f_t' - \frac{\gamma}{n}\sum_{j\ne i}\Big[\nabla l(f_t, z_j) -  \nabla l(f_t', z_j)\Big] + \frac{\gamma}{n} \Big[\nabla l(f_t, z_i) - \nabla l(f_t', z) \Big]}_\mathcal{H} \\
+        &\begin{aligned}[t]
+            \le \frac{1}{n}\sum_{j\ne i} &\Big\| f_t - \gamma \nabla l(f_t, z_j) - f_t' + \gamma \nabla l(f_t', z_j)  \Big\|^2_\mathcal{H} + \frac{1}{n}\norm{ f_t - f_t' }_\mathcal{H} \\
+            &+ \frac{\gamma}{n}\Big( \norm{\nabla l(f_t, z_i)}_\mathcal{H} + \norm{\nabla l(f_t', z)} \Big) \\    
+        \end{aligned} \\
+        &= \norm{f_t - f_t'}_\mathcal{H} + \frac{2Lk}{n}\gamma
+    \end{aligned}
+    \end{equation*}
+    The second ineqalities comes from lemma \ref{lem:stability-gd-1} and lemma \ref{lem:stability-gd-2}. Please note that $\norm{\nabla l(f_t, z)}_\mathcal{H} \le Lk$:
+    \begin{equation*}
+        \norm{f_{t+1} - f_{t+1}'}_\mathcal{H} \le \norm{f_t - f_t'}_\mathcal{H} + \frac{2Lk}{nM} = \frac{2Lk(t+1)}{nM}
+    \end{equation*}
+    Setting $t+1 = T$, and we finish the proof, while setting $\gamma = 1/M$
+\end{proof}
+
+
+\section{Sub-Gradient Methods}
+
+\subsection{Introduction to Sub-Gradient}
+
+\begin{definition}{\textbf{(Convex Function)}}
+    A function $f:X\rightarrow[-\infty,\infty]$ is convex iff, for all $x, y\in X$ and $\lambda \in [0, 1]$:
+    \begin{equation*}
+        f((1-\lambda)x + \lambda y) \le (1-\lambda)f(x) + \lambda f(y)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Extended Value Theorem)}}
+    We can transform the constrained optimization:
+    \begin{equation*}
+        \min_{\norm{x}\le1}\norm{Ax-y}^2
+    \end{equation*}
+    Using the extended value theorem, where this is the same as:
+    \begin{equation*}
+        \min_{x\in X} f(x) = h(x) + L_{B_1}(x) \qquad \text{ where } \qquad L_{B_1}(x) = \begin{cases}
+            0 & x\in B_1 \\
+            \infty & x\not\in B_1 \\
+        \end{cases}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Subdifferential \& Subgradient)}}
+    Let $x\in\operatorname{dom}(f)$, the subdifferential:
+    \begin{equation*}
+        \partial f(x) = \brackc{ u\in X \Big| \forall y \in X : f(y)\ge f(x) + \brackd{y-x, u} }
+    \end{equation*}
+    The subgradient is the element of $\partial f$ at $x$. Please note that $z = f(y)\ge f(x) + \brackd{y-x, u}$ is the affine function passing through $(x, f(x))$ with slope $u$. If $x\not\in\operatorname{dom}(f)$, then by definition $\partial f(x)=\emptyset$
+\end{definition}
+
+\begin{lemma}
+    Suppose that $X = X_1\times\dots\times X_m$ and $f(x_1,\dots,x_m) = f_1(x_1) + \dots + f_m(x_m)$ where $f_i:X_i\rightarrow]-\infty,\infty]$, then we have:
+    \begin{equation*}
+        \partial f(x_1,\dots,x_m) = \underbrace{\partial f_1(x_1)}_{\subset X_1} \times\dots\times \underbrace{\partial_m(x_m)}_{\subset X_m} \subset X
+    \end{equation*}
+\end{lemma}
+
+\begin{remark}
+    Let's consider $X = \mathbb{R}^m$ where $f(x) = \norm{x}_1 = \sum^m_{i=1}\abs{x_i}$ where $f_i=\abs{\cdot}:\mathbb{R}\rightarrow \mathbb{R}$, then we have:
+    \begin{equation*}
+        \partial\norm{\cdot}_{x_1}(x) = \underbrace{\partial\abs{\cdot}(x_1)}_{\subset \mathbb{R}}\times\dots\times\underbrace{\partial\abs{\cdot}(x_m)}_{\subset \mathbb{R}}\subset \mathbb{R}^m
+    \end{equation*}
+    where, we have:
+    \begin{equation*}
+        \partial\abs{\cdot}(x) = \begin{cases}
+            \{-1\} &\text{ if } t < 0 \\
+            [-1, 1] &\text{ if } t = 0 \\
+            \brackc{1} &\text{ if } t>0
+        \end{cases}
+    \end{equation*}
+\end{remark}
+
+\begin{lemma}
+    For a convex function $f:\mathbb{R}\rightarrow \mathbb{R}$ (note that it is finite), its subdifferential is:
+    \begin{equation*}
+        \partial f(x) = \brackb{f_-'(x), f_+'(x)}
+    \end{equation*}
+    However, for infinite value function, its subdifferential is:
+    \begin{equation*}
+        \partial f(x) = \brackb{f_-'(x), f_+'(x)}\cap \mathbb{R}
+    \end{equation*}
+\end{lemma}
+
+\begin{remark}
+    We have the problem:
+    \begin{equation*}
+    \begin{aligned}
+        \min_{x\in C} f(x) \quad \text{ where } &C\subset X \text{ is closed convex.} \\
+        &f:X\rightarrow \mathbb{R}\text{ is convex and Lipschitz continuous.}
+    \end{aligned}
+    \end{equation*}
+    If $f$ is finite every where, then subdifferential is non-empty, while in smooth setting, there is one subgradient, which is the gradient.
+\end{remark}
+
+\subsection{Projected Subgradient Method}
+
+\begin{definition}{\textbf{(Projected Subgradient Method)}}
+    The projected subgradient method is given by:
+    \begin{equation*}
+        x_{k+1} = P_c(x_k-\gamma u_k)
+    \end{equation*}
+    where $u_k\in\partial f(x_n)$ and $\gamma_n>0$.
+\end{definition}
+
+\begin{remark}
+    Projected Subgradient method isn't decending. We will consider $X = \mathbb{R}^2$ where $f(x_1, x_2) = \abs{x_1} + 2\abs{x_2}$ as we have 
+    \begin{equation*}
+        \partial f(1, 0) = \brackc{1}\times[-2, 2] 
+    \end{equation*}
+    it is clear that $(1, 2)\in\partial f(1, 0)$. Then choosing this subgradient will not lead to any convergence.
+\end{remark}
+
+\begin{lemma}
+    We would like to note that: if $u\in\partial f(x)$, then $\norm{u} < L$. 
+\end{lemma}
+\begin{proof}
+    We consider the following inequalities:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{y-x, u} &\le f(y) - f(x) \\
+        &\le\abs{f(y)-f(x)} \\
+        &\le L\norm{y-x}
+    \end{aligned}
+    \end{equation*}
+    If we were to set, $u = y-x$:
+    \begin{equation*}
+        \brackd{y-x, y-x} = \norm{y-x}^2 \le L\norm{y-x}
+    \end{equation*}
+    and by simple rearrangement, we arrived at the statement.
+\end{proof}
+
+\begin{lemma}
+    \begin{equation*}
+        \norm{x_{k+1} - x_k} = \norm{P_C(y_k) - P_c(x_k)} \le \norm{y_k - x_k}
+    \end{equation*}
+\end{lemma}
+
+\begin{lemma}
+    For all $k\in \mathbb{N}$ and $x \in C$:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma_k(f(x_k) - f(x)) &\le 2\gamma_k\brackd{x_k - x, u_k} \\
+        &\le \norm{x_k-x}^2 - \norm{x_{k+1}-x}^2 + \gamma_k^2L^2
+    \end{aligned}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    The first ineqalities comes from the definition of subgradient:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma_k(f(x_k) - f(x)) &\le 2\gamma_k\brackd{x_k - x, u_k} \\
+        & = 2\brackd{x_k - x, \gamma_k u_k} \\
+        &= \norm{x_k-x}^2 + \norm{\gamma_ku_k}^2 -\norm{x_k - x - \gamma_ku_k} \\
+        &\le\norm{x_k-x}^2 -\norm{y_k - x} + \gamma_k^2L^2 \\
+        &\le\norm{x_k-x}^2 - \norm{x_{k+1}-x_k}^2 + \gamma^2_kL^2
+    \end{aligned}    
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}
+    For all $k\in \mathbb{N}$, we have $f_k =\min_{0\le i \le k}f(x_i)$ and $\bar{x} = \bracka{\sum^k_{i=0}\gamma_i}^{-1}\bracka{\sum^k_{i=0}\gamma_ix_i}$. Then for all $k\in \mathbb{N}$ and $x \in C$:
+    \begin{equation*}
+        \max\brackc{f_k, f(\bar{x}_k)} - f(x)\le \frac{\norm{x_0-x}^2}{2\sum^k_{i=0}\gamma_i} + \frac{L^2}{2}\frac{\sum^k_{i=0}\gamma_i^2}{\sum^k_{i=0}\gamma_i}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We start by summing the lemma:
+    \begin{equation*}
+        \sum^k_{i=0} 2\gamma_i(f(x_i) - f(x)) \le \sum^k_{i=0} \norm{x_i-x}^2 - \norm{x_{i+1}-x}^2 + \gamma_i^2L^2
+    \end{equation*}
+    Let's consider with the following, with the convexity of $f$:
+    \begin{equation*}
+    \begin{aligned}
+        f(\bar{x}) &= f\bracka{\frac{\sum^k_{i=0}\gamma_ix_i}{\sum^k_{i=0}\gamma_i}} \le \sum^k_{i=1}f(x_i)\gamma_i\Big/\sum^k_{i=0}\gamma_i
+    \end{aligned}
+    \end{equation*}
+    And, so we have:
+    \begin{equation*}
+        \bracka{\sum^k_{i=0}\gamma_i} \max\brackc{ f_k, f(\bar{x}_k) } \le \sum^k_{i=0}\gamma_i f(i)
+    \end{equation*}
+    as $f_k$ is always less than $f(i)$ by definition, thus the maximum holds, and, so we can apply the lemma above with telescoping sum: 
+    \begin{equation*}
+    \begin{aligned} 
+        \bracka{\sum^k_{i=0}2\gamma_i} \Big[\max\brackc{ f_k, f(\bar{x}_k) }- f(x) \Big] &\le \sum^k_{i=0} 2\gamma_i(f(x_i) - f(x)) \\
+        &\le \sum^k_{i=0} \norm{x_i-x}^2 - \norm{x_{i+1}-x}^2 + L^2\sum^k_{i=0}\gamma_i^2 \\
+        &= \norm{x_0-x}^2 - \norm{x_{k+1}-x}^2 + L^2\sum^k_{i=0}\gamma_i^2 \\
+        &\le \norm{x_0-x}^2  + L^2\sum^k_{i=0}\gamma_i^2 \\
+    \end{aligned}
+    \end{equation*}
+    By rearrange the equation, the statement.
+\end{proof}
+
+\begin{corollary}
+    Suppose that $\sum_{k\in\mathbb{N}}\gamma=\infty$ and $ \bracka{\sum^k_{i=0}\gamma_i}^{-1}\bracka{\sum^k_{i=0}\gamma_ix_i}\rightarrow0$, then it is clear that 
+    \begin{equation*}
+        f_k\rightarrow \inf_cf \qquad f(\bar{x}_k)\rightarrow \inf_cf
+    \end{equation*}
+    The possible choice: $\gamma_k = \bar{\gamma}/(k+1)^2$ with $\gamma\in[1/2, 1]$. In particular, $\gamma_k = \bar{\gamma}/\sqrt{k+1}$ and $\bar{\gamma}_k = \bar{\gamma}/(k+1)$
+\end{corollary}
+
+\begin{remark}
+    The result above doesn't assume that $s_* = \arg\min_c f \ne \emptyset$. As for all $x\in C$, we have:
+    \begin{equation*}
+        f(\bar{x}_k) \le f(x) + \frac{\norm{x_0-x}^2}{2\sum^k_{i=0}\gamma_i} + \frac{L^2}{2}\frac{\sum^k_{i=0}\gamma_i^2}{\sum^k_{i=0}\gamma_i}
+    \end{equation*}
+    But we can see that $\lim\sup f(\bar{x}_k) \le f(x)$ and for all $x\in C$:
+    \begin{equation*}
+        \lim\sup f(\bar{x}_k) \le \inf_c f \le \lim\inf_kf(\bar{x}_k)\le\lim\sup f(\bar{x}_k)
+    \end{equation*}
+    and so they are all equal and will converge to $f$.
+\end{remark}
+
+\begin{corollary}
+    Suppose that $S_* = \arg\min_c f \ne\emptyset$ then the following holds:
+    \begin{itemize}
+        \item Let $k\in\mathbb{N}$ then: set $(\gamma_i)_{0\le i\le k} = \frac{\norm{x_0-  S_*}}{L\sqrt{k+1}}$ then:
+        \begin{equation*}
+            \max\brackc{f_k, f(\bar{x}_k)} - \min_c f < \frac{Ld(x_0, S_*)}{\sqrt{k+1}}
+        \end{equation*}
+        \item Suppose that $X$ is finite dimensional, where $\sum\gamma_k=\infty$ and $\sum\gamma_k^2<\infty$ then there exists $x_*\in S_*$ such that $x_k\rightarrow x_*$
+        \item For every $k\in\mathbb{N}$ where $\gamma_k = \bar{\gamma}/(k+1)$, then:
+        \begin{equation*}
+            \max\brackc{f_k, f(\bar{x}_k)} - \min_c f \le \mathcal{O}\bracka{\frac{1}{\log(k+1)}}
+        \end{equation*}
+        \item For every $k\in\mathbb{N}$ where $\gamma_k = \bar{\gamma}/\sqrt{k+1}$, then:
+        \begin{equation*}
+            \max\brackc{f_k, f(\bar{x}_k)} - \min_c f \le \mathcal{O}\bracka{\frac{\log(k+1)}{\sqrt{k+1}}}
+        \end{equation*}
+        \item For every $k\in\mathbb{N}$ where $\gamma_k = \bar{\gamma}/\sqrt{k+1}$, then: $\tilde{f}_k = \inf_{\lfloor k/2\rfloor \le i \le k}f(x_i)$ where:
+        \begin{equation*}
+            \tilde{x}_k = \bracka{\sum^k_{i=\lfloor k/2\rfloor}\gamma_i}^2\sum^k_{i=\lfloor k/2\rfloor} \gamma_ix_i
+        \end{equation*}
+        Suppose $C$ is bounded then: 
+        \begin{equation*}
+            \max\brackc{f_k, f(\bar{x}_k)} - \min_c f = \mathcal{O}\bracka{\frac{1}{\sqrt{k+1}}}
+        \end{equation*}
+    \end{itemize}
+\end{corollary}
+
+\begin{definition}{\textbf{(Projected Stochastic Subgradient Method)}}
+    The algorithm is defined as:
+    \begin{equation*}
+        x_{k+1} = P_C(x_k-\gamma_k\hat{u}_k)
+    \end{equation*}
+    where $\hat{u}_k$ is $x$-valued random variable such that $\mathbb{E}[\hat{u}_k | x_k] \in\partial f(x_k)$. Now, we have $x_k$ and $f(x_k)$ are random varaible now.
+\end{definition}
+
+\begin{remark}
+    We are going to define a function values $f_k = \min_{0\le i\le k}\mathbb{E}[f(x_i)]$ and $\bar{x}_k = \bracka{\sum^k_{i=0}\gamma_i}^2\bracka{\sum^k_{i=0}\gamma_ix_i}$. Together with the assumption that there exists $B>0$ such that for all $k\in\mathbb{N}$ as $\mathbb{E}[\norm{\hat{u}_k}^2]\le B^2<\infty$. 
+\end{remark}
+
+\begin{lemma}
+    For all $k\in\mathbb{N}$ and all points $x\in C$:
+    \begin{equation*}
+        2\gamma_n(\mathbb{E}[P(x_n)] - f(x)) \le \mathbb{E}[\norm{x_k-x}^2] - \mathbb{E}[\norm{x_{k+1} - x}^2] + \gamma_k^2 B^2
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We consider $y_k = x_k - \gamma\hat{u}_k$ and $x_{k+1}=P_C(y_k)$, then we have:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma_k\brackd{x_k - x, \hat{u}_k} &= 2\brackd{x_k - x, x_k - y_k} \\ 
+        &= \norm{x_k-x}^2 + \norm{x_k-y_k}^2 - \norm{y_k-x}^2 \\
+        &\le \norm{x_k-x}^2 - \norm{x_{k+1}-x}^2 + \gamma_k^2\norm{u_k}^2 \\
+    \end{aligned}
+    \end{equation*}
+    and so we have:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma_k\brackd{x_k - x, \mathbb{E}[u_k| x_k]} &= 2\brackd{x_k - x, x_k - y_k} \\ 
+        &\le \norm{x_k-x}^2 - \mathbb{E}\brackb{\norm{x_{k+1}-x}^2\big|x_k} + \gamma_k^2\mathbb{E}\brackb{\norm{u_k}^2\big|x_k} \\
+    \end{aligned}
+    \end{equation*}
+    Note that 
+    \begin{equation*}
+        2\gamma_k\Big( f(x_k) - f(x) \Big) \le 2\gamma_k\brackd{x_k - x, \mathbb{E}[u_k| x_k]}
+    \end{equation*}
+    and so, we have:
+    \begin{equation*}
+    \begin{aligned}
+        2\gamma_k\Big( \mathbb{E}[f(x_k)] - f(x) \Big) &\le \norm{x_k-x}^2 - \mathbb{E}\brackb{\norm{x_{k+1}-x}^2} + \gamma_k^2\mathbb{E}\brackb{\norm{u_k}^2} \\
+        &\le \norm{x_k-x}^2 - \mathbb{E}\brackb{\norm{x_{k+1}-x}^2} + \gamma_k^2B^2 \\ 
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}
+    For all number $k \in \mathbb{N}$ and for all $x\in C$: we have 
+    \begin{equation*}
+        \max\brackc{f_k, \mathbb{E}[f(\bar{x}_k)]} - f(x) \le \frac{\mathbb{E}[\norm{x_0 - x}^2]}{2\sum^k_{i=0}\gamma_i} +\frac{B^2}{2}\frac{\sum^k_{i=1}\gamma_i^2}{\sum^k_{i=1}\gamma_i}
+    \end{equation*}
+\end{theorem}
+
+\begin{corollary}
+    Suppose that $\sum^\infty_{k=0}\gamma_k=\infty$ and $\sum^n_{i=0}\gamma_i^2/\sum^n_{i=0}\gamma_i \rightarrow 0$  where $\gamma = \bar{\gamma}/(1+k)^2$ with $\alpha\in[1/2, 1]$. Then $f_k \rightarrow \inf_Cf$ and $\mathbb{E}[f(\bar{x}_k)]\rightarrow \inf_C f$
+\end{corollary}
+
+\begin{corollary}
+    Suppose that $S_* = \arg\min_c f\ne\emptyset$ and let $D\ge\operatorname{dist}(x_0, S_*)$ then the following holds:
+    \begin{itemize}
+        \item Let $k\in\mathcal{N}$ and set $(\gamma_i)_{1\le i\le k} = D/(B\sqrt{k+1})$ then:
+        \begin{equation*}
+            \max\brackc{f_n, \mathbb{E}[f(\bar{x}_k)]} - \min_c f \le \frac{BD}{\sqrt{k+1}}
+        \end{equation*}
+        \item Set $\gamma_k = \bar{\gamma}/\sqrt{k+1}$ then:
+        \begin{equation*}
+            \max\brackc{f_n, \mathbb{E}[f(\bar{x}_k)]} - \min_c f \le \mathcal{O}\bracka{\frac{\log(k+1)}{\sqrt{k+1}}} 
+        \end{equation*}
+    \end{itemize}
+\end{corollary}
+
+\subsection{Examples of Stochastic Optimization}
+
+\begin{remark}{\textbf{(Stochastic Optimization)}}
+    We have the following setting:
+    \begin{equation*}
+        \min_{x\in C} f(x) = \mathbb{E}[f(x, \xi)] = \int_\mathcal{Z} F(x, z) \dby\mu(\mathcal{Z})
+    \end{equation*}
+    where $\xi$ is random variable taking values in measurable space $\mathcal{Z}$ with distribution measure $\mu(\mathcal{Z})$ and $F:\mathcal{X}\times\mathcal{Z}\rightarrow \mathbb{R}$ such that:
+    \begin{itemize}
+        \item $F(\cdot, z)$ is convex and $L(\mathcal{Z})$-Lipschitz continuous and 
+        \begin{equation*}
+            \int_\mathcal{Z} L(z)^2\dby\mu(\mathcal{Z} ) < \infty
+        \end{equation*}
+        \item $F(0, z) \in L^1(\mathcal{Z}, \mu)$
+        \item There exists $\tilde{\nabla}F : X \times \mathcal{Z} \rightarrow X$ such that $\tilde{\nabla}F(x, z)$ is subgradient of $F(\cdot, z)$ at $X$.
+        \item $(\xi_k)_{k\in\mathbb{N}}$ is sequence of independent copies of $S$.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    \begin{equation*}
+    \begin{aligned}
+        \abs{F(\cdot, x)} &\le \abs{F(x, \cdot)-F(0,\cdot)} + \abs{F(0, \cdot)} \\
+        &\le L(\cdot)\norm{x} + \abs{F(0,\cdot)}
+    \end{aligned}
+    \end{equation*}
+    Thus $F(x, \cdot)\in L^1(z,\mu)$.
+\end{remark}
+
+\begin{definition}{\textbf{(Projected Gradient Descent)}}
+    We have the following algorithm:
+    \begin{equation*}
+        x_{k+1} = P_c(x_k - \gamma_k\underbrace{\tilde{\nabla}F(x_k,\xi_k)}_{\hat{u}_k})
+    \end{equation*}
+    Checking the assumption on $\hat{u}_k$:
+    \begin{itemize}
+        \item $x_k = x_k(\xi_0, \dots, \xi_{k-1})$ as we have $x_k$ and $\xi_k$ are independent that random value.
+        \item We have: 
+        \begin{equation*}
+        \begin{aligned}
+            &F(y, z) \ge F(x, z) + \brackd{y-x, \tilde{\nabla}F(x, z)} \\
+            &f(y)\ge f(x) + \bigg\langle y-x, \underbrace{\int_\mathcal{Z}\tilde{\nabla}F(x, z)\dby \mu(\mathcal{Z})}_{\mathbb{E}[\tilde{\nabla}F(x, \xi)]}\bigg\rangle
+        \end{aligned}
+        \end{equation*}
+        for all $x, y \in X$ and $z\in \mathcal{Z}$. And, $\mathbb{E}[\tilde{\nabla}F(x, \xi)] \in \partial f(x)$, or we have 
+        \begin{equation*}
+            \mathbb{E}[\tilde{\nabla} F(x_k, \xi) | x_k] = \int \tilde{\nabla}F(x_k, z)\dby\mu(z) \in \partial f(x_k)
+        \end{equation*}
+        \item We have:
+        \begin{equation*}
+        \begin{aligned}
+            \mathbb{E}\brackb{\left.\norm{\tilde{\nabla}F(x_k, \xi_k)}^2 \right| x_k} &= \int \norm{\tilde{\nabla}F(x_k, z)}^2 \dby \mu(\mathcal{Z}) \\
+            &\le \int L(z)^2\dby\mu(\mathcal{Z}) = B^2
+        \end{aligned}
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Statistical Learning)}}
+    Let $\xi$ and $\eta$ be 2 random values with value in $\mathcal{X}$ and $\mathcal{Y}$ repectively, and let $\mu$ be the distribution of $(\xi,\eta)$. Let $l:\mathcal{X}\times\mathcal{Y}\times \mathbb{R}\rightarrow \mathbb{R}$ be a convex loss function and $\Phi:\mathcal{X}\rightarrow H$ be a feature map:
+    \begin{equation*}
+    \begin{aligned}
+        \min_{w\in\mathcal{H}} R(w) &= \int_{\mathcal{X}\times\mathcal{Y}} l(x, y, \brackd{w, \Phi(s)})\dby\mu(X, Y) \\ 
+        &= \mathbb{E}[l(\xi, \eta, \brackd{w, \Phi(s)})]
+    \end{aligned}
+    \end{equation*}
+    based on some sequence $(\xi_k,\eta_k)_{k\in\mathbb{N}}$ of independent copies of $(\xi, \eta)$. We assume:
+    \begin{itemize}
+        \item $l(x, y, \cdot)$ is $2$-Lipschitz continuous and $\mathbb{E}[l(\xi, \eta, 0)]<\infty$ 
+        \item $\mathbb{E}\brackb{\norm{\Phi(x)}^2 }\le\infty$ as we have $\mathbb{E}[k(\xi, \xi)]<\infty$
+    \end{itemize}
+    We will now check that the assumption for stochastic optimization holds, where we will set $\mathcal{Z}=\mathcal{X}\times\mathcal{Y}$, $F:H\times\mathcal{Z}\rightarrow \mathbb{R}$ and $F(w, z) = l(x, y, \brackd{w, \Phi(x)})$
+    \begin{itemize}
+        \item Let's consider the $F(\cdot, z) = l(x, y, \brackd{\cdot, \Phi(x)})$ and it is convex:
+        \begin{equation*}
+        \begin{aligned}
+            \abs{F(w_1, z) - F(w_2, z)} &= \abs{l(x, y, \brackd{w_1, \Phi(x)}) - l(x, y, \brackd{w_1, \Phi(x)})} \\
+            &\le 2\abs{\brackd{w_1-w_2, \Phi(x)}} \\
+            &\le 2\underbrace{\norm{\Phi(x)}}_{L(z)}\norm{w_1-w_2}
+        \end{aligned}
+        \end{equation*}
+        \item We have $F(0, \cdot) = l(\cdot, \cdot, 0) \in L^1(\mathcal{Z},\mu)$
+        \item For the subgradient, we have:
+        \begin{equation*}
+            \partial F(w, z) = \partial \underbrace{l(x, y, \brackd{w, \Phi(x)})}_{\subset \mathbb{R}}\underbrace{\Phi(x)}_{\in H} \subset H
+        \end{equation*}
+        as we have $\tilde{l}' : \mathcal{X}\times\mathcal{Y}\times \mathbb{R}\rightarrow \mathbb{R}$ or we have $\tilde{l}'(x, y, t)\in\partial l(x, y, t)$, thus we have:
+        \begin{equation*}
+            \tilde{\nabla}F(w, z) = \tilde{l}'(x, y, \brackd{w, \Phi(x)})\Phi(x) \in\partial F(w, z)
+        \end{equation*}
+        And so the third condition holds.
+        \item $\xi_k = (\xi_k, \eta_k)$ and so the final assumption holds.
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Statitical Learning Algorithm)}}
+    The algorithm:
+    \begin{equation*}
+        w_{k+1} = w_k - \gamma_k\tilde{l}'(\xi_n, \eta_n, \brackd{w_k, \Phi(\xi_k)})\Phi(\xi_k)
+    \end{equation*}
+    This isn't practical as $\mathcal{H}$ is $\infty$-dimension. However, we can have:
+    \begin{equation*}
+        g_{k+1}(x) = g_k(x)-\gamma_k\tilde{l}'(\xi_k, \eta_k, g_k(\xi_k))K(x,\xi_k)
+    \end{equation*}
+    Where $k(x, x')=\brackd{\Phi(x), \Phi(x')}$ is kernel function. 
+\end{definition}
+
+\begin{remark}
+    We let 
+    \begin{equation*}
+        \bar{w}_n = \bracka{\sum^k_{i=0}\gamma_i}^{-1}\bracka{\sum^k_{i=0}\gamma_iw_i} \qquad \bar{g}_n(x) = \brackd{\bar{w}_k, \Phi(x)} = \bracka{\sum^k_{i=0}\gamma_i}^{-1}\bracka{\sum^k_{i=1}\gamma_ig_i(x)}
+    \end{equation*}
+    We have:
+    \begin{itemize}
+        \item The risk of $g_k$ is $R(\bar{w}_k)$ and according to corollary, we have:
+        \begin{equation*}
+            R(\bar{w}_k) \rightarrow \inf_H R
+        \end{equation*}
+        provided that $\sum^\infty_{k=-\infty}\gamma_k=\infty$ and $(\sum^\infty_{i=0}\gamma_i)^{-1}(\sum^k_{i=0}\gamma_i^2)\rightarrow0$
+        \item Suppose that $S_*=\arg\min_\mathcal{H}R\ne\emptyset$ and let $D \ge d(s_0, S_*) $
+        \begin{itemize}
+            \item If $\gamma_k = \bar{\gamma}\sqrt{k+1}$ then:
+            \begin{equation*}
+                \mathbb{E}[R(\bar{w}_k)] -\min_HR\le\mathcal{O}\bracka{\frac{\log (k+1)}{\sqrt{k+1}}}
+            \end{equation*}
+            \item Let $k\in\mathbb{N}$ and let $(\gamma_i)_{1\le i\le k}=D/(B\sqrt{k+1})$ then:
+            \begin{equation*}
+                \mathbb{E}[R(\bar{w}_k)] -\min_\mathcal{H}R \le \frac{BD}{\sqrt{k+1}}
+            \end{equation*}
+            Where $B^2 = 4\mathbb{E}\brackb{\norm{\phi(\xi))}^2}$
+        \end{itemize}
+    \end{itemize}
+\end{remark}

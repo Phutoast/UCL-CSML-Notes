@@ -1,0 +1,402 @@
+\section{Estimation of Parameters}
+
+\subsection{Method of Moments}
+
+\begin{remark}
+    Given the set of data $X_1,\dots,X_n$ sampled from a known distribution family but unknown parameter $P(x|\theta)$, we would like to this parameter.
+\end{remark}
+
+\begin{definition}{\textbf{(Moments)}}
+    The $k$-th moment of probability is defined as $\mu_k = \mathbb{E}[X^k]$, where $X$ is random variable following distribution. The sample moment is:
+    \begin{equation*}
+        \hat{\mu}_k = \frac{1}{n}\sum^n_{i=1}X^k_i
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Method of Moments)}}
+    The method of moments estimates parameters by finding expression for them in terms of lowest possible order moments and substituting sample moments into the expression. Suppose there are $2$ parameters, which can be expressed in terms of $2$ moments as:
+    \begin{equation*}
+        \theta_1 = f_1(\mu_1,\mu_2)\qquad \theta_2=f_2(\mu_1,\mu_2)
+    \end{equation*}
+    Then method moments simply substitute the sample moment of the functions getting the parameter $\hat{\theta}_1, \hat{\theta}_2$.
+\end{definition}
+
+\begin{definition}{\textbf{(Sampling Distribution/Standard Error)}}
+    It is natural question to aks to the distribution of the estimate, which is called \emph{sampling distribution}, or the approximation to that distribution. The standard error is the standard deviation of sampling distribution. 
+\end{definition}
+
+\begin{example}
+    We will consider the use of method of moments in $3$ difference kinds of distribution:
+    \begin{itemize}
+        \item Poisson Distribution: This is simple as $\lambda = \mathbb{E}[X]$, so the parameter is set to:
+        \begin{equation*}
+            \hat{\lambda} = \bar{X} = \frac{1}{n}\sum^n_{i=1} X_i
+        \end{equation*}
+        To consider the sampling distribution, we have:
+        \begin{equation*}
+            p(\hat{\lambda} = n) = p(S = nv) = \frac{(n\lambda_0)^{nv}\exp(-n\lambda_0)}{(nv)!}
+        \end{equation*}
+        Since $S = \sum_iX_i$ is Poisson, the mean and variance are both $n\lambda_0$, so we have $\mathbb{E}[\hat{\lambda}] = 1/n \mathbb{E}[S] = \lambda_0$ and $\operatorname{var}(\hat{\lambda}) = \lambda_0/n$, and so the standard error is the square root of the variance.
+        \item \textbf{Normal Distribution:} We can see that $\mathbb{E}[X] = \mu$ and $\mathbb{E}[X^2] = \mu^2 + \sigma^2$, and so, we have:
+        \begin{equation*}
+        \begin{aligned}
+            &\hat{\mu} = \hat{\mu}_1 = \bar{X} \\
+            &\hat{\sigma}^2 = \hat{\mu}_2 - \hat{\mu}_1^2 = \frac{1}{n}\sum^n_{i=1}X_i^2 - \bar{X}^2 
+        \end{aligned}
+        \end{equation*}
+        We can see that the sampling distribution of $\bar{X}\sim\mathcal{N}(\mu, \sigma^2/n)$ and $n\hat{\sigma}^2/\sigma^2\sim\chi^2_{n-1}$. 
+        \item \textbf{Gamma Distribution:} We can see that the first $2$ moments are given as $\mathbb{E}[X] = \alpha/\lambda$ and $\mathbb{E}[X^2] = (\alpha(\alpha + 1))/\lambda^2$. From the second equation: $\mu_2 = \mu_1^2 + \mu_1/\lambda$, and so we have:
+        \begin{equation*}
+            \hat{\lambda} = \frac{\hat{\mu_1}}{\hat{\mu}_2 - \hat{\mu}_1^2} \qquad\qquad \hat{\alpha} = \frac{\hat{\mu}_1^2}{\hat{\mu}_2 - \hat{\mu}_1^2} 
+        \end{equation*}
+        The sampling distribution can be hard to find. We will have to use boostrapping to do this. 
+    \end{itemize}
+\end{example}
+
+\begin{definition}{\textbf{(Bootstrap)}}
+    We can samping \emph{with replacement} of the data, and we calculate the parameter via any mean. The distribution of the parameter is the approximation of the sampling distribution. This method is called bootstrap.
+\end{definition}
+
+\begin{definition}{\textbf{(Consistent)}}
+    Let $\hat{\theta}_n$ be an estimate of parameter $\theta$ based on sample of size $n$. Then $\hat{\theta}_n$ is said to be consistent in probability if $\hat{\theta}_n$ converges in probability to $\theta$ as $n$ appraoches infinity, that is for any $\varepsilon>0$:
+    \begin{equation*}
+        \mathbb{P}\bracka{\abs{\hat{\theta}_n - \theta} > \varepsilon}\rightarrow0 \quad \text{ as } \quad n \rightarrow\infty
+    \end{equation*}
+    The weak law of large number implies the sample moment converge in probability to population moment. 
+\end{definition}
+
+\subsection{Maximum Likelihood}
+
+\begin{definition}{\textbf{(Maximum Likelihood)}}
+    We will assume the data $X_i$ to be iid, and so the log-likelihood:
+    \begin{equation*}
+        l(\theta) = \log \prod^n_{i=1}p(X_i|\theta) = \sum^n_{i=1}\log f(X_i | \theta)
+    \end{equation*}
+\end{definition}
+
+
+\begin{example}
+    We will consider difference distributions and its maximum likelihood estimate:
+    \begin{itemize}
+        \item \textbf{Poisson Distribution:} The log-likelihood of the Poisson distribution is:
+        \begin{equation*}
+        \begin{aligned}
+            l(\lambda) &= \sum^n_{i=1}(X_i \log \lambda - \lambda - \log X_i!) = \log \lambda\sum^n_{i=1}X_i - n\lambda - \sum^n_{i=1}\log X_i!
+        \end{aligned}
+        \end{equation*}
+        We can see that its derivative is given as:
+        \begin{equation*}
+            l'(\lambda) = \frac{1}{\lambda} \sum^n_{i=1}X_i -n = 0
+        \end{equation*}
+        The MLE is equal to $\hat{\lambda} = \bar{X}$
+        \item \textbf{Normal Distribution:} The log-likelihood is given by 
+        \begin{equation*}
+        \begin{aligned}
+            l(\mu, \sigma^2) &= \log \prod^n_{i=1}\frac{1}{\sqrt{2\pi\sigma}} \exp\bracka{-\frac{(x_i-\mu)^2}{2\sigma^2}}  \\
+            &= -n\log\sigma - \frac{n}{2}\log2\pi - \frac{1}{2\sigma^2}\sum^n_{i=1}(X_i-\mu)^2
+        \end{aligned}
+        \end{equation*}
+        This leads to the following derivative:
+        \begin{equation*}
+            \frac{\partial l}{\partial\mu} = \frac{1}{\sigma^2}\sum^n_{i=1}(X_i-\mu) \qquad \frac{\partial l}{\partial\sigma} = -\frac{n}{\sigma}+ \sigma^{-3}\sum^n_{i=1}(X_i - \mu)^2
+        \end{equation*}
+        Setting the derivative to zero, and we have $\hat{\mu} = \bar{X}$ and we substitute the MLE for $\mu$ for $\sigma$ as we have $\hat{\sigma} = \sqrt{\frac{1}{n}\sum^n_{i=1}(X_i-\bar{X})^2}$. The sampling distribution is the same as method of moment. 
+        \item \textbf{Gamma Distribution:} The log-likelihood is given by:
+        \begin{equation*}
+        \begin{aligned}
+            l(\alpha,\lambda) &= \log\prod^n_{i=1}\frac{1}{\Gamma(\alpha)}\lambda^\alpha X_i^{\alpha-1}\exp(-\lambda X_i) \\
+            &= n\alpha\log\lambda + (\alpha-1)\sum^n_{i=1}\log X_i - \lambda\sum^n_{i=1}X_i - \lambda\sum^n_{i=1}X_i - n\log\Gamma(\alpha)
+        \end{aligned}
+        \end{equation*}
+        for $0\le x<\infty$. Now, we have the following derivative:
+        \begin{equation*}
+            \frac{\partial l}{\partial \alpha} = n\log \lambda + \sum^n_{i=1}\log X_i - n\frac{\Gamma'(\alpha)}{\Gamma} \qquad \frac{\partial l}{\partial\lambda} = \frac{n\alpha}{\lambda} - \sum^n_{i=1}X_i
+        \end{equation*}
+        Setting the second partial to zero as $\hat{\lambda} = (n\hat{\alpha})/(\sum^n_{i=1}X_i) = \hat{\alpha}/\bar{X}$. Now $\alpha$ can be solved by non-linear equation via iterative method:
+        \begin{equation*}
+            n\log\hat{\alpha} - n\log\bar{X} + \sum^n_{i=1}\log X_i - n\frac{\Gamma'(\hat{\alpha})}{\Gamma(\hat{\alpha})} = 0
+        \end{equation*}
+        The sampling distribution can be found by bootstrapping. 
+        \item \textbf{Multinomial-Cell Distribution:} We have the following log-likelihood to be:
+        \begin{equation*}
+            l(p_1,\dots,p_m) = \log \frac{n!}{\prod^m_{i=1} X_i!}\prod^m_{i=1}p_i^{X_i} = \log n! - \sum^m_{i=1}\log X_i! + \sum^m_{i=1}x_i\log p_i
+        \end{equation*}
+        Maximizing the likelihood would be subject to contraint as we have have the following Lagragian:
+        \begin{equation*}
+            \mathcal{L}(p_1,\dots,p_m) = \log n! - \sum^m_{i=1}\log x_i! + \sum^m_{i=1}x_i\log p_i + \lambda\bracka{\sum^m_{i=1}p_i - 1}
+        \end{equation*}
+        Setting the partial derivative to be equal to zero: 
+        \begin{itemize}
+            \item As we have the following system of equation: $\hat{p}_j = -x_j/\lambda $ for $j=1,\dots,m$ summing both equation as we have: $1 = -n/\lambda$ or $\lambda =-n$ and so $\hat{p}_j = x_j/n$. 
+            \item The sampling distribution of $\hat{p}_j$ is determined by the distribution of $x_j$, which is biomial.
+        \end{itemize}
+    \end{itemize}
+\end{example}
+
+\begin{theorem}
+    Under appropriate smoothness conditions on $f$, the MLE from an iid sample is consistent.
+\end{theorem}
+\begin{proof}
+    Consider maximizing the following values, given the $X_1,X_2,\dots,X_n \sim p(X|\theta_0)$:
+    \begin{equation*}
+        \frac{1}{n}l(\theta) = \frac{1}{n}\sum^n_{i=1}\log p(X_i | \theta)
+    \end{equation*}
+    as $n$ tends to infinity, the law of large number implies that:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{n}l(\theta) &\rightarrow \mathbb{E}_{X \sim p(X | \theta_0)}[\log p(X | \theta)] \\
+        &= \int p(x|\theta_0)\log p(x|\theta) \dby x
+    \end{aligned}
+    \end{equation*}
+    The $\theta$ that maximizes $l(\theta)$ should be closed to the $\theta$ that maximizes $\mathbb{E}[\log f(X|\theta)]$ (again not shown). We consider the derivative:
+    \begin{equation*}
+        \frac{\partial}{\partial \theta}\int p(x|\theta_0)\log p(x|\theta)\dby x = \int p(x|\theta)\frac{p(x|\theta_0)}{p(x|\theta)} \cfrac{\partial}{\partial \theta} \dby x
+    \end{equation*}
+    If $\theta=\theta_0$, this equation becomes:
+    \begin{equation*}
+        \int \frac{\partial}{\partial\theta}p(x|\theta_0)\dby x = \frac{\partial}{\partial \theta} \int p(x|\theta_0)\dby x = \frac{\partial}{\partial \theta}(1) = 0
+    \end{equation*}
+    This shows that $\theta_0$ is stationary and (hopefully) it is a maximum. The assumption of smoothness on $f$ must be strong enough to justify this. 
+\end{proof}
+
+\begin{lemma}
+    Define $I(\theta)$ by:
+    \begin{equation*}
+        I(\theta) = \mathbb{E}\brackb{\frac{\partial}{\partial \theta} \log p(X|\theta)}^2 = - \mathbb{E}\brackb{\frac{\partial^2}{\partial\theta^2}\log p(X|\theta)}
+    \end{equation*}
+    Under appropriate smoothness conditions on $p$, this can be expressed on the right-hand side.
+\end{lemma}
+\begin{proof}
+    Observe that $\int p(x|\theta)\dby x = 1$, and so we have, the following observation:
+    \begin{equation*}
+        \frac{\partial}{\partial\theta} \int p(X|\theta)\dby x = 0
+        \qquad \frac{\partial}{\partial\theta}p(x|\theta) = p(x|\theta)\brackb{\frac{\partial}{\partial\theta}\log p(x|\theta)}
+    \end{equation*}
+    Combinding this with identity, as we have (take the second derivative to be):
+    \begin{equation*}
+    \begin{aligned}
+        0 = \frac{\partial}{\partial\theta}\int p(x|\theta)\dby x &= \int \brackb{\frac{\partial}{\partial \theta}\log p(x|\theta)}p(x|\theta)\dby x \\
+        &= \int \brackb{\frac{\partial^2}{\partial\theta^2}\log p(x|\theta)}p(x|\theta)\dby x + \int \brackb{\frac{\partial}{\partial \theta}\log p(x|\theta)}^2p(x|\theta)\dby x \\
+    \end{aligned}
+    \end{equation*}
+    And so we have the lemma is proven.
+\end{proof}
+
+\begin{theorem}
+    Under smoothness condition on $f$, the probability distribution of $\sqrt{nI(\theta_0)}(\hat{\theta} - \theta_0)$ thends to a standard normal distribution
+\end{theorem}
+\begin{proof}
+    The following is sketch of proof. Consider the Taylor series expansion (of $l'(\hat{\theta})$), as we have:
+    \begin{equation*}
+    \begin{aligned}
+        0 = l'(\hat{\theta}) &\approx l'(\theta_0) + (\hat{\theta} - \theta_0)l''(\theta) \\
+        (\hat{\theta} - \theta_0)&\approx \frac{-l'(\theta_0)}{l''(\theta_0)} \\
+        \sqrt{n}(\hat{\theta} - \theta_0) &\approx\frac{-{n}^{-1/2}l'(\theta_0)}{n^{-1}l''(\theta_0)}
+    \end{aligned}
+    \end{equation*}
+    We consider the numeraor of this last expression. Its expectation is given as:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\brackb{n^{-1/2}l'(\theta_0)} = n^{-1/2}\sum^n_{i=1}\mathbb{E}\brackb{\frac{\partial}{\partial\theta}\log p(X_i | \theta_0)} = 0
+    \end{aligned}
+    \end{equation*}
+    As we have $\theta_0$, which is the fixed point (see thoerem above). Now, consider the variance of the quantity:
+    \begin{equation*}
+        \operatorname{var}\brackb{n^{-1/2} l'(\theta_0)} = \frac{1}{n}\sum^n_{i=1}\mathbb{E}\brackb{\frac{\partial^2}{\partial \theta^2} \log p(x_i | \theta_0) }^2 = I(\theta_0)
+    \end{equation*}
+    Consider the denominator to be. Together with the law of large number, the expression converges to:
+    \begin{equation*}
+        \frac{1}{n} l''(\theta_0) = \frac{1}{n}\sum^n_{i=1}\frac{\partial^2}{\partial\theta^2} \log p(x_i|\theta_0) \longrightarrow \mathbb{E}\brackb{\frac{\partial^2}{\partial\theta^2}\log p(x|\theta_0)} = -I(\theta_0)
+    \end{equation*}
+    Thus, we have:
+    \begin{equation*}
+        n^{1/2}(\hat{\theta} - \theta_0) \approx \frac{n^{-1/2}l'(\theta_0)}{I(\theta_0)}
+    \end{equation*}
+    We have the following mean and variance of the ratio to be:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{E}[n^{1/2}(\hat{\theta} - \theta_0)] \approx 0 \\
+        &\operatorname{var}[n^{1/2}(\hat{\theta} - \theta_0)] \approx \frac{I(\theta_0)}{I^2(\theta_0)} = \frac{1}{I(\theta_0)}
+    \end{aligned}
+    \end{equation*}
+    And so we have $\operatorname{var}(\hat{\theta} - \theta_0)\approx 1/(nI(\theta_0))$. 
+    % The CLT may be applied to $l'(\theta_0)$, which is the sum of iid random variables:
+    % \begin{equation*}
+    %     l'(\theta_0) =\sum^n_{i=1}\frac{\partial}{\partial\theta}\log f(x_i | \theta_0)
+    % \end{equation*}
+    Thus the equation is proven.
+\end{proof}
+
+\begin{remark}
+    For an iid sample, the MLE is the maximizer of the log-likelihood function $l(\theta) = \sum^n_{i=1}\log p(X_i|\theta)$ has the asymptotic variance that is given as:
+    \begin{equation*}
+        \frac{1}{nI(\theta_0)} = -\frac{1}{\mathbb{E}[l''(\theta_0)]}
+    \end{equation*}
+    When $\mathbb{E}[l''(\theta_0)]$ is large, meaning that $l(\theta)$ is changing very rapidly in a vincinity of $\theta_0$ and the variance of the maximizer is small. 
+\end{remark}
+
+\begin{remark}{\textbf{(Confidence Interval for Mean and Variance Estimate)}}
+    Consider the maximum likelihood estimate of $\mu$ and $\sigma^2$ from an iid normal sample to be:
+    \begin{equation*}
+        \hat{\mu} = \bar{X} \qquad \hat{\sigma}^2 = \frac{1}{n}\sum^n_{i=1}(X_i - \bar{X})^2
+    \end{equation*}
+    There are various confidence interval on each of the likelihood estimation as we have:
+    \begin{itemize}
+        \item Confidence interval of $\mu$ is based on:
+        \begin{equation*}
+            \frac{\sqrt{n}(\bar{X} - \mu)}{S} \sim t_{n-1} \qquad \text{ where } \qquad S^2 = \frac{1}{n-1}\sum^n_{i=1}(X_i-\bar{X})^2
+        \end{equation*}
+        Let $t_{n-1}(\alpha/2)$ denote the point beyound which $t$ distribution with $n-1$ degree of freedom has probability $\alpha/2$, to be:
+        \begin{equation*}
+            \mathbb{P}\bracka{-t_{n-1}(\alpha/2)\le \frac{\sqrt{n}(\bar{X} - \mu)}{S} \le t_{n-1}(\alpha/2)} = 1-\alpha
+        \end{equation*}
+        The inequality can be manipulated to yields:
+        \begin{equation*}
+            \mathbb{P}\bracka{\bar{X} - \frac{S}{\sqrt{n}} t_{n-1}(\alpha/2) \le \mu \le \bar{X} + \frac{S}{\sqrt{n}}t_{n-1}(\alpha/2) } = 1-\alpha
+        \end{equation*}
+        The probability that $\mu$ lies in the interval is $1-\alpha$. 
+        \item Let's consider the conditional interval $\sigma^2$, as we have the following distribution:
+        \begin{equation*}
+            \frac{n\hat{\sigma}^2}{\sigma^2} \sim \chi^2_{n-1}
+        \end{equation*}
+        Let $\chi^2_m(\alpha)$ denote the point beyound which the chi-square distribution with $m$ degree of freedom that has probability $\alpha$:
+        \begin{equation*}
+            \mathbb{P}\bracka{\chi^2_{n-1}(1-\alpha/2)\le \frac{n\hat{\sigma}^2}{\sigma^2} \le \chi^2_{n-1}(\alpha/2)} = 1-\alpha
+        \end{equation*}
+        Manipulation of the inequality yields:
+        \begin{equation*}
+            \mathbb{P}\bracka{\frac{n\hat{\sigma}^2}{\chi^2_{n-1}(\alpha/2)} \le \sigma^2 \le \frac{n\hat{\sigma}^2}{\chi^2(1-\alpha/2)}} = 1-\alpha
+        \end{equation*}
+        \item For a general maximum likelihood methods, one can consider the distribution of $\sqrt{nI(\hat{\theta})}(\hat{\theta} - \theta_0)$, where it is normally distributed, and so we have the following intervales:
+        \begin{equation*}
+            \mathbb{P}\bracka{-z(\alpha/2) \le \sqrt{nI(\hat{\theta})}(\hat{\theta}-\theta_0) \le z(\alpha/2) } \approx 1-\alpha
+        \end{equation*}
+        which we can yields the confidence interval, as we have:
+        \begin{equation*}
+            \mathbb{P}\bracka{ -\frac{z(\alpha/2)}{\sqrt{nI(\hat{\theta})}} \le \theta_0 \le \frac{z(\alpha/2)}{\sqrt{nI(\hat{\theta})}}  } 
+        \end{equation*}
+        \item For the estimation for \emph{random multinomial}. The counts are not iid, so the variance of the parameter estimate is of the form $1/[nI(\theta)]$ can't be used. It can be shown that:
+        \begin{equation*}
+            \operatorname{var}(\hat{\theta}) \approx \frac{1}{\mathbb{E}[l'(\theta_0)^2]} = -\frac{1}{\mathbb{E}[l''(\theta_0)]}
+        \end{equation*}
+        Please note that this is used to construct the confidence interval instead of above. 
+    \end{itemize}
+\end{remark}
+
+\subsection{Cramer-Rao Lower Bound}
+
+ \begin{definition}{\textbf{(Efficiency of Estimates)}}
+    Given $2$ estimates $\hat{\theta}$ and $\tilde{\theta}$ of a parameter $\theta$, the efficiency of $\hat{\theta}$ and $\tilde{\theta}$ is defined to be:
+    \begin{equation*}
+        \operatorname{eff}(\hat{\theta}, \tilde{\theta}) = \frac{\operatorname{var}(\tilde{\theta})}{\operatorname{var}(\hat{\theta})}
+    \end{equation*}
+ \end{definition}
+
+ \begin{theorem}
+    Let $X_1,\dots,X_n$ be iid with density function $p(x|\theta)$. Let $T = t(X_1,\dots,X_n)$ be unbiased estimate of $\theta$. Then under smoothness assumption on $p(x|\theta)$, we have:
+    \begin{equation*}
+        \operatorname{var}(T) \ge \frac{1}{nI(\theta)}
+    \end{equation*}
+ \end{theorem}
+ \begin{proof}
+    Let the following value:
+    \begin{equation*}
+    \begin{aligned}
+        Z &= \sum^n_{i=1}\frac{\partial}{\partial\theta}\log p(X_i|\theta) = \sum^n_{i=1}\frac{1}{p(X_i|\theta)} \frac{\partial}{\partial\theta } p(X_i|\theta)
+    \end{aligned}
+    \end{equation*}
+    We already show that $\mathbb{E}[Z] = 0$. Because the correlation coefficient of $Z$ and $T$ is less than or equal to $1$ in absolute value as:
+    \begin{equation*}
+        \operatorname{cov}^2(Z, T) \le \operatorname{var}(Z)\operatorname{var}(T)
+    \end{equation*}
+    Furthermore, we have shown that (from the lemma of $I(\theta)$):
+    \begin{equation*}
+        \operatorname{var}\brackb{\frac{\partial}{\partial\theta} \log p(X|\theta)} = I(\theta)
+    \end{equation*}
+    and so $\operatorname{var}(Z) = nI(\theta)$. The proof will be complete by showing that $\operatorname{cov}(Z, T) = 1$. Please note that (follows product rule):
+    \begin{equation*}
+        \bracka{\sum^n_{i=1}\frac{1}{p(X_i|\theta)} \frac{\partial}{\partial\theta } p(X_i|\theta)}\bracka{\prod^n_{j=1}f(x_j | \theta)} = \frac{\partial}{\partial\theta}\prod^n_{i=1}f(x_i|\theta)
+    \end{equation*}
+    Since $Z$ has mean of $0$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{cov}(Z, T) &= \mathbb{E}[ZT] \\
+        &= \int\cdots\int t(x_1,\dots,x_n) \brackb{\sum^n_{i=1}\frac{1}{p(X_i|\theta)} \frac{\partial}{\partial\theta } p(X_i|\theta)}\prod^n_{j=1}f(x_j|\theta)\dby x_j \\
+        &= \int\cdots\int t(x_1,\dots,x_n)\frac{\partial}{\partial\theta}\prod^n_{i=1}f(x_i|\theta) \dby x_i \\
+        &= \frac{\partial}{\partial\theta}\int\cdots\int t(x_1,\dots,x_n)\prod^n_{i=1}f(x_i|\theta) \dby x_i \\
+        &= \frac{\partial}{\partial\theta} \mathbb{E}[T] = \frac{\partial}{\partial\theta} \theta = 1
+    \end{aligned}
+    \end{equation*}
+    This proves the inequality as we have. 
+\end{proof}
+
+\begin{definition}{\textbf{(Efficient)}}
+    The unbiased estimate whose variance achieves this lower bound is said to be efficient. Since the asymptotic variance of maximum likelihood estimate is equal to lower bound, it is said to be asymptotically efficient. 
+\end{definition}
+
+\subsection{Sufficient Statistics}
+
+\begin{definition}
+    A statistics $T(X_1,\dots,X_n)$ is said to be sufficient for $\theta$ if conditional distribution of $X_1,\dots,X_n$ given $T=t$ doesn't depends on $\theta$ or any value of $t$. 
+\end{definition}
+
+\begin{theorem}
+    A necessary and sufficient condition for $T(X_1,\dots,X_n)$ to be sufficient for a parameter $\theta$ is the joint probability function factors in the form of:
+    \begin{equation*}
+        p(x_1,\dots,x_n|\theta) = g[T(x_1,\dots,x_n), \theta]h(x_1,\dots,x_n)
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We will consider it to be in discrete case. Suppsoe that the frequency function factors. To simplify notation, we let $\boldsymbol X$ denotes $(X_1,\dots,X_n)$ and $\boldsymbol x$ denotes $(x_1,\dots,x_n)$. We have:
+    \begin{equation*}
+    \begin{aligned}
+        P(T = t) &= \sum_{T(x) = t}P(\boldsymbol X=\boldsymbol x) \\
+        &= g(t, \theta) \sum_{T(x) = t} h(\boldsymbol x)
+    \end{aligned}
+    \end{equation*}
+    We then have:
+    \begin{equation*}
+        P(\boldsymbol X=\boldsymbol x | T = t) = \frac{P(\boldsymbol X = \boldsymbol x, T = t)}{P(T = t)} = \frac{h(\boldsymbol x)}{\sum_{T(\boldsymbol X) = t}h(\boldsymbol x)}
+    \end{equation*}
+    This conditional distributed doesn't depend on $\theta$. To show that the conclusion holds in other direction, suppose that the conditional distribution of $\boldsymbol X$ given $T$ is independent of $\theta$. Let:
+    \begin{equation*}
+        g(t, \theta) = P(T=t|\theta) \qquad h(\boldsymbol x) = P(\boldsymbol X=\boldsymbol x | T = t)
+    \end{equation*}
+    We then have:
+    \begin{equation*}
+    \begin{aligned}
+        P(\boldsymbol X = \boldsymbol x | \theta) &= P(T = t | \theta)P(\boldsymbol X=\boldsymbol x |T=t) \\
+        &= g(t, \theta)h(\boldsymbol x)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{corollary}
+    If $T$ is sufficient for $\theta$, the MLE is a function of $T$.
+\end{corollary}
+\begin{proof}
+    The likelihood is $g(T, \theta)h(\boldsymbol x)$, which depends on $\theta$ only through $T$. To maximize this quantity, we need to maximize $g(T,\theta)$
+\end{proof}
+
+\begin{theorem}{\textbf{(Rao-Blackwell Theorem)}}
+    Let $\hat{\theta}$ be an estimator of $\theta$ with $\mathbb{E}[\hat{\theta}^2]<\infty$ for all $\theta$. Suppose that $T$ is sufficient statistics for $\theta$, and let $\tilde{\theta} = \mathbb{E}[\hat{\theta} | T]$, then for all $\theta$:
+    \begin{equation*}
+        \mathbb{E}[\tilde{\theta} - \theta]^2 \le \mathbb{E}[\hat{\theta} - \theta]^2
+    \end{equation*}
+    The inequality is strict unless $\hat{\theta} = \tilde{\theta}$.
+\end{theorem}
+\begin{proof}
+    First note that from the property of iterated condition expectation, we have:
+    \begin{equation*}
+        \mathbb{E}[\tilde{\theta}] = \mathbb{E}[\mathbb{E}[\hat{\theta} | T]] = \mathbb{E}[\tilde{\theta}]
+    \end{equation*}
+    To compare the square-error, we will have to only consider their varince:
+    \begin{equation*}
+    \begin{aligned}
+        &\operatorname{var}(\hat{\theta}) = \operatorname{var}[\mathbb{E}[\hat{\theta} | T]] + \mathbb{E}[\operatorname{var}[\hat{\theta} | T]] \\
+        &= \operatorname{var}(\tilde{\theta}) + \mathbb{E}[\operatorname{var}(\hat{\theta} | T)]
+    \end{aligned}
+    \end{equation*}
+    Thus $\operatorname{var}(\hat{\theta}) > \operatorname{var}(\tilde{\theta})$ unless $\operatorname{var}(\hat{\theta} | T) = 0$, which is when $\hat{\theta}$ is a function of $T$, which implies $\hat{\theta} =\tilde{\theta}$.
+\end{proof}
+

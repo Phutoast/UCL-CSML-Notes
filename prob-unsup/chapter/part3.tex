@@ -1,0 +1,428 @@
+\section{Expectation-Maximization}
+
+\subsection{Methods}
+% Consider the exponential model as we have 
+% \begin{equation*}
+%    p(\boldsymbol x | \boldsymbol \theta) = f(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol T(\boldsymbol x))/Z(\boldsymbol \theta) 
+%\end{equation*}
+%Please note that $Z(\boldsymbol \theta)$ is $1/g(\boldsymbol \theta)$ from the eariler definition of exponential family. Consider the log-likelihood  terms that depend only on $\boldsymbol \theta$, given the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$ as we have:
+%\begin{equation*}
+%    l(\boldsymbol \theta) = \boldsymbol \theta^T \sum^N_{i=1}T(\boldsymbol x_i) - N\log Z(\boldsymbol \theta) + \const
+%\end{equation*}
+%Please note that the concave function. 
+
+\begin{remark}{\textbf{(General Form of The Objective)}} 
+    Now, we shall consider the latent variable model to be:
+    \begin{equation*}
+        p(\boldsymbol x|\boldsymbol z, \boldsymbol \theta_x) = \frac{f_x(\boldsymbol x)\exp(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z)^T \boldsymbol T_x(\boldsymbol x) )}{Z_x(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z))} \qquad p(\boldsymbol z|\boldsymbol \theta_x) = \frac{f_z(\boldsymbol z)\exp(\boldsymbol \theta_z^T\boldsymbol T_z(\boldsymbol z))}{Z_z(\boldsymbol \theta_z)}
+    \end{equation*}
+    and so the marginalization of the latent variable model is equal to: 
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta_x, \boldsymbol \theta_z) = \int \frac{f_x(\boldsymbol x)\exp(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z)^T \boldsymbol T_x(\boldsymbol x) )}{Z_x(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z))} \cdot \frac{f_z(\boldsymbol z)\exp(\boldsymbol \theta_z^T\boldsymbol T_z(\boldsymbol z))}{Z_z(\boldsymbol \theta_z)}\dby \boldsymbol z
+    \end{equation*}
+    And so, the log-likelihood over the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$ is equal to:
+    \begin{equation*}
+        l(\boldsymbol \theta_x, \boldsymbol \theta_z) = \sum^N_{i=1} \log \int \frac{f_x(\boldsymbol x_i)\exp(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z)^T \boldsymbol T_x(\boldsymbol x_i) )}{Z_x(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol z))} \cdot \frac{f_z(\boldsymbol z)\exp(\boldsymbol \theta_z^T\boldsymbol T_z(\boldsymbol z))}{Z_z(\boldsymbol \theta_z)}\dby \boldsymbol z
+    \end{equation*}
+\end{remark}
+
+\begin{theorem}{\textbf{(Jensen's Inequality)}}
+    Getting the set of weights $\brackc{\alpha_i}^N_{i=1}$ where $\sum\alpha_i = 1$ and $\brackc{x_i > 0}^N_{i=1}$, then we can show that:
+    \begin{equation*}
+        \log\bracka{\sum^N_{i=1} \alpha_ix_i} \ge \sum_{i=1}^N \alpha_i\log(x_i)
+    \end{equation*}
+    for the concave $f$ (and $\alpha_i$ is the probability measure). This also implies that: $f(\mathbb{E}_\alpha[x]) \ge \mathbb{E}_\alpha[f(x)]$ with the equality iff $f(x)$ is almost surely constant or linear support of $\alpha$.
+\end{theorem}
+
+\begin{definition}{\textbf{(Free Energy)}}
+    Consider the latent variable model again: Given the observed data $\mathcal{X} = \brackc{\boldsymbol x_i}$ and the set of latent variables $\mathcal{Z} = \brackc{\boldsymbol z_i}$ with the parameter $\boldsymbol \theta = \brackc{\boldsymbol \theta_x, \boldsymbol \theta_z}$:
+    \begin{equation*}
+        l(\boldsymbol \theta) = \log p(\mathcal{X}|\boldsymbol \theta) = \log \int p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)\dby \mathcal{Z}
+    \end{equation*}
+    We will consider the Jensen's inequality for arbitrary distribution $q(\mathcal{Z})$. We can find the lower bound:
+    \begin{equation*}
+    \begin{aligned}
+        l(\boldsymbol \theta) &= \log \int q(\mathcal{Z})\frac{p(\mathcal{Z},\mathcal{X} | \boldsymbol \theta)}{q(\mathcal{Z})}\dby \mathcal{Z} \ge \int q(\mathcal{Z})\log \frac{p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}{q(\mathcal{Z})}\dby \mathcal{Z} = F(q, \boldsymbol \theta)
+    \end{aligned}
+    \end{equation*}
+    We denote $F(q, \boldsymbol \theta)$ to be a free energy. 
+\end{definition}
+
+\begin{remark}{\textbf{(Other Form of Free Energy)}}
+    We can consider the free energy to be:
+    \begin{equation*}
+    \begin{aligned}
+        \int q(\mathcal{Z})\log \frac{p(\mathcal{Z} , \mathcal{X} | \boldsymbol \theta)}{q(\mathcal{Z})}\dby\mathcal{Z} &= \int q(\mathcal{Z}) \log p(\mathcal{Z} , \mathcal{X} | \boldsymbol \theta) \dby \mathcal{Z} - \int q(\mathcal{Z})\log q(\mathcal{Z})\dby \mathcal{Z} \\ 
+        &= \int q(\mathcal{Z})\log p(\mathcal{Z}, \mathcal{X}|\boldsymbol \theta)\dby \mathcal{Z} + H[q]
+    \end{aligned}
+    \end{equation*}
+    and so the free-energy is equal to $F(q, \boldsymbol \theta) = \brackd{\log p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{q(\mathcal{Z})} + H[q]$
+\end{remark}
+
+\begin{definition}{\textbf{(Expectation Maximization)}}
+    The EM-Step follows the following step to be:
+    \begin{itemize}
+        \item \emph{E-Step}: Optimize $F(q, \theta)$ with respected to $q(\mathcal{Z})$ as:
+        \begin{equation*}
+            q^{(k)}(\mathcal{Z}) = \argmax{q(\mathcal{Z})}F(q(\mathcal{Z}), \boldsymbol \theta^{(k-1)})
+        \end{equation*}
+        \item \emph{M-Step}: Optimize $F(q, \theta)$ with respected to $\boldsymbol \theta$ as:
+        \begin{equation*}
+            \boldsymbol \theta^{(k)} = \argmax{\boldsymbol \theta}F(q^{(k)}(\mathcal{Z}), \boldsymbol \theta) = \argmax{\boldsymbol \theta}\brackd{\log P(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{q^{(k)}(\mathcal{Z})}
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(Simplification of E-Step)}}
+    To consider the E-step, we have the following free-energy principle:
+    \begin{equation*}
+    \begin{aligned}
+        F(q, \boldsymbol \theta) &= \int q(\mathcal{Z})\frac{p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}{q(\mathcal{Z})}\dby\mathcal{Z} \\ 
+        &= \int q(\mathcal{Z})\frac{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta)p(\mathcal{X}|\boldsymbol \theta)}{q(\mathcal{Z})}\dby\mathcal{Z} \\ 
+        &= \int q(\mathcal{Z})\log p(\mathcal{X}|\theta)\dby\mathcal{Z} + \int q(\mathcal{Z})\log\frac{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta)}{q(\mathcal{Z})}\dby\mathcal{Z} \\ 
+        &= l(\boldsymbol \theta) - \operatorname{KL}[q(\mathcal{Z}) \| p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta) ]
+    \end{aligned}
+    \end{equation*}
+    where $l(\boldsymbol \theta)$ is the log-likelihood and to minimize the $q(\mathcal{Z})$ by making KL-divergence equal to $0$, when setting:
+    \begin{equation*}
+        q^{(k)}(\mathcal{Z}) = p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^{(k-1)}) 
+    \end{equation*}
+    Furthermore, we can see that after E-step the free energy is equal to likelihood. 
+\end{remark}
+
+\begin{theorem}{\textbf{(Improvement of EM)}}
+    The results $\theta$ given by EM step never decrease in the likelihood. 
+\end{theorem}
+\begin{proof}
+    We have the following chain of inequalities:
+    \begin{equation*}
+        l(\boldsymbol \theta^{(k-1)}) =_1 F(q^{(k)}, \boldsymbol \theta^{(k-1)}) \le_2 F(q^{(k)}, \boldsymbol \theta^{(k)}) \le_3 l(\boldsymbol \theta^{(k)})
+    \end{equation*}
+    Let's consider each step of the EM as we have:
+    \begin{enumerate}
+        \item The E-step gives free energy to the likelihood.
+        \item The M-step maximizes the free energy with respected to $\boldsymbol \theta$
+        \item $F\le l$ comes from the lower-bound property of the free energy.
+    \end{enumerate}
+    Thus the theorem is proved
+\end{proof}
+
+\begin{theorem}{\textbf{(Convergence of EM to Optimum)}}
+    The fixed point of the EM algorithm is the stationary point of log-likelihood $l(\boldsymbol\theta)$ and it is maxima.
+\end{theorem}
+\begin{proof}
+    Please note that the fixed point of the EM is when (M-step with complete E-step):
+    \begin{equation*}
+        \left. \frac{\partial }{\partial \boldsymbol \theta} \brackd{\log p(\mathcal{X}, \mathcal{Z}| \boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)}\right|_{\boldsymbol \theta^*} = \boldsymbol 0
+    \end{equation*}
+    Consider the log-likelihood, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        l(\boldsymbol \theta) &= \log p(\mathcal{X}|\boldsymbol \theta) = \brackd{\log p(\mathcal{X}|\boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)} \\
+        &= \brackd{\log\frac{p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta)}}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)} \\
+        &= \brackd{ p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)} - \brackd{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta) }_{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*) } \\
+    \end{aligned}
+    \end{equation*}
+    Consider the derivative with respected to $\boldsymbol \theta$ of the log-likelihood evaluated at $\boldsymbol \theta$ and we have:
+    \begin{equation*}
+    \begin{aligned}
+        \left.\frac{\partial}{\partial \boldsymbol \theta} l(\boldsymbol \theta)\right|_{\boldsymbol \theta^*} &= \left.\frac{\partial}{\partial \boldsymbol \theta} \brackd{ p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)}\right|_{\boldsymbol \theta^*} - \left.\frac{\partial}{\partial \boldsymbol \theta} \brackd{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta) }_{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*) }\right|_{\boldsymbol \theta^*} \\
+        &= \boldsymbol 0 - \left.\frac{\partial}{\partial \boldsymbol \theta} \brackd{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta) }_{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*) }\right|_{\boldsymbol \theta^*} = \boldsymbol 0
+    \end{aligned}
+    \end{equation*}
+    The second term is equal to $\boldsymbol 0$ as the KL-divergence is zero. Now, we are left to show that the second derivative is \correctquote{negative}, where we have:
+    \begin{equation*}
+        \left.\frac{\partial^2}{\partial^2 \boldsymbol \theta} l(\boldsymbol \theta)\right|_{\boldsymbol \theta^*} = \left.\frac{\partial^2}{\partial^2 \boldsymbol \theta} \brackd{ p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*)}\right|_{\boldsymbol \theta^*} - \left.\frac{\partial^2}{\partial^2 \boldsymbol \theta} \brackd{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta) }_{ p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta^*) }\right|_{\boldsymbol \theta^*}
+    \end{equation*}
+    The first term is negative due to the improvement of EM, now the second term is positive because it is the minimum of KL-divergence. And, the point $\boldsymbol \theta^*$ is minima.
+\end{proof}
+
+\begin{definition}{\textbf{(Partial M-Step and E-Step)}}
+    Let's start with the \emph{M-Step} first, as long as we increase the $F(q, \boldsymbol \theta)$ in the M-step, the theorem above still holds. And so, for partial M-step, after E-step, we have the following gradient update:
+    \begin{equation*}
+        \left.\frac{\partial}{\partial \boldsymbol \theta}\right|_{\boldsymbol \theta^{(k-1)}} \brackd{\log p(\mathcal{Z}, \mathcal{X} | \boldsymbol \theta)}_{p(\mathcal{Z} | \mathcal{X}, \boldsymbol \theta)} = \left.\frac{\partial}{\partial \boldsymbol \theta}\right|_{\boldsymbol \theta^{(k-1)}}  \log p(\mathcal{X}|\boldsymbol \theta)
+    \end{equation*}
+    For \emph{E-Step}, we can use the typical gradient based scheme on $q(\mathcal{Z})$ but the theorem above may not hold.
+\end{definition}
+
+\subsection{Practical}
+
+\begin{remark}{\textbf{(Useful Derivative Results)}}
+    Now, we are going to consider EM applied to the mixture of Gaussian that we have described above. There are some derivatives that would be useful in the future. Starting wthe the log-likelihood:
+    \begin{equation*}
+    \begin{aligned}    
+        l(\brackc{\boldsymbol \mu_i}^k_{i=1}, \brackc{\boldsymbol \Sigma_i}^k_{i=1}, \boldsymbol \pi) &= \sum^N_{i=1}\log\sum^k_{m=1} \pi_m \underbrace{\frac{1}{\sqrt{\abs{2\pi\boldsymbol \Sigma_m}}}\exp\brackc{-\frac{1}{2}(\boldsymbol x_i-\boldsymbol \mu)\boldsymbol \Sigma_m^{-1}(\boldsymbol x_i-\boldsymbol \mu)}}_{p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}\\
+        &= \sum^N_{i=1}\log\sum^k_{m=1}\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)
+    \end{aligned}
+    \end{equation*} 
+    where we denote $\boldsymbol \theta_m = \brackc{\brackc{\boldsymbol \mu_i}^k_{i=1}, \brackc{\boldsymbol \Sigma_i}^k_{i=1}}$. Now consider the derivatives of the log-likelihood with respected to both $\boldsymbol \mu_m$ and $\boldsymbol\Sigma_m$: Starting with outer derivatives, we have:
+    \begin{equation*}
+    \begin{aligned} 
+        \frac{\partial}{\partial\boldsymbol\theta_m}\sum^N_{i=1}\log\sum^k_{m=1}\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m) 
+        &= \sum^N_{i=1}\frac{\pi_m}{\sum^k_{m=1}\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)}\frac{\partial p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\partial\boldsymbol\theta_m} \\
+        &= \sum^N_{i=1}\underbrace{\frac{\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\sum^k_{m=1}\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)} }_{\gamma_{im}}\frac{\partial \log p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\partial\boldsymbol\theta_m} \\
+    \end{aligned}
+    \end{equation*}
+    Please remeber $\gamma_{im}$ as it is going to be useful later on. We are left to find the derivatives on the RHS, starting with the mean $\boldsymbol \mu_m$, which we can use the results from before:
+    \begin{equation*}
+        \frac{\partial \log p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\partial\boldsymbol\mu_m} = \boldsymbol \Sigma_m^{-1}(\boldsymbol x_i - \boldsymbol \mu_m)
+    \end{equation*}
+    Similarly for $\boldsymbol \Sigma^{-1}$ we have:
+    \begin{equation*}
+        \frac{\partial \log p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\partial\boldsymbol\Sigma_m} = \frac{1}{2}\Big[\boldsymbol \Sigma_m - (\boldsymbol x_i - \boldsymbol \mu_m)(\boldsymbol x_i - \boldsymbol \mu_m)^T\Big]
+    \end{equation*}
+    We can plug both into get the full derivative.
+\end{remark}
+
+\begin{proposition}{\textbf{(E-Step for mixture of Gaussian)}}
+    The E-step for mixture of Gaussian is done by setting:
+    \begin{equation*}
+        \gamma_{im}^{(t)} = \frac{\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\sum^k_{m=1}\pi_mp_m(\boldsymbol x_i ; \boldsymbol \theta_m)} 
+    \end{equation*}
+    This follows directly from the Bayes' rule. 
+\end{proposition}
+
+\begin{proposition}{\textbf{(M-Step for mixture of Gaussian)}}
+    The M-step for mixture of Gaussian is done by setting:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol \mu^{(t)}_m = \frac{1}{N_m}\sum^N_{i=1}\gamma_{im}^{(t)}\boldsymbol x_i \\
+        &\boldsymbol \Sigma^{(t)}_m = \frac{1}{N_m}\sum^N_{i=1}\gamma_{im}^{(t)}(\boldsymbol x_i - \boldsymbol \mu_m)(\boldsymbol x_i-\boldsymbol \mu_m)^T \\
+        &\pi_m^{(t)} = \frac{N_m}{N}
+    \end{aligned}
+    \end{equation*}
+    where $N_m = \sum^N_{i=1}\gamma_{im}^{(t)}$.
+\end{proposition}
+\begin{proof}
+    Setting the derivative of log-likelihood to zero for $\boldsymbol \mu_m$ and $\boldsymbol \Sigma_m$, which are:
+    \begin{equation*}
+        \frac{\partial l}{\partial\boldsymbol\mu_m} = \sum^N_{i=1}\gamma_{im}\boldsymbol \Sigma_m^{-1}(\boldsymbol x_i - \boldsymbol \mu_m) \qquad \quad
+        \frac{\partial l}{\partial\boldsymbol\Sigma_m} = \frac{1}{2}\sum^N_{i=1}\gamma_{im}\Big[\boldsymbol \Sigma_m - (\boldsymbol x_i - \boldsymbol \mu_m)(\boldsymbol x_i - \boldsymbol \mu_m)^T\Big]
+    \end{equation*}
+    with simple rearrangement, we have the required update. We are left with $\pi^{(t)}_m$ as we required the constriant so that $\sum^k_{m=1}\pi^{(t)}_m = 1$. We have the following Lagragian:
+    \begin{equation*}
+    \begin{aligned} 
+        \frac{\partial}{\partial \pi_m} \Bigg( &\sum^N_{i=1}\log\sum^k_{m=1}\pi_m p_m(\boldsymbol x_i ; \boldsymbol \theta_m) - \lambda \brackb{\sum^k_{m=1}\pi_m - 1} \Bigg) \\
+        &= \sum^N_{i=1}\frac{p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\sum^k_{m=1}\pi_m p_m(\boldsymbol x_i ; \boldsymbol \theta_m)} + \lambda
+    \end{aligned}
+    \end{equation*}
+    Setting this to zero, and we have:
+    \begin{equation*}
+    \begin{aligned} 
+        &\sum^N_{i=1}\frac{p_m(\boldsymbol x_i ; \boldsymbol \theta_m)}{\sum^k_{m=1}\pi_m p_m(\boldsymbol x_i ; \boldsymbol \theta_m)} + \lambda = 0\\
+        \implies&\sum^k_{m=1}\sum^N_{i=1}\frac{p_m(\boldsymbol x_i ; \boldsymbol \theta_m)\pi_m}{\sum^k_{m=1}\pi_m p_m(\boldsymbol x_i ; \boldsymbol \theta_m)} + \lambda\sum^k_{m=1}\pi_m = 0\\
+        \implies&N+ \lambda = 0\\
+    \end{aligned}
+    \end{equation*}
+    and so, we have $\lambda = -N$. Now we simply times $\pi_k$ on both side of the original derivative and we get the result. 
+\end{proof}
+
+\begin{remark}{\textbf{(Connection between K-Mean and Gaussian Mixture Model)}}
+    If we consider $\phi_m = 1/k$ and $\boldsymbol \Sigma_m = \sigma^2I$ where $\sigma^2\rightarrow0$, the leads us to the responsibility:
+    \begin{equation*}
+        r_{im} = \delta\Big( m, \argmin{l} \norm{\boldsymbol x_i - \boldsymbol \mu_l}^2 \Big)
+    \end{equation*}
+    We find the data in which it is closest to the mean, which we allocate the weight to be $1$ and $0$ for all others. Now, we simply have to update the mean (M-step), which is given by:
+    \begin{equation*}
+        \boldsymbol \mu_m = \frac{\sum_i \gamma_{im}\boldsymbol x_i}{\sum_i \boldsymbol x_i}
+    \end{equation*}
+    This is exactly the K-mean algorithm. 
+\end{remark}
+
+\begin{remark}{\textbf{(EM for Factor Analysis)}}
+    Now, we are interested in training the factor analysis using the EM algorithm. Recall that factor analysis consists of the following model:
+    \begin{equation*}
+        p(\boldsymbol z) = \mathcal{N}(\boldsymbol z | \boldsymbol 0,\boldsymbol  I) \qquad p(\boldsymbol x|\boldsymbol z) = \mathcal{N}(\boldsymbol x | \boldsymbol W\boldsymbol z, \Psi)
+    \end{equation*}
+    Furthermore, we are going to assume that $\boldsymbol\Psi \in \mathbb{R}^{D\times D}$ where it is a diagonal matrix with values $\brackc{\psi_{ii}}^D_{i=1}$. And so recall that the marginal distribution, which is:
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta) = \mathcal{N}(\boldsymbol x | \boldsymbol 0, \Psi + \boldsymbol W\boldsymbol W^T)
+    \end{equation*}
+    We can see that the model parameter is $\boldsymbol \theta = \brackc{\boldsymbol W, \boldsymbol \Psi}$. Now let's recall the EM algorithm, and see what we have to do:
+    \begin{itemize}
+        \item E-Step: We have to find the posterior distribution of each latent variable that corresponds to each data point in dataset $\brackc{\boldsymbol x_i}^N_{i=1}$:
+        \begin{equation*}
+            q_i^{(t)}(\boldsymbol z_i) = p(\boldsymbol z_i | \boldsymbol x_i, \boldsymbol \theta^{(t-1)})
+        \end{equation*}
+        \item M-Step: We have to find $\boldsymbol \theta^{(t)}$ as we have:
+        \begin{equation*}
+        \begin{aligned} 
+            \argmax{\boldsymbol \theta} F(q^{(t)}_i, \boldsymbol \theta) = \argmax{\boldsymbol \theta} \sum_{i=1}^N \int q_i^{(t)}(\boldsymbol z_i) \Big[ \log p(\boldsymbol z_i|\boldsymbol \theta) + \log p(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \theta) \Big]\dby \boldsymbol z_i
+        \end{aligned}
+        \end{equation*}
+    \end{itemize}
+\end{remark}
+
+\begin{proposition}{\textbf{(E-Step for Factor Analysis)}}
+    Finding the posterior of $\boldsymbol z_i$ for the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$, is:
+    \begin{equation*}
+        p(\boldsymbol z_i | \boldsymbol x_i) = \mathcal{N}(\boldsymbol z_i | \boldsymbol \Sigma^{-1}\boldsymbol W^T\boldsymbol \Psi^{-1}(\boldsymbol x_i, \boldsymbol \Sigma^{-1})
+    \end{equation*}
+    where $\boldsymbol \Sigma = \boldsymbol I + \boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W$. This is the old result from PPCA that we have derived eariler. We denote the mean to be $\boldsymbol \mu_i = \boldsymbol \Sigma^{-1}\boldsymbol W^T\boldsymbol \Psi^{-1}(\boldsymbol x_i)$.
+\end{proposition}
+
+\begin{proposition}{\textbf{(M-Step for Factor Analysis)}}
+    The M-Step update of the factor analysis is given by:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol W = \bracka{\sum_{i=1}^N \boldsymbol x_i\boldsymbol \mu_i^T}\bracka{\sum_{i=1}^N \boldsymbol \mu_i\boldsymbol \mu_i^T + N\boldsymbol \Sigma}^{-1} \qquad
+        &\boldsymbol \Psi = \boldsymbol W\boldsymbol \Sigma\boldsymbol W^T  + \frac{1}{N}\sum^N_{i=1} (\boldsymbol x_i - \boldsymbol W\boldsymbol \mu_i)(\boldsymbol x_i - \boldsymbol W\boldsymbol \mu_i)^T
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    M-step of the Factor analysis, we are interested into find the variables $\boldsymbol \theta$ such that
+    \begin{equation*}
+        \argmax{\boldsymbol \theta} F(q, \boldsymbol \theta) = \sum_{i=1}^N\brackd{\log p(\boldsymbol z_i | \boldsymbol \theta) + \log p(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \theta)}_{q_i(\boldsymbol z_i)}
+    \end{equation*}
+    Now let's consoder the sum of the log, and so we have:
+    \begin{equation*}
+    \begin{aligned}
+        \log p(\boldsymbol z_i | \boldsymbol \theta) + \log p(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \theta) &= -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}(\boldsymbol x_i - \boldsymbol W\boldsymbol z_i)^T\boldsymbol \Psi^{-1}(\boldsymbol x_i - \boldsymbol W\boldsymbol z_i) + \const \\
+        &= -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i + \boldsymbol z_i^T\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i \Big] + \const \\
+        &= -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i + \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i\boldsymbol z_i^T] \Big] + \const \\
+    \end{aligned}
+    \end{equation*}
+    Now, we consider the expectation over $q^{(t)}_i(\boldsymbol z_i)$ as we now have:
+    \begin{equation*}
+    \begin{aligned}
+        \langle\log p(\boldsymbol z_i | \boldsymbol \theta) &+ \log p(\boldsymbol x_i | \boldsymbol z_i, \boldsymbol \theta)\rangle_{q^{(t)}_i(\boldsymbol z_i)} \\
+        &= \brackd{-\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i + \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol z_i\boldsymbol z_i^T] \Big]}_{q^{(t)}_i(\boldsymbol z_i)} \\
+        &= -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\brackd{\boldsymbol z_i}_{q^{(t)}_i(\boldsymbol z_i)} + \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W\brackd{\boldsymbol z_i\boldsymbol z_i^T}_{q^{(t)}_i(\boldsymbol z_i)}] \Big] \\
+        &= -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol \mu_i + \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma)] \Big] \\
+    \end{aligned}
+    \end{equation*}
+    Using the expectation over the Gaussian distribution to be $\brackd{\boldsymbol z_i} = \boldsymbol \mu_i$ and $\brackd{\boldsymbol z_i\boldsymbol z_i^T} = \boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma$. Now, let's consider the derivative with respected to $\boldsymbol W$ and $\boldsymbol \Psi^{-1}$:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{2}\frac{\partial}{\partial\boldsymbol W} &\sum_{i=1}^N \Big[2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol \mu_i - \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma)] \Big] \\
+        &= \frac{1}{2}\sum_{i=1}^N \brackb{2\frac{\partial}{\partial\boldsymbol W}\operatorname{Tr}[\boldsymbol W\boldsymbol \mu_i\boldsymbol x_i^T\boldsymbol \Psi^{-1}] - \frac{\partial}{\partial\boldsymbol W}\operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma)] } \\
+        &= \frac{1}{2}\sum_{i=1}^N \brackb{2\boldsymbol \Psi^{-1}\boldsymbol x_i\boldsymbol \mu_i^T - 2\bracka{\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma) } } \\
+        &= \boldsymbol \Psi^{-1}\brackb{\sum_{i=1}^N \boldsymbol x_i\boldsymbol \mu_i^T - \boldsymbol W\bracka{\sum_{i=1}^N \boldsymbol \mu_i\boldsymbol \mu_i^T + N\boldsymbol \Sigma}}  \\
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative to zero and we yields:
+    \begin{equation*}
+        \boldsymbol W = \bracka{\sum_{i=1}^N \boldsymbol x_i\boldsymbol \mu_i^T}\bracka{\sum_{i=1}^N \boldsymbol \mu_i\boldsymbol \mu_i^T + N\boldsymbol \Sigma}^{-1}
+    \end{equation*}
+    Let's consider the case for $\boldsymbol \Psi^{-1}$, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial\boldsymbol \Psi^{-1}}\sum^N_{i=1}&\bracka{ -\frac{1}{2}\log\abs{\boldsymbol \Psi} - \frac{1}{2}\Big[ \boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol \mu_i + \operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma)] \Big]} \\ 
+        &= \begin{aligned}[t]
+            \frac{1}{2}\sum^N_{i=1}\Bigg(-\frac{\partial}{\partial\boldsymbol \Psi^{-1}} \log\abs{\boldsymbol \Psi} &- \frac{\partial}{\partial\boldsymbol \Psi^{-1}}\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol x_i + 2\frac{\partial}{\partial\boldsymbol \Psi^{-1}}\boldsymbol x_i^T\boldsymbol \Psi^{-1}\boldsymbol W\boldsymbol \mu_i \\
+            &- \frac{\partial}{\partial\boldsymbol \Psi^{-1}}\operatorname{Tr}[\boldsymbol W^T\boldsymbol \Psi^{-1}\boldsymbol W(\boldsymbol \mu_i\boldsymbol \mu_i^T + \boldsymbol \Sigma)]\Bigg)  \\  
+        \end{aligned} \\
+        &= \begin{aligned}[t]    
+            \frac{1}{2}\sum^N_{i=1}\Bigg( \boldsymbol \Psi - \boldsymbol x_i\boldsymbol x_i^T + 2\boldsymbol x_i\boldsymbol \mu_i^T\boldsymbol W^T - \boldsymbol W\boldsymbol \mu_i\boldsymbol \mu_i^T\boldsymbol W^T - \boldsymbol W\boldsymbol \Sigma\boldsymbol W^T\Bigg)\\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative to zero, and we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{1}{2}\sum^N_{i=1}\Bigg( \boldsymbol \Psi - \boldsymbol x_i\boldsymbol x_i^T + 2\boldsymbol x_i\boldsymbol \mu_i^T\boldsymbol W^T - \boldsymbol W\boldsymbol \mu_i\boldsymbol \mu_i^T\boldsymbol W^T - \boldsymbol W\boldsymbol \Sigma\boldsymbol W^T\Bigg) = 0 \\
+        \implies& \begin{aligned}
+            N\boldsymbol \Psi - N\boldsymbol W\boldsymbol \Sigma\boldsymbol W^T - \sum^N_{i=1} \Big[ \boldsymbol x_i\boldsymbol x_i^T - 2\boldsymbol x_i\boldsymbol \mu_i^T\boldsymbol W^T + \boldsymbol W\boldsymbol \mu_i\boldsymbol \mu_i^T\boldsymbol W^T \Big] = 0
+        \end{aligned} \\
+        \implies& \begin{aligned}
+            \boldsymbol \Psi = \boldsymbol W\boldsymbol \Sigma\boldsymbol W^T  + \frac{1}{N}\sum^N_{i=1} (\boldsymbol x_i - \boldsymbol W\boldsymbol \mu_i)(\boldsymbol x_i - \boldsymbol W\boldsymbol \mu_i)^T
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Which is the result as required. 
+\end{proof}
+
+\subsection{Additional EM Methods}
+
+\begin{remark}
+    This is going to be more generalized version of EM as we may dealing with the exponential family, which occures for both latent variable and the observable. 
+\end{remark}
+
+\begin{proposition}
+    Given the exponential family of the form:
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta) = \frac{f(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol T(\boldsymbol x))}{Z(\boldsymbol \theta)}
+    \end{equation*}
+    We can show that the 
+    \begin{equation*}
+        \frac{\partial}{\partial \boldsymbol \theta} \log Z(\boldsymbol \theta) = \brackd{T(\boldsymbol x)}_{p(\boldsymbol x | \boldsymbol \theta)}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial \boldsymbol \phi} \log Z(\boldsymbol \phi) &= \frac{1}{Z(\boldsymbol \phi)} \frac{\partial}{\partial \boldsymbol \phi} Z(\boldsymbol \phi) \\
+        &= \frac{1}{Z(\boldsymbol \phi)} \frac{\partial}{\partial\boldsymbol \phi}\iint f(\boldsymbol x,\boldsymbol z)\exp\Big\{ \boldsymbol \theta^T \boldsymbol T(\boldsymbol x) \Big\}\dby \boldsymbol x\dby\boldsymbol z \\
+        &= \iint \frac{1}{Z(\boldsymbol \phi)}  f(\boldsymbol x,\boldsymbol z)\frac{\partial}{\partial\boldsymbol \phi}\exp\Big\{\boldsymbol \theta^T\boldsymbol T(\boldsymbol x)\Big\}\dby \boldsymbol x\dby\boldsymbol z \\
+        &= \iint \frac{1}{Z(\boldsymbol \phi)}  f(\boldsymbol x,\boldsymbol z)\exp\Big\{\boldsymbol \theta^T\boldsymbol T(\boldsymbol x)\Big\}\boldsymbol T(\boldsymbol x)\dby \boldsymbol x\dby\boldsymbol z \\
+        &= \brackd{T(\boldsymbol x)}_{p(\boldsymbol x| \boldsymbol \theta)}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(EM For Exponential Family)}}
+    We now consider the \emph{joint} probability distribution over $\boldsymbol x$ and $\boldsymbol z$ to be an exponential family, now we have:
+    \begin{equation*}
+        p(\boldsymbol x, \boldsymbol z | \boldsymbol \phi) = \frac{f(\boldsymbol x, \boldsymbol z) \exp\Big(\boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z)^T\boldsymbol T(\boldsymbol x, \boldsymbol z)\Big) }{Z(\boldsymbol \phi)}
+    \end{equation*}
+    Let's consider the free-energy (consider only terms that depends on $\boldsymbol \phi$), using the previous result:
+    \begin{equation*}
+    \begin{aligned}
+        F(q, \boldsymbol \phi) &= \int q(\boldsymbol z) \log P(\boldsymbol x, \boldsymbol z | \boldsymbol \phi) \dby \boldsymbol z + H[q] \\
+        &= \int q(\boldsymbol z) \Big[ \boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z) ^T\boldsymbol T(\boldsymbol x, \boldsymbol z) - \log Z(\boldsymbol \phi) \Big]\dby \boldsymbol z + \const \\
+        &=  \boldsymbol\phi(\boldsymbol \theta_x, \boldsymbol \theta_z)^T\brackd{T(\boldsymbol x, \boldsymbol z)}_{q(\boldsymbol z)} - \log Z(\boldsymbol \phi) \\
+    \end{aligned}
+    \end{equation*}
+    For the EM algorithm, we have the following:
+    \begin{itemize}
+        \item For \emph{E-Step}, we only need to compute the sufficient statistics under the distribution $q(\boldsymbol z)$. 
+        \item For \emph{M-step}, we solve for the following equation, where we use the derivative from above:
+        \begin{equation*}
+            \frac{\partial F}{\partial \boldsymbol \phi} = \brackd{T(\boldsymbol x, \boldsymbol z)}_{q(\boldsymbol z)} - \brackd{T(\boldsymbol x, \boldsymbol z)}_{p(\boldsymbol x, \boldsymbol z | \boldsymbol \phi)} =\boldsymbol 0
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(EM For Exponential Family Mixture)}}
+    We consider a short-hand version where we consider the 1-hot vector i.e for the mixture component $m$, we have:
+    \begin{equation*}
+        s_i = m \iff \boldsymbol s_i = [0,0,\dots, \underbrace{1}_\text{m-th position},\dots, 0]^T 
+    \end{equation*}
+    To compute the components, we consider the \correctquote{list} of parameters, which is a matrix $\boldsymbol\Theta = [\boldsymbol \theta_m]$ (has the size of $\mathbb{R}^{D\times M}$). The log-likelihood is the given by:
+    \begin{equation*}
+    \begin{aligned}
+        \log p\bracka{\brackc{\boldsymbol x_i}^N_{i=1}, \brackc{\boldsymbol s_i}^N_{i=1}} &= \sum^N_{i=1} \log \bracka{\pi_{i s_i} \brackb{\frac{f(\boldsymbol x_i)\exp\bracka{\boldsymbol \theta_{s_i}^T\boldsymbol T(\boldsymbol x_i)}}{Z(\boldsymbol\theta_{s_i})}}} \\
+        &= \sum^N_{i=1}\brackb{ \log \pi_{i s_i} + \boldsymbol \theta_{s_i}^T\boldsymbol T(\boldsymbol x_i) - \log Z(\boldsymbol\theta_{s_i})} + \text{const} \\
+        &= \sum^N_{i=1}\brackb{ (\log \boldsymbol \pi)^T\boldsymbol s_i + (\boldsymbol \Theta\boldsymbol s_i)^T\boldsymbol T(\boldsymbol x_i) - \boldsymbol s_i^T \log Z(\boldsymbol\Theta)} + \text{const}
+    \end{aligned}
+    \end{equation*}
+    where $Z(\boldsymbol\Theta)$ is the normalizing factor of each component, so it has the size of $M$. If we were to consider the EM-algorithm for this, we have:
+    \begin{itemize}
+        \item E-step, we calculate the expectation over the latent variable, which gives us:
+        \begin{equation*}
+            \gamma_{im} = \sum^N_{i=1}\brackd{\boldsymbol s_i}_p \qquad \sum^N_{i=1}\boldsymbol T(\boldsymbol x_i)\brackd{\boldsymbol s_i^T}_p
+        \end{equation*}
+        \item M-step, maximizing the log-joint probability, we have the following solutions (to the derivative):
+        \begin{equation*}
+            \boldsymbol \pi^{(k+1)} \propto \sum^N_{i=1}\brackd{\boldsymbol s_i}_p \qquad \brackd{\boldsymbol T(\boldsymbol x_i) \left| \boldsymbol \theta^{(k+1)}_m \right.} = \frac{\sum^N_{i=1} \boldsymbol T(\boldsymbol x_i)\brackd{[\boldsymbol s_i]_m}_p }{\sum^N_{i=1} \brackd{[\boldsymbol s_i]_m}_p}
+        \end{equation*}
+    \end{itemize}
+    Thinking of this as the Gaussian mixture model, where we also have similar form.
+\end{remark}
+
+\begin{remark}{\textbf{(EM for MAP)}}
+    Recall the probability distribution over the exponential model; however, we also added the prior over the parameters:
+    \begin{equation*}
+        p(\boldsymbol x, \boldsymbol z | \boldsymbol \phi) = \frac{f(\boldsymbol x, \boldsymbol z) \exp\Big( \boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z) ^T\boldsymbol T(\boldsymbol x, \boldsymbol z)\Big) }{Z(\boldsymbol \phi)} \qquad\quad p(\boldsymbol \phi | \nu, \boldsymbol \tau) = \frac{F(\nu, \boldsymbol \tau)\exp\Big( \boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z)^T\boldsymbol\tau \Big)}{Z(\boldsymbol\phi)^\nu}
+    \end{equation*}
+    To consider the free-energy over the dataset $\mathcal{X}$ and set of latent variables $\mathcal{Z}$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        F(q, \boldsymbol \phi) &= \int q(\boldsymbol z) \log P(\mathcal{X}, \mathcal{Z}, \boldsymbol \phi) \dby \boldsymbol z + H[q] \\
+        &= \int q(\mathcal{Z}) \brackb{ \boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z) ^T\bracka{\boldsymbol\tau + \sum^N_{i=1}\boldsymbol T(\boldsymbol x_i, \boldsymbol z_i)} - (N+\nu)\log Z(\boldsymbol \phi) }\dby \mathcal{Z} + \const \\
+        &=  \boldsymbol \phi(\boldsymbol \theta_x, \boldsymbol \theta_z) ^T\bracka{\boldsymbol\tau + \sum^N_{i=1}\brackd{\boldsymbol T(\boldsymbol x_i, \boldsymbol z_i)}_{q(\boldsymbol z_i)}} - (N+\nu)\log Z(\boldsymbol \phi) + \const
+    \end{aligned}
+    \end{equation*}
+    Now, we carry on with the EM step as usual. 
+\end{remark}

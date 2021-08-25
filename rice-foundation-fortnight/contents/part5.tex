@@ -1,0 +1,549 @@
+\section{Comparing Two Samples}
+
+\subsection{Comparing Two Independent Samples}
+
+\begin{remark}{\textbf{(Setting)}}
+    We will assume the sample $X_1,\dots,X_n \sim \mathcal{N}(\mu_X, \sigma^2)$ as the control group and we have $Y_1,\dots,Y_m \sim \mathcal{N}(\mu_Y, \sigma^2)$ as the group after receives treatment. The effect of the treatment is characterized by the differences $\mu_X - \mu_Y$ with the natural estimate $\bar{X}-\bar{Y}$.
+\end{remark}
+
+\begin{remark}{\textbf{(Confidence Interval)}}
+    As $\bar{X}-\bar{Y}$ is expressed as a linear combination of independent normally distributed random variable is:
+    \begin{equation*}
+        \bar{X} - \bar{Y} \sim\mathcal{N}\brackb{\mu_X - \mu_Y , \sigma^2\bracka{\frac{1}{n} + \frac{1}{m}}}
+    \end{equation*}
+    If we know $\sigma^2$, where the confidence interval for $\mu_X - \mu_Y$ could be based on:
+    \begin{equation*}
+        Z = \cfrac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sigma\sqrt{\cfrac{1}{n} + \cfrac{1}{m}}}
+    \end{equation*}
+    This leads to the confidence interval, which is of the form of $(\bar{X} - \bar{Y}) \pm z(\alpha/2)\sigma\sqrt{\frac{1}{m} + \frac{1}{n}}$. 
+\end{remark}
+
+\begin{definition}{\textbf{(Pooled Sample Variance)}}
+    Generally, $\sigma^2$ will not be known and must be estimated from the data by calculating pooled sample variance:
+    \begin{equation*}
+        s_p^2 = \frac{(n-1)s_X^2 + (m-1)s_Y^2}{m+n-2}
+    \end{equation*}
+    where $s_X^2 = 1/(n-1)\sum^n_{i=1}(X_i - \bar{X})^2$ and similarly for $s_Y^2$, and so $s_p^2$ is a weighted average of sample variance $X$ and $Y$ with weights propotional to degree of freedom. 
+\end{definition}
+
+\begin{theorem}
+    Suppose that $X_1,\dots,X_n \sim \mathcal{N}(\mu_X, \sigma^2)$ and $Y_1,\dots,Y_m \sim \mathcal{N}(\mu_Y, \sigma^2)$, and that $Y_i$ are independent of $X_i$. The statistics:
+    \begin{equation*}
+        t = \cfrac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{s_p\sqrt{\cfrac{1}{n} + \cfrac{1}{m}}}
+    \end{equation*}
+    This follows a $t$-distribution with $m+n-2$ degree of freedom. 
+\end{theorem}
+\begin{proof}
+    We note that $(n-1)s_X^2/\sigma^2 \sim \chi^2_{n-1}$ and $(m-1)s_Y^2/\sigma^2\sim \chi^2_{m-1}$. Both are independent as $X_i$ and $Y_i$ are. Their sum is $\chi^2_{m+n-2}$ degree of freedom. We express the statistics as the ratio $U/V$, where:
+    \begin{equation*}
+    \begin{aligned}
+        &U = \cfrac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sigma\sqrt{\cfrac{1}{n} + \cfrac{1}{m}}} \\
+        &V = \sqrt{\brackb{\frac{(n-1)\sigma^2_X}{\sigma^2} + \frac{(m-1)s_Y^2}{\sigma^2}}\frac{1}{m+n-2} }
+    \end{aligned}
+    \end{equation*}
+    Please note that $U$ follows the standard normal distribution and $V$ has the distribution of square root of $\chi^2$ divided by its degree of freedom.  The independent of $U$ and $V$ follows from independent of $\bar{X}$ and $s^2$. 
+\end{proof}
+
+\begin{corollary}
+    Under the assumption of thoerem above, a $100(1-\alpha)\%$ confidence interval for $\mu_X - \mu_Y$ is:
+    \begin{equation*}
+        (\bar{X} - \bar{Y}) \pm t_{m+n-2}(\alpha/2)s_{\bar{X} - \bar{Y}} \qquad \text{ where } \qquad s_{\bar{X} - \bar{Y}} = s_p\sqrt{\frac{1}{n} + \frac{1}{m}}
+    \end{equation*}
+\end{corollary}
+
+\begin{remark}{\textbf{(Notes on One and Two-Sided Alternative)}}
+    In the current case, the null hypothesis to be tested is $H_0:\mu_X = \mu_Y$, where there are $3$ common alternatives, as we have:
+    \begin{equation*}
+        H_1 : \mu_X \ne \mu_Y \qquad H_2 : \mu_X > \mu_Y \qquad H_3 : \mu_X < \mu_Y
+    \end{equation*}
+    The test statistics that will be used to make a decision to reject the null-hypothesis is:
+    \begin{equation*}
+        t = \frac{\bar{X} - \bar{Y}}{s_{\bar{X} - \bar{Y}}}
+    \end{equation*}
+    The $t$-statistics equals the multiple of its estimate standard deviation differs from zero. This is the same role in the comparison of $2$ samples as is played by $\chi^2$-statistics. We will reject for extreme value of $t$. We have the following rejection region:
+    \begin{equation*}
+        H_1 : \abs{t} > t_{n+m-2}(\alpha/2) \qquad H_2 : t > t_{n+m-2}(\alpha) \qquad t < - t_{n+m-2}(\alpha)
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}{\textbf{(Two-Sided Alternative T-Statistics)}}
+    The test for $H_1$ (see above) rejects the large value of the following value:
+    \begin{equation*}
+        \frac{\abs{\bar{X} - \bar{Y}}}{\sqrt{\sum^n_{i=1} (X_i - \bar{X})^2  + \sum^m_{j=1}(Y_j - \bar{Y})^2 }}
+    \end{equation*}
+    Which is $t$ statistics apart from constant that don't depend on the data. Thus, the likelihood ratio test is equivalent to $t$-test as claimed. 
+\end{proposition}
+\begin{proof}
+    Consider the set $\Omega$ is the set of all possible parameter values:
+    \begin{equation*}
+        \Omega = \Big\{ -\infty < \mu_X < \infty, \ -\infty < \mu_Y < \infty, \ 0 < \sigma < \infty \Big\}
+    \end{equation*}
+    The unknown parameters are $\theta = (\mu_X, \mu_Y, \sigma)$. Under $H_0$ where $\theta \in \omega_0$ where:
+    \begin{equation*}
+        \omega_0 = \Big\{ \mu_X = \mu_Y : 0 < \sigma < \infty \Big\}
+    \end{equation*}
+    The likelihood of $2$ samples $X_1,\dots,X_n$ and $Y_1,\dots,Y_m$ is given as:
+    \begin{equation*}
+    \begin{aligned}
+        l(\mu_X, \mu_Y, \sigma^2) &= \log\prod^n_{i=1}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\brackb{-\frac{1}{2}\bracka{\frac{X_i - \mu_X}{\sigma}}^2} \prod^m_{j=1}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\brackb{-\frac{1}{2}\bracka{\frac{Y_j - \mu_Y}{\sigma}}^2} \\
+        &= -\frac{m+n}{2}\log 2\pi - \frac{m+n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\brackb{\sum^n_{i=1}(X_i - \mu_X)^2 + \sum^m_{j=1}(Y_j - \mu_Y)^2}
+    \end{aligned}
+    \end{equation*}
+    Let's consider the MLE and its log-likelihood are given as:
+    \begin{itemize}
+        \item Under $\omega_0$, we have a sample of size $m+n$ from a normal distribution with unknown mean $\mu_0$ and unknown variance $\sigma_0^2$. The MLE of $\mu_0$ and $\sigma^2_0$ is:
+        \begin{equation*}
+            l(\hat{\mu}_0, \hat{\sigma}^2_0) = -\frac{n+m}{2}\log 2\pi - \frac{n_m}{2}\log\hat{\sigma}^2_0 - \frac{m+n}{2}
+        \end{equation*}
+        \item To find the MLE's $\hat{\mu}_X, \hat{\mu}_Y$ and $\sigma^2_1$ under $\Omega$, we consider the log-likelihood is
+        \begin{equation*}
+        \begin{aligned}
+            \sum^n_{i=1}(X_i - \hat{\mu}_X) = 0& \implies \hat{\mu}_X = \bar{X} \\
+            \sum^m_{j=1}(Y_j - \hat{\mu}_Y) = 0& \implies \hat{\mu}_Y = \bar{Y} \\
+            -\frac{m+n}{2\hat{\sigma}^2_1} + \frac{1}{2\hat{\sigma}^4_1}\brackb{\sum^n_{i=1}(X_i - \hat{\mu}_X)^2 + \sum^m_{j=1}(Y_j - \hat{\mu}_Y)^2} = 0&  \implies \hat{\sigma}^2_1 = \frac{1}{m+n}\brackb{\sum^n_{i=1}(X_i-\hat{\mu}_X)^2 + \sum^m_{j=1}(Y_j - \hat{\mu}_Y)^2}
+        \end{aligned}
+        \end{equation*}
+        This implies that the log-likelihood, we obtain it as:
+        \begin{equation*}
+            l(\hat{\mu}_X, \hat{\mu}_Y , \hat{\sigma}^2_1) = -\frac{m+n}{2} \log 2\pi - \frac{m+n}{2}\log\hat{\sigma}^2_1 - \frac{m+n}{2}
+        \end{equation*}
+    \end{itemize}
+    The log of likelihood ratio is given as:
+    \begin{equation*}
+        \frac{l(\hat{\mu}_0, \hat{\sigma}^2_0)}{l(\hat{\mu}_X, \hat{\mu}_Y , \hat{\sigma}^2_1)} = \frac{m+n}{2}\log\bracka{\frac{\hat{\sigma^2}_0}{\hat{\sigma}^2_0}} = \frac{m+n}{2}\log\bracka{\frac{\sum^n_{i=1}(X_i - \hat{\mu}_0)^2 + \sum^m_{j=1}(Y_j-\hat{\mu}_0)^2}{ \sum^n_{i=1}(X_i - \bar{X})^2 + \sum^m_{j=1}(Y_j-\bar{Y})^2 }} 
+    \end{equation*}
+    Let's consider the alternatives expression for the numerator of this ratio:
+    \begin{equation*}
+    \begin{aligned}
+        &\sum^n_{i=1}(X_i - \hat{\mu}_0)^2 = \sum^n_{i=1}(X_i - \hat{X})^2 + n(\bar{X} - \hat{\mu}_0)^2 
+        \qquad \sum^n_{j=1}(Y_j - \hat{\mu}_0)^2 = \sum^n_{j=1}(Y_j - \hat{Y})^2 + n(\bar{Y} - \hat{\mu}_0)^2
+    \end{aligned}
+    \end{equation*}
+    Please note that:
+    \begin{equation*}
+        \hat{\mu}_0 = \frac{1}{m+n}(n\bar{X} + m\bar{Y}) = \frac{n}{m+n}\bar{X} + \frac{m}{m+n}\bar{Y}
+    \end{equation*}
+    This implies that:
+    \begin{equation*}
+        \bar{X} - \hat{\mu}_0 = \frac{m(\bar{X} - \bar{Y})}{m+n} \qquad \bar{Y} - \hat{\mu}_0 = \frac{n(\bar{Y} - \bar{X})}{m+n}
+    \end{equation*}
+    The alternatives expression for the numerator of the ratio is:
+    \begin{equation*}
+        \sum^n_{i=1}(X_i - \bar{X})^2 + \sum^m_{j=1}(Y_j - \bar{Y})^2 + \frac{mn}{m+n}(\bar{X} - \bar{Y})^2
+    \end{equation*}
+    The test rejects for the large value of:
+    \begin{equation*}
+        1 + \frac{mn}{m+n}\bracka{ \frac{(\bar{X} - \bar{Y})^2}{\sum^n_{i=1} (X_i - \bar{X})^2  + \sum^m_{j=1}(Y_j - \bar{Y})^2} }
+    \end{equation*}
+    This is equivalent to the value above. Thus the proposition is proven.
+\end{proof}
+
+\begin{remark}{\textbf{(Difference Variance)}}
+    If 2 variances are not assumed to be equal, a natural estimate of $\operatorname{var}(\bar{X} - \bar{Y})$ is given as:
+    \begin{equation*}
+        \frac{s_X^2}{n} + \frac{s_Y^2}{m}
+    \end{equation*}
+    If this estimate is used in the denominator of $t$ statistics, the distribution of that statistics is no longer the $t$-distribution. But it can be closely approximated by $t$-distribution with degree of freedom, where we round it to nearest integer.
+    \begin{equation*}
+        \cfrac{[(s_X^2/n) + (s^2_Y/m)]^2}{\cfrac{(s_X^2/n)^2}{n-1} + \cfrac{(s_Y^2/m)^2}{m-1}}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Notes on Two Sample T-Test)}}
+    The power of $2$-sample $t$-test depends on $4$ factors:
+    \begin{itemize}
+        \item The real differences $\Delta = \abs{\mu_X - \mu_Y}$. The larger the differences, the greater the power. 
+        \item The significant level $\alpha$ at which the test is done. The larger the more powerful the test. 
+        \item The population standard deviation $\sigma$, whichi s amplitude of the nose that hides the signal. The smaller the larger the power. 
+        \item The sample size $n$ and $m$, The larger the sample size, and the greater the power. 
+    \end{itemize}
+    The necessary sample sizes can be determined from the significant level of the test, the standard deviation, and the desired power agaisnt an alternatives hypothesis. 
+\end{remark}
+
+\begin{remark}{\textbf{(Finding Power of t Test)}}
+    To calculate the power of a $t$ test exactly, we need special table of non-central $t$ distribution. If the sample are reasonably large, one can perform approximation of it based on normal distribution. 
+\end{remark}
+
+\begin{proposition}{\textbf{(Approximate Power of the Test)}}
+    The probability that the test statistics falls in rejection region is given as:
+    \begin{equation*}
+        1 - \Phi\brackb{z(\alpha/2) - \frac{\Delta}{\sigma}\sqrt{\frac{n}{2}}} + \Phi\brackb{-z(\alpha/2) - \frac{\Delta}{\sigma}\sqrt{\frac{n}{2}}}
+    \end{equation*}
+    where $\Delta = \mu_X - \mu_Y$ with test at level $\alpha$. Now, $\Delta$ moves away from zero, one of these terms will be negligible with respect to others.
+\end{proposition}
+\begin{proof}
+    Consider the following variance:
+    \begin{equation*}
+        \operatorname{var}(\bar{X} - \bar{Y}) = \sigma^2\bracka{\frac{1}{n} + \frac{1}{n}} = \frac{2\sigma^2}{n}
+    \end{equation*}
+    The tes at level $\alpha$ of $H_0 : \mu_X = \mu_Y$ agaisnt the alternatives $H_1 : \mu_X \ne \mu_Y$ is based on test statistics:
+    \begin{equation*}
+        Z = \frac{\bar{X} - \bar{Y}}{\sigma\sqrt{2/n}}
+    \end{equation*}
+    The rejection region is given as:
+    \begin{equation*}
+        \abs{\bar{X} - \bar{Y}} > z(\alpha/2)\sigma\sqrt{\frac{2}{n}}
+    \end{equation*}
+    Let's consider the rejection region to be the following:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\Bigg[ &\abs{\bar{X} - \bar{Y}} > z(\alpha/2)\sigma\sqrt{\frac{2}{n}} \Bigg] \\
+        &= \mathbb{P}\Bigg[ \bar{X} - \bar{Y} > z(\alpha/2)\sigma\sqrt{\frac{2}{n}} \Bigg] + \mathbb{P}\Bigg[ \bar{X} - \bar{Y} <- z(\alpha/2)\sigma\sqrt{\frac{2}{n}} \Bigg]
+    \end{aligned}
+    \end{equation*}
+    As two of them are mutually exclusive. Both probability can be calculated by standardizing:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\Bigg[ \bar{X} - \bar{Y} > z(\alpha/2)\sigma\sqrt{\frac{2}{n}} \Bigg] &= \mathbb{P}\brackb{\frac{(\bar{X} - \bar{Y})- \Delta}{\sigma\sqrt{2/n}} > \frac{z(\alpha/2)\sigma\sqrt{2/n} - \Delta}{\sigma\sqrt{2/n}}} \\
+        &= 1 - \Phi\brackb{z(\alpha/2) - \frac{\Delta}{\sigma}\sqrt{\frac{n}{2}}}
+    \end{aligned}
+    \end{equation*}
+    Similarly, we have the second probability is given as:
+    \begin{equation*}
+        \Phi\brackb{-z(\alpha/2) - \frac{\Delta}{\sigma}\sqrt{\frac{n}{2}}}
+    \end{equation*}
+    Adding them together is given the above approximation of the test. 
+\end{proof}
+
+\subsection{Nonparametric Test}
+
+\begin{remark}{\textbf{(Setting for Mann-Whitney test)}}
+    Suppose we have $m + n$ experimental untis to assign to a treatment group and control group, as we have:
+    \begin{itemize}
+        \item $n$ units are randomly chosen and assigned to the control. 
+        \item $m$ units are assigned to the treatment. 
+    \end{itemize}
+    We are interested in testing the null hypothesis that the treatment has not effect. 
+\end{remark}
+
+\begin{definition}{\textbf{(Statistics for Mann-Whitney Test)}}
+    We consider the following procedure:
+    \begin{itemize}
+        \item Group all $m+n$ observations together and rank them in order of increasing size. 
+        \item Calculate the sum of the ranks of those observations that came from the control group. 
+    \end{itemize}
+    If the sum is too small or too large, we will reject the null hypothesis. Please note that this test doesn't depend on an assumption of normality. It is nearly as powerful as $t$-test and it is generally preferable (for small sample size). 
+\end{definition}
+
+\begin{remark}{\textbf{(Settings for Mann-Whitney Test)}}
+    Consider the control values as we have $X_1,\dots,X_n \sim F$ and the experimental values $Y_1,\dots,Y_m \sim G$ . The Mann-Whitney test is a test of null hypothesis $H_0 : F = G$. We will denote $T_Y$ to denotes the sum of ranks of $Y_1,Y_2,\dots,Y_m$.
+\end{remark}
+
+\begin{lemma}
+    From a simple random sampling without replacement, we have:
+    \begin{equation*}
+        \operatorname{cov}(X_i, X_j) = -\sigma^2/(N-1)
+    \end{equation*}
+    where the $\operatorname{var}(X_i) = \sigma^2$
+\end{lemma}
+\begin{proof}
+    Using the identities for covariance established:
+    \begin{equation*}
+        \operatorname{cov}(X_i, X_j) = \mathbb{E}[X_iX_j] - \mathbb{E}[X_i]\mathbb{E}[X_j]
+    \end{equation*}
+    And, we have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[X_iX_j] &= \sum^m_{k=1}\sum^m_{l=1}\xi_k\xi_lP(X_i = \xi_k \wedge X_j = \xi_l) \\
+        &= \sum^m_{k=1}\xi_kP(X_i = \xi_k)\sum^k_{l=1}\xi_lP(X_j = \xi_l | X_i = \xi_k)
+    \end{aligned}
+    \end{equation*}
+    from the multiplication law of conditional probability as we have:
+    \begin{equation*}
+        P(X_j = \xi_l | X_i = \xi_k) = \begin{cases}
+            n_l/(N-1) & \text{ if } k \ne l \\
+            (n_l - 1)/(N-1) & \text{ if } k = l \\
+        \end{cases}
+    \end{equation*}
+    If we express is give as:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^m_{l=1}\xi_lP(X_j = \xi_l | X_i = \xi_k) &= \sum_{l\ne k}\xi_l\frac{n_l}{N-1} + \xi_k \frac{n_k-1}{N-1} \\
+        &= \sum^m_{l=1}\xi_l\frac{n_l}{N-1} - \xi_k\frac{1}{N-1}
+    \end{aligned}
+    \end{equation*}
+    Now, we have the expression for $\mathbb{E}[X_iX_j]$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^m_{k=1}\xi_k\frac{n_k}{N}\bracka{\sum^m_{l=1}\xi_l\frac{n_l}{N-1} - \frac{\xi_k}{N-1}} &= \frac{1}{N(N-1)}\bracka{\tau^2 - \sum^m_{k=1}\xi_k^2n_k} \\
+        &= \frac{\tau^2}{N(N-1)} - \frac{1}{N(N-1)}\sum^m_{k=1}\xi_k^2n_k \\
+        &= \frac{N\mu^2}{N-1} - \frac{1}{N-1}(\mu^2 + \sigma^2) \\
+        &= \mu^2 - \frac{\sigma^2}{N-1}
+    \end{aligned}
+    \end{equation*}
+    Finally, subtracting $\mathbb{E}[X_i]\mathbb{E}[X_j] = \mu^2$ fro mthe last equation, as we have:
+    \begin{equation*}
+        \operatorname{cov}(X_i, X_j) = -\frac{\sigma^2}{N-1}
+    \end{equation*}
+    for $i\ne j$.
+\end{proof}
+
+\begin{corollary}
+    With simple random sampling, we can show that:
+    \begin{equation*}
+        \operatorname{var}(\bar{X}) = \frac{\sigma^2}{n}\bracka{\frac{N-n}{N-1}} = \frac{\sigma^2}{n}\bracka{1-\frac{n-1}{N-1}}
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    We can see that:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{var}(\bar{X}) &= \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1} \operatorname{cov}(X_i, X_j) \\
+        &= \frac{1}{n^2}\sum^n_{i=1}\operatorname{var}(X_i) + \frac{1}{n^2}\sum^n_{i=1}\sum_{j\ne i} \operatorname{cov}(X_i, X_j) \\
+        &= \frac{\sigma^2}{n} - \frac{1}{n^2}n(n-1)\frac{\sigma^2}{N-1}
+    \end{aligned}
+    \end{equation*}
+    This gives the desired result.
+\end{proof}
+
+\begin{proposition}
+    If $F = G$ as we have:
+    \begin{equation*}
+        \mathbb{E}[T_Y] = \frac{m(m+n+1)}{2} \qquad \operatorname{var}(T_Y) = \frac{mn(m+n+1)}{12}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Under the null hypothesis, $T_Y$ is the sum of random sample of size $m$ drawn without replacement from a population of integers $[m+n]$. $T_Y$ thus equal to $m$ times the average of such a sample as:
+    \begin{equation*}
+        \mathbb{E}[T_Y] = m\mu \qquad \operatorname{var}(T_Y) = m\sigma^2\bracka{\frac{N-m}{N-1}}
+    \end{equation*}
+    We can show that, where $N = m+n$ is the size of population. Using the identities (to calculate the values $\mu$ and $\sigma^2$) as we have (this follows from the thoerem above):
+    \begin{equation*}
+        \sum^N_{k=1} k = \frac{N(N+1)}{2} \qquad \sum^N_{k=1}k^2 = \frac{N(N+1)(2N+1)}{6}
+    \end{equation*}
+    We find the population as we have $[m +n]$ as we have:
+    \begin{equation*}
+        \mu = \frac{N+1}{2} \qquad \sigma^2 = \frac{N^2-1}{12} 
+    \end{equation*}
+    The result follows from the algebraic simplification.
+\end{proof}
+
+\begin{remark}{\textbf{(Alternative Derivation of Mann-Whitney Test)}}
+    We consider the $X\sim F$ and $Y \sim G$ and 
+    \begin{itemize}
+        \item Consider measuring of the effect of the treatment: $\pi = P(X < Y)$. 
+        \item The value of $\pi$ is the probability that an observation from the distribution $F$ is smaller than an independent observation from the distribution $G$. 
+    \end{itemize}
+    The estimate of $\pi$ can be obtained by comparing all $n$ values of $X$ to all $m$ values of $Y$. Calculating the proposition of the comparison for which $X$ was less than $Y$:
+    \begin{equation*}
+        \hat{\pi} = \frac{1}{mn}\sum^n_{i=1}\sum^m_{j=1}Z_{ij} \qquad Z_{ij} = \begin{cases}
+            1 & \text{ if } X_i < Y_j \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Understand the relationship of $\hat{\pi}$ to the rank sum introduced earlier, we find the convenient to work with:
+    \begin{equation*}
+        V_{ij} = \begin{cases}
+            1 & \text{ if } X_{(i)} < Y_{(j)} \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Since $V_{ij}$ are jusre reordering of $Z_{ij}$, also gives us:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^n_{i=1}\sum^m_{j=1} V_{ij} &= \begin{aligned}[t]
+            \#(X<Y_{(1)}) &+ \#(X < Y_{(2)}) \\
+            &+ \cdots + \#(X<Y_{(m)})
+        \end{aligned} 
+    \end{aligned}
+    \end{equation*}
+    where $\#(X < Y_{(1)})$ is the number of $X$ that are less than $Y_{(1)}$. If the rank of $Y_{(k)}$ in the combined sample is denoted by $R_{yk}$, then the number of $X$ that is less than $Y_{(1)}$ is $R_{y1} -1$ and number of $X$ is less than $Y_{(2)}$ is $R_{y2} - 2$ and so on, thus we have:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^n_{i=1}\sum^m_{j=1}V_{ij} &= (R_{y1} - 1) + (R_{y2} - 2) +\cdots + (R_{ym} - m) \\
+        &= \sum^m_{i=1}R_{yi} - \sum^m_{i=1} i \\
+        &= \sum^m_{i=1}R_{yi} - \frac{m(m+1)}{2} \\
+        &= T_y - \frac{m(m+1)}{2} \\
+    \end{aligned}
+    \end{equation*}
+    Thus $\hat{\pi}$ may be expressed in terms of rank sum of $Y$. 
+\end{remark}
+
+\begin{corollary}
+    Let $U_Y = \sum _{i=1}^n \sum_{j=1}^m Z_{ij}$. Under the null hypothesis $H_0 : F = G$ as we have:
+    \begin{equation*}
+        \mathbb{E}[U_Y] = \frac{mn}{2} \qquad \operatorname{var}(U_Y) = \frac{mn(m+n+1)}{12}
+    \end{equation*}
+\end{corollary}
+
+\begin{remark}
+    For both $n$ and $m$ are both greater than $10$, the null distribution $U_Y$ is quite well approximated by a normal distribution as we have:
+    \begin{equation*}
+        \frac{U_Y - \mathbb{E}[U_Y]}{\sqrt{\operatorname{var}(U_Y)}}\sim \mathcal{N}(0, 1)
+    \end{equation*}
+    The distribution of the rank sum of the $X$ and $Y$ may be approximated by normal distribution as the rank sum differ from $U_Y$ only by constant. 
+\end{remark}
+
+\begin{remark}{\textbf{(Mann-Whitney as CI)}}
+    Let's consider the shift model as we have $G(x) = F(x-\Delta)$. We will consider the confidence interval for $\Delta$. To test $H_0:F=G$, we use the statistics $U_Y$ equal to number of $X_i - Y_j$ that are less than $0$. We can use: (to test the hypothesis that the shift parameter is $\Delta$)
+    \begin{equation*}
+        U_Y(\Delta) = \#[X_i - (Y_j - \Delta) < 0] = \#(Y_j - X_i > \Delta)
+    \end{equation*}
+    The null distribution of $U_Y(\Delta)$ is symmetric about $mn/2$:
+    \begin{equation*}
+        \mathbb{P}\bracka{U_Y(\Delta) = \frac{mn}{2} + k} = \mathbb{P}\bracka{U_Y(\Delta) = \frac{mn}{2} - k}
+    \end{equation*}
+    for all integer $k$. Suppose that $k = k(\alpha)$ is such that $\mathbb{P}(k\le U_Y(\Delta) \le mn-k) = 1-\alpha$; the level $\alpha$ test then accepts for such $U_Y(\Delta)$. By the duality of CI and hypothesis tests, a $100(1-\alpha)\%$ confidence interval for $\Delta$ is thus:
+    \begin{equation*}
+        C = \brackc{\Delta : k \le U_Y(\Delta) \le mn-k}
+    \end{equation*}
+    where $C$ is the set of values for which the null hypothesis won't be rejected. Let's find the explicit form for this CI. Let $D_{(1)},D_{(2)},\dots, D_{(nm)}$ denote the ordered $mn$ differences $Y_j - X_i$. We will show that:
+    \begin{equation*}
+        C = [D_{(k)}, D_{(mn-k+1)})
+    \end{equation*}
+    To see this, first suppose that $\Delta = D_{(k)}$. Then:
+    \begin{equation*}
+    \begin{aligned}
+        U_Y(\Delta) &= \#(X_i - Y_j + \Delta < 0) \\
+        &= \#(Y_j - X_i > \Delta) \\
+        &= mn-k
+    \end{aligned}
+    \end{equation*}
+    Similarly, if $\Delta = D_{(mn - k + 1)}$, we have:
+    \begin{equation*}
+        U_Y(\Delta) = \#(Y_j - X_i > \Delta) = k
+    \end{equation*}
+\end{remark}
+
+\subsection{Bayesian Approach}
+
+\begin{remark}{\textbf{(Setting For Bayesian Approach)}}
+    Consider the case where 
+    \begin{itemize}
+        \item $X_i \sim \mathcal{N}(\mu_X, \xi^{-1})$
+        \item $Y_j \sim \mathcal{N}(\mu_Y, \xi^{-1})$ and independent of $X_i$. 
+        \item The means $\mu_X$ and $\mu_Y$ are given improper prior that are constant on $(-\infty, \infty)$.
+        \item $\xi$ is given the improper prior $f_{\Xi}(\xi) = \xi^{-1}$.
+    \end{itemize}
+    This posterior is thus given by:
+    \begin{equation*}
+        p(\mu_X, \mu_Y, \xi) \propto \xi^{(n+m)/2 - 1}\exp\bracka{-\frac{\xi^{m+n}}{2}\brackb{\sum^n_{i=1}(x_i - \mu_X)^2 + \sum^m_{j=1}(y_j - \mu_Y)^2}}
+    \end{equation*}
+    Using the identity that $\sum^n_{i=1}(x_i-\mu_X)^2 = (n-1)s_x^2 + n(\mu_X - \bar{x})^2$, and the analogous expression for $y_j$ as:
+    \begin{equation*}
+    \begin{aligned}
+        p(\mu_X, \mu_Y, \xi) \propto \  &\xi^{(n+m)/2-1}\exp\bracka{-\frac{\xi}{2}\brackb{(n-1)s_x^2 + (m-1)s^2_y}} \\
+        &\times \exp\bracka{-\frac{n\xi}{2}(\mu_X - \bar{x})^2}\exp\bracka{-\frac{m\xi}{2}(\mu_Y - \bar{y})^2}
+    \end{aligned}
+    \end{equation*}
+    For a fixed $\xi$, $\mu_X$ and $\mu_Y$ are independent normally distributed with means $\bar{x}$ and $\bar{y}$ and precisions $n\xi$ and $m\xi$, thus: the difference $\mu_X - \mu_Y$ is normally distributed with mean $\bar{x}-\bar{y}$ and variance $\xi^{-1}(n^{-1} + m^{-1})$. With further analysis, one can show that:
+    \begin{equation*}
+        \frac{\Delta-(\bar{x} -\bar{y})}{s_p\sqrt{n^{-1} + m^{-1}}} \sim t_{n+m-2}
+    \end{equation*}
+    This may be similar to above result but has differences in interpretation, as $\bar{x}-\bar{y}$ and $s_p$ are random in above result and $\Delta$ is fix. This is opposite in this case. The posterior probability that $\Delta>0$ can be found using $t$ distribution. Let $T$ be random variable with $t_{m+n-2}$ distribution, then:
+    \begin{equation*}
+    \begin{aligned}
+        P(\Delta > 0 | X, Y) &= \mathbb{P}\bracka{\left.\frac{\Delta - (\bar{x} -\bar{y})}{s_p\sqrt{n^{-1} + m^{-1}}} \ge \frac{-(\bar{x} - \bar{y})}{s_p\sqrt{n^{-1} + m^{-1}}} \right| X, Y } \\
+        &= \mathbb{P}\bracka{T \ge \frac{\bar{y} - \bar{x}}{s_p\sqrt{n^{-1} + m^{-1}}}}
+    \end{aligned}
+    \end{equation*}
+    As, we can use this as CI. 
+\end{remark}
+
+\subsection{Compare Paired Samples}
+
+\begin{remark}{\textbf{(Conditions for Paired Samples Test)}}
+    Some of the experiments, the samples are paired. In medical experiment, the subjects might be matched by age or severity of the condition, while one of them are randomly assigned to treatment group and other control group. 
+\end{remark}
+
+\begin{proposition}{\textbf{(Releative Efficiently)}}
+    We will denote the pair as $(X_i, Y_i)$ where $i=1,\dots,n$ adn assume $X$ and $Y$ have means $\mu_X$ and $\mu_Y$ and variances $\sigma^2_X$ and $\sigma^2_Y$. We will assume that different pairs are independently distributed that $\operatorname{cov}(X_i, Y_i) = \sigma_{XY}$. Given the estimate of $D = X_i - Y_i$ (in the pair setting):
+    \begin{equation*}
+        \frac{\operatorname{var}(\bar{D})}{\operatorname{var}(\bar{X} - \bar{Y})} = 1-\rho
+    \end{equation*}
+    where $\rho$ is the correlation of members of a pair, and $\sigma_X=\sigma_Y=\sigma$. This menas that if the correlation coefficient is $0.5$, a paired design with $n$ pairs of subjects yields same precision as an unpaired design with $2n$ subject per treatment. 
+\end{proposition}
+\begin{proof}
+    Starting with paired experiment, as we have:
+    \begin{itemize}
+        \item We will work with the differences: $D_i = X_i - Y_i$, which are independent with:
+        \begin{equation*}
+            \mathbb{E}[D_i] = \mu_X - \mu_Y \qquad \operatorname{var}(D_i)\begin{aligned}[t]   
+                &=\sigma^2_X + \sigma^2_Y - 2\sigma_{XY} \\
+                &=\sigma_X^2 + \sigma^2_Y - 2\rho\sigma_X\sigma_Y
+            \end{aligned}
+        \end{equation*}
+        A natural estimate of $\mu_X - \mu_Y$ is $\bar{D} = \bar{X}-\bar{X}$, the average difference. From the properties of $D_i$:
+        \begin{equation*}
+            \mathbb{E}[\bar{D}] = \mu_X - \mu_Y \qquad \operatorname{var}(\bar{D}) = \frac{1}{n}(\sigma^2_X + \sigma^2_Y - 2\rho\sigma_X\sigma_Y)
+        \end{equation*}
+        \item An experiment had been done by taking a sample of $n$ $X$'s and an independent sample of $n$ $Y$'s, then $\mu_X - \mu_Y$ would be estimated by $\bar{X} -\bar{Y}$ and:
+        \begin{equation*}
+        \begin{aligned}
+            \mathbb{E}[\bar{X} - \bar{Y}] = \mu_X - \mu_Y \qquad \operatorname{var}(\bar{X} - \bar{Y}) = \frac{1}{n}(\sigma^2_X + \sigma^2_Y)
+        \end{aligned}
+        \end{equation*}
+    \end{itemize}
+    We see that the variance of $\bar{D}$ is smaller if the correlation is positive. If $X$ and $Y$ are positively correlated. Consider the case where $\sigma_X = \sigma_Y = \sigma$, the $2$ variances may be simply expressed as:
+    \begin{equation*}
+        \operatorname{var}(\bar{X}) = \frac{2\sigma^2(1-\rho)}{n} \qquad \operatorname{var}(\bar{X}-\bar{Y}) = \frac{2\sigma^2}{n}
+    \end{equation*}
+    Thus the relative efficiently is give. 
+\end{proof}
+
+\begin{remark}{\textbf{(Method Based on Normal Distribution)}}
+    Assume the differences that are sample of a normal distribution:
+    \begin{equation*}
+        \mathbb{E}[D_i] = \mu_X - \mu_Y = \mu_D \qquad \operatorname{var}(D_i) = \sigma^2_D
+    \end{equation*}
+    Generally, $\sigma_D$ will be unknown, the inferences will be based on:
+    \begin{equation*}
+        t = \frac{\bar{D} - \mu_D}{s_{\bar{D}}}
+    \end{equation*}
+    This follows a $t$ distribution with $n-1$ degree of freedom. With similar reasoning $100(1-\alpha)\%$ confidence interval is given as:
+    \begin{equation*}
+        \bar{D} \pm t_{n-1}(\alpha)s_{\bar{D}}
+    \end{equation*}
+    If sample size $n$ is large, the approximate validity of the CI and hypothesis test follows from CLT. 
+\end{remark}
+
+\begin{definition}{\textbf{(Signed Rank Test)}}
+    We consider a paired sample $(X_i, Y_i)$, we then find the absoluate differences $\abs{X_i - Y_i}$ and rank them in order, denoted by $D_{(i)}$. The signed rank is calculated as: 
+    \begin{equation*}
+        S_{(i)} = \begin{cases}
+            -D_{(i)} & \text{ if } X_i > Y_i \\
+            D_{(i)} & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Now, we have $W_{(+)} = \sum_{S_{(i)} > 0} S_{(i)}$. If there is no differences between the two paired conditions, as we expect about half of $D_i$ to be positive and half negative. 
+\end{definition}
+
+\begin{remark}{\textbf{(Finding Rejection Region)}}
+    THe null distribution can be calculated this way. If $H_0$ is true, it makes no difference:
+    \begin{itemize}
+        \item The difference $X_i-Y_i = D_i$ has the same distribution as the difference $Y_i - X_i = -D_i$, so the distribution of $D_i$ is symmetric about zero.
+        \item The $k$-th largest value of $D$ is thus equally likely to be positive or negative, and any particular assignment of signs to the integer $1,\dots,n$ (the ranks) is equally likely. 
+        \item We obtain a list of $2^n$ value of $W_+$ each of which occurs with probability $1/2^n$. The probability of each distinct value of $W_+$ may be calculated, given the desired null distribution. 
+    \end{itemize}
+    If the sample size is greater than $20$, a noraml approximation to the null distribution can be used. We calculate the mean and variance of $W_+$
+\end{remark}
+
+\begin{proposition}
+    Under the null hypothesis that the $D_i$ are independent and symmetrically distribution about zero:
+    \begin{equation*}
+        \mathbb{E}[W_+] = \frac{n(n+1)}{4} \qquad \operatorname{var}[W_+] = \frac{n(n+1)(2n+1)}{24}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    To facilitate the calculation, we represent $W_+$ in the following way:
+    \begin{equation*}
+        W_+ = \sum^n_{i=1}kI_k \qquad I_k = \begin{cases}
+            1 & \text{ if } k \text{ largest } \abs{D_i} \text{ has } D_i > 0 \\
+            0 & \text{ otherwise } 
+        \end{cases}
+    \end{equation*}
+    Under $H_0$ and $I_k$ are independent Bernoulli random variable $p=1/2$, so we have:
+    \begin{equation*}
+        \mathbb{E}[I_k] = \frac{1}{2} \qquad \operatorname{var}(I_k) = \frac{1}{4}
+    \end{equation*}
+    We thus have:
+    \begin{equation*}
+        \mathbb{E}[W_+] = \frac{1}{2}\sum^n_{k=1}k = \frac{n(n+1)}{4} \qquad \operatorname{var}(W_+) = \frac{1}{4}\sum^n_{k=1} k^2 = \frac{n(n+1)(2n+1)}{24}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(When Tie is Encountered)}}
+    If some of the differences are equal to zero, the most common way to discard those observation. If there are ties, each $\abs{D_i}$ is assigned the average value of the ranks for which it is tied. If there are not too many ties, the significant level of the test isn't greatly affected. 
+\end{remark}
+
+

@@ -1,0 +1,398 @@
+\section{Analysis of Variance}
+
+\begin{definition}{\textbf{(One-Way Layout)}}
+    The independent measurement are made under each of several treatments. It is the generalization of the above test. We will denote the $I$ groups that contains $J$ samples. We will denote, the following values:
+    \begin{equation*}
+        Y_{ij} = \text{The } j\text{-th observation in the } i\text{-th treatments.} 
+    \end{equation*}
+\end{definition}
+
+\subsection{Normal Theory: F Test}
+
+\begin{remark}{\textbf{(Statistical Model of One-Way Layout)}}
+    We have the statistical model model is given as $Y_{ij} = \mu + \alpha_i + \varepsilon_{ij}$. Here $\mu$ is the overall mean and $\alpha_i$ is the differential effect of the $i$-th treatment. We will assume to be independent, normally distributed with mean $0$ and variance $\sigma^2$. The $\alpha_i$ are normalized:
+    \begin{equation*}
+        \sum^I_{i=1}\alpha_i = 0
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Defining Null-Distribution)}}
+    The expected response to the $i$-th treatment is $\mathbb{E}[Y_{ij}] = \mu + \alpha_i$. If $\alpha_i = 0$ for $i=1,\dots,I$ all treatments have the same expected respoinse, and in general $\alpha_i - \alpha_j$ is the differeces between the expected values under treatments $i$ and $j$. 
+\end{remark}
+
+\begin{lemma}
+    We consider the following identity:
+    \begin{equation*}
+        \sum^I_{i=1}\sum^J_{j=1}(Y_{ij} - \bar{Y}_{..})^2 = \sum^I_{i=1}\sum^J_{j=1}(Y_{ij} - \bar{Y}_{i.})^2 + J\sum^I_{i=1}(\bar{Y}_{i.} - \bar{Y}_{..})^2
+    \end{equation*}
+    where we have:
+    \begin{equation*}
+        \bar{Y}_{i.} = \frac{1}{J}\sum^J_{j=1}Y_{ij} \qquad \bar{Y}_{..} = \frac{1}{IJ}\sum^I_{i=1}\sum^J_{j=1}Y_{ij}
+    \end{equation*}
+    This means that the total sum of squares equals to the sum of square within groups plus the squares between groups, as we have $SS_\text{TOT} = SS_\text{W} + SS_\text{B}$
+\end{lemma}
+\begin{proof}
+    To establish the identity, we express the left-hand side as:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^I_{i=1}\sum^J_{j=1}(Y_{ij} - \bar{Y}_{..})^2 &= \sum^I_{i=1}\sum^J_{j=1}[(Y_{ij} - \bar{Y}_{i.}) + (\bar{Y}_{i.}  - \bar{Y}_{..})]^2 \\
+        &= \begin{aligned}[t]
+            \sum^I_{i=1}\sum^J_{j=1}&(Y_{ij} - \bar{Y}_{i.})^2 + \sum^I_{i=1}\sum^J_{j=1}(\bar{Y}_{i.} - \bar{Y}_{..})^2 \\
+            &+ 2\sum^I_{i=1}\sum^J_{j=1}(Y_{ij} - \bar{Y}_{i.})(Y_{i.} - \bar{Y}_{..})
+        \end{aligned} \\
+        &= \begin{aligned}[t]
+            \sum^I_{i=1}\sum^J_{j=1}&(Y_{ij} - \bar{Y}_{i.})^2 + \sum^I_{i=1}\sum^J_{j=1}(\bar{Y}_{i.} - \bar{Y}_{..})^2 \\
+            &+ 2\sum^I_{i=1}\brackb{(Y_{i.} - \bar{Y}_{..})\sum^J_{j=1}(Y_{ij} - \bar{Y}_{i.}) }
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The last term of the final expression vanishes because some of deviation from a mean is zero. 
+\end{proof}
+
+\begin{lemma}
+    Let $X_i$ where $i=1,\dot,n$ be independent random variable with $\mathbb{E}[X_i] = \mu_i$ and $\operatorname{var}(X_i) = \sigma^2$. Then we have, the following identity:
+    \begin{equation*}
+        \mathbb{E}[(X_i - \bar{X})^2] = (\mu_i - \bar{\mu})^2 + \frac{n-1}{n}\sigma^2 \qquad \text{ where } \qquad \hat{\mu} = \frac{1}{n}\sum^n_{i=1}\mu_i 
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We used the fact that $\mathbb{E}[U^2] = \mathbb{E}[U]^2 + \operatorname{var}(U)$ for any random variable with finite variance. Let's consider the second term: $\operatorname{var}(X_i - \bar{X})$:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{var}(X_i - \bar{X}) &= \operatorname{var}(X_i) + \operatorname{var}(\bar{X}) - 2\operatorname{cov}(X_i, \bar{X}) \\
+        &= \sigma^2 + \frac{1}{n}\sigma^2 + \operatorname{cov}\bracka{X_i, \frac{1}{n}\sum^n_{j=1}X_j} \\
+        &= \sigma^2 + \frac{1}{n}\sigma^2 - \frac{2}{n}\sigma^2 \\
+    \end{aligned}
+    \end{equation*}
+    This concludes the proof.
+\end{proof}
+
+\begin{theorem}
+    We consider the expectation:
+    \begin{equation*}
+        \mathbb{E}[SS_\text{W}] = I(J-1)\sigma^2 \qquad \mathbb{E}[SS_\text{B}] = J\sum^I_{i=1}\alpha_i^2 + (I-1)\sigma^2
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Under the assumption for the model stated at the beginning of this section:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[SS_\text{W}] &= \sum^I_{i=1}\sum^J_{j=1}\mathbb{E}[(Y_{ij} - \bar{Y}_{i.})^2] = \sum^I_{i=1}\sum^J_{j=1}\frac{J-1}{J}\sigma^2 = I(J-1)\sigma^2
+    \end{aligned}
+    \end{equation*}
+    We have used lemma above with the role of $X_i$ being played by $Y_{ij}$. The second equality follows since $\mathbb{E}[Y_{ij}] = \mathbb{E}[\bar{Y}_i] = \mu + \alpha_i$. Now, let's find the $\mathbb{E}[SS_\text{B}]$, we use the lemma with $\hat{Y}_{i.}$ and $\hat{Y}_{..}$ as:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[SS_\text{B}] = J\sum^I_{i=1}\mathbb{E}(\bar{Y}_{i.} - \bar{Y}_{..})^2 = J \sum^I_{i=1}\brackb{\alpha_i^2 + \frac{(I-1)\sigma^2}{IJ}} = J\sum^I_{i=1}\alpha_i^2 + (I-1)\sigma^2
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(Notes on the Sum of Squares)}}
+    $SS_\text{W}$ may be used to estimate $\sigma^2$, where the estimate is:
+    \begin{equation*}
+        s_p^2 = \frac{SS_\text{W}}{I(J-1)}
+    \end{equation*}
+    which is unbiased. The subscript $p$ stands for pooled. Estimates of $\sigma^2$ from the $I$ treatments are pooled together, since:
+    \begin{equation*}
+        SS_\text{w} = \sum^I_{i=1}(J-1)s_i^2
+    \end{equation*}
+    where $s_i^2$ is the sample variance in the $i$-th group. 
+\end{remark}
+
+\begin{remark}{\textbf{(Introduction to the Test)}}
+    If all the $\alpha_i$ are equal to zero, then the expectation of $SS_\text{B}/(I-1)$  is also $\sigma^2$. In this case, $SS_\text{W}/[I(J-1)]$ and $SS_\text{B}/(I-1)$ should be abount equal. If some of the $\alpha_i$ are non-zero, $SS_\text{B}$ will be inflated. 
+\end{remark}
+
+\begin{theorem}
+    If the errors are independent and normally distributed with means $0$ and variance $\sigma^2$, then we have $SS_\text{W}/\sigma^2 \sim \chi^2_{I(J-1)}$. If additionally, the $\alpha_i$ are all equal to zero, then $SS_\text{B}/\sigma^2 \sim \chi^2_{I-1}$ and it is independent of $SS_\text{W}$.
+\end{theorem}
+\begin{proof}
+    Let's consider the distribution function over random variable, as we have:
+    \begin{itemize}
+        \item We consider $SS_\text{W}$, where we have:
+        \begin{equation*}
+            \frac{1}{\sigma^2}\sum^J_{j=1}(Y_{ij}-\bar{Y}_{i.})^2 \sim \chi^2_{J-1}
+        \end{equation*}
+        There are $I$ such sums in $SS_\text{W}$, they are independent of each other. The sum of $I$ independent $\chi^2_{J-1}$ random variable give a $\chi^2_{I(J-1)}$. This also applied to $SS_\text{B}$ noting that $\operatorname{var}(\bar{Y}_{i.}) =\sigma^2/J$
+        \item Now, we will show that $2$ sums of square are independent of each other. 
+        \begin{itemize}
+            \item $SS_\text{W}$ is a function of vector $\boldsymbol U$, which has the element $Y_{ij} - \bar{Y}_{i.}$, where $i=1,\dots,I$ and $j=1,\dots,J$
+            \item $SS_\text{B}$ is a function of vector $\boldsymbol V$ whose element are $\bar{Y}_{i.}$ where $i=1,\dots,I$, since $\bar{Y}_{..}$ can be obtained from $\bar{Y}_{i.}$
+        \end{itemize}
+        It is sufficent to how that these $2$ vectors are independent of each other, we consider:
+        \begin{itemize}
+            \item If $i\ne i'$ then $Y_{ij} - \bar{Y}_{i.}$ and $\hat{Y}_{i'.}$ are independent since they are function of differeces observations. 
+            \item On the other hand, $Y_{ij} - \bar{Y}_{i.}$ and $\bar{Y}_{i.}$ are independent by the previous result.
+        \end{itemize}
+        This completes the proof of the thoerem.
+    \end{itemize}
+\end{proof}
+
+\begin{definition}{\textbf{(F Statistics)}}
+    We use the following statistics:
+    \begin{equation*}
+        F = \frac{SS_\text{B}/(I-1)}{SS_\text{W}/[I(J-1)]}
+    \end{equation*}
+    And it is used to the the following null hypothesis: 
+    \begin{equation*}
+        H_0 : \alpha_1 = \alpha_2 = \cdots = \alpha_I = 0
+    \end{equation*}
+    If the null hypothesis is true, the F-statistics should be close to $1$, and if it is false, the statistics should be larger. If the null hypothesis is false the numerator reflects variation between the different groups as well as variation within groups. 
+\end{definition}
+
+\begin{theorem}
+    Under the assumption that the errors are noramlly distributed, the null distribution of $F$ is $F$ distribution with $I-1$ and $I(J-1)$ degree of freedom. 
+\end{theorem}
+\begin{proof}
+    The theorem follows from theorem above and for the definition of the $F$ distribution. 
+\end{proof}
+
+\begin{remark}{\textbf{(When number are not necessarily equal)}}
+    The analysis is the same as for the case of equal sample sizes. Suppose that there are $J_i$ observation under treatment $i$, for $i=1,\dots,I$. The basic identity still holds:
+    \begin{equation*}
+        \sum_{i=1}^I \sum^{J_i}_{j=1}(Y_{ij} - \bar{Y}_{..})^2 = \sum^I_{i=1}\sum^{J_i}_{j=1} (Y_{ij} - \bar{Y}_{i.})^2 + \sum^I_{i=1}J_i(\bar{Y}_i - \bar{Y}_{..})^2
+    \end{equation*}
+    By reasoning similar to that used here for the simple case, as it can be shown that:
+    \begin{equation*}
+        \mathbb{E}[SS_\text{W}] = \sigma^2\sum^I_{i=1}(J_i - 1) \qquad \mathbb{E}[SS_\text{B}] = (I-1)\sigma^2 + \sum^I_{i=1}J_i\alpha^2_i
+    \end{equation*}
+    The degree of freedom for these sum of squares are $\sum^I_{i=1}J_i - I$ and $I-1$, respectively. 
+\end{remark}
+
+\subsection{Problem of Multiple Comparisons}
+
+\begin{remark}
+    We are interested in comparing pairs or groups of treatments and estimating the treatment means and their differeces. The naive approach is to compare all pairs of treatment means using $t$ test:
+    \begin{itemize}
+        \item Although each individual comparison would have a type I error rate of $\alpha$
+        \item The collection of all Comparisons considered simulataneous would not. 
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Tukey's Method)}}
+    It is used to construct confidence intervals for the differences of all pairs of means. 
+    \begin{itemize}
+        \item If the sample sizes are all equal and the errors are normally distributed with a constant variance
+        \item The centered sample means: $\bar{Y}_{i.} - \mu_i$ are independent and distributed with $\mathcal{N}(0, \sigma^2/J)$, where $\sigma^2 \approx s^2_p$. 
+    \end{itemize}
+    Tukey's method is based on the probability distribution of the random variable:
+    \begin{equation*}
+        \max_{i_1,i_2}\frac{\abs{(\bar{Y}_{i_1.} - \mu_{i_1}) - (\bar{Y}_{i_2.}-\mu_{i_2})}}{s_p/\sqrt{J}}
+    \end{equation*}
+    where maximum is taken over all pairs. This distribution is called studentized range distribution with parameter $I$ (number of samples being compared) and $I(J-1)$ (degree of freedom in $s_p$).
+\end{definition}
+
+\begin{remark}{\textbf{(Confidence Bound for Turkey Method)}}
+    The upper $100\alpha$ percentage point of the distribution is denoted by $q_{I, I(J-1)}(\alpha)$. Now, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{P}\Bigg[ &\abs{(\bar{Y}_{i_1.} - \mu_{i_1}) - (\bar{Y}_{i_2.}-\mu_{i_2})} \le q_{I, I(J-1)}(\alpha)\frac{s_p}{\sqrt{J}} , \text{ for all } i_1, i_2 \Bigg] \\
+        &=\mathbb{P}\Bigg[ \max_{i_1,i_2}\abs{(\bar{Y}_{i_1.} - \mu_{i_1}) - (\bar{Y}_{i_2.}-\mu_{i_2})} \le q_{I, I(J-1)}(\alpha)\frac{s_p}{\sqrt{J}} \Bigg] = 1-\alpha \\
+    \end{aligned}
+    \end{equation*}
+    This can be converted to confidence interval as that holds for all differeces $\mu_{i_1} - \mu_{i_2}$ with confidence $100(1-\alpha)\%$. The interval are:
+    \begin{equation*}
+        \bar{Y}_{i_1.} - \bar{Y}_{i_2.} \pm q_{I, I(J-1)}(\alpha)\frac{s_p}{\sqrt{J}}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Bonferroni Method)}}
+    If $k$ null hypotheses are to be tested, a desired overally type I error rate of at most $\alpha$ can be guarantee by testing each null hypothesis at level $\alpha/k$, and so if $k$ confidence intervals are each formed to have a confidence level $100(1-\alpha/k)\%$, they hold simulataneously with confidence interval of at least $100(1-\alpha)\%$
+\end{definition}
+
+
+\begin{definition}{\textbf{(Kruskal-Wallis Test)}}
+    The observations are assumed to be independent, but no particular distributional form. We consider:
+    \begin{equation*}
+        R_{ij} = \text{ the rank of }  Y_{ij} \text{ in the sample.}
+    \end{equation*}
+    Let's consider the following quantities:
+    \begin{equation*}
+        \bar{R}_{i.} = \frac{1}{J_i}\sum^{J_i}_{j=1} R_{ij} \qquad \bar{R}_{..} = \frac{1}{N}\sum^I_{i=1}\sum^{J_i}_{j=1} R_{ij} = \frac{N+1}{2} \qquad SS_\text{B} = \sum^I_{i=1}J_i(\bar{R}_{i.} - \bar{R}_{..})^2
+    \end{equation*}
+    $SS_\text{B}$ is the measure of dispersion of $\bar{R}_{i.}$ where the larger $SS_\text{B}$ is the stronger is the evidence against the null hypotheses. The exact null distribution of this statistics for various combination of $I$ and $J_i$ can be enumerated. Or, we can use the statistics:
+    \begin{equation*}
+        K = \frac{12}{N(N+1)}SS_\text{B}
+    \end{equation*}
+    is approximately distributed as $\chi^2_{I-1}$. The value of $K$ can be found by running the ranks through and analysis of variance program. It can be shown that:
+    \begin{equation*}
+        K = \frac{12}{N(N+1)}\bracka{\sum^I_{i=1}J_i\bar{R}_i^2} - 3(N-1)
+    \end{equation*}
+    which is easier to compute by hand. 
+\end{definition}
+
+\subsection{Two-Way Layout}
+
+\begin{definition}{\textbf{(Two-Way Layout)}}
+    Two-Way Layout is an experimental design involving 2 factors. The level of one factor might be various drugs and the level of the other factor might be genders. If there are $I$ levels of one factor and $J$ of the other, then there are $I\times J$ combinations. We will assume that $K$ independent observations are taken for each of these combination. We will assume that there are $K>1$ observations per cell.
+\end{definition}
+
+\begin{remark}{\textbf{(Statistical Models)}}
+    This leads to the simple additive model as:
+    \begin{equation*}
+        \hat{Y}_{ij} = \hat{\mu} + \hat{\alpha}_i + \hat{\beta}_j
+    \end{equation*}
+    We use the $\hat{Y}_{ij}$ to denote the fitted or predicted value of $Y_{ij}$. According to this additive model, we have:
+    \begin{equation*}
+        \hat{Y}_{i1} - \hat{Y}_{i2} = (\hat{\mu} + \hat{\alpha}_i + \hat{\beta}_1) - (\hat{\mu} + \hat{\alpha}_i + \hat{\beta}_2) = \hat{\beta}_1 - \hat{\beta}_2
+    \end{equation*}
+    This may not always be the case as there can be \emph{interaction} between each factors, and so this can be incorporated into the model to make it fit the data exactly. Consider the residual in cell $ij$ to be:
+    \begin{equation*}
+    \begin{aligned}
+        Y_{ij} = \hat{\mu} + \hat{\alpha}_i + \hat{\beta}_j + \hat{\delta}_{ij}
+    \end{aligned}
+    \end{equation*}
+    Please note that the transformation can be used to stabilize the variance. Finally, to include the random error the model is given as:
+    \begin{equation*}
+        Y_{ijk} = \mu + \alpha_i + \beta_j + \delta_{ij} + \varepsilon_{ijk}
+    \end{equation*}
+    where $\varepsilon_{ijk} \sim \mathcal{N}(0, \sigma^2)$, thus we have the following expected value: $\mathbb{E}[Y_{ijk}] = \mu + \alpha_i + \beta_j + \delta_{ij}$. The parameter will satisfy the following constraints to be:
+    \begin{equation*}
+        \sum^I_{i=1}\alpha_i = 0 \qquad \sum^J_{j=1}\beta_j = 0 \qquad \sum^I_{i=1}\delta_{ij} = \sum^J_{j=1}\delta_{ij} = 0
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}{\textbf{(MLE Estimate of Statistical Model)}}
+    The cell $ij$ are normally distributed with mean $\mu + \alpha_i + \beta_j + \delta_{ij}$ and variance $\sigma^2$. The MLE, given the constraints, is 
+    \begin{equation*}
+    \begin{aligned}
+        &\hat{\mu} = \bar{Y}_{...} \\
+        &\hat{\alpha}_i = \bar{Y}_{i..} - \bar{Y}_{...} \qquad i = 1,\dots,I \\
+        &\hat{\beta}_j = \bar{Y}_{.j.} - \bar{Y}_{...} \qquad j = 1,\dots,J \\
+        &\hat{\delta}_{ij} = \bar{Y}_{ij.} - \bar{Y}_{i..} - \bar{Y}_{.j.} + \bar{Y}_{...} \\
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We have the following log-likelihood:
+    \begin{equation*}
+        l = -\frac{IJK}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}(Y_{ijk} - \mu - \alpha_i - \beta_j - \delta_{ij})^2
+    \end{equation*}
+    Setting the derivative subjected to constraints gives us the MLE.
+\end{proof}
+
+\begin{proposition}{\textbf{(Sum of Square Decomposition)}}
+    We can consider the sum of the square to be:
+    \begin{equation*}
+    \begin{aligned}
+        &SS_\text{A} = JK\sum^I_{i=1}(\bar{Y}_{i..} - \bar{Y}_{...})^2 \\
+        &SS_\text{B} = IK\sum^J_{j=1}(\bar{Y}_{.j.} - \bar{Y}_{...})^2 \\
+        &SS_\text{AB} = K\sum^I_{i=1}\sum^J_{j=1} (\bar{Y}_{ij.} - \bar{Y}_{i..} - \bar{Y}_{.j.} + \bar{Y}_{...})^2 \\
+        &SS_\text{E} = \sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}(Y_{ijk} - \bar{Y}_{ij.})^2 \\
+        &SS_\text{TOT} = \sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}(Y_{ijk} - \bar{Y}_{...})^2 \\
+    \end{aligned}
+    \end{equation*}
+    The sum of square satisfy the algebraic identity:
+    \begin{equation*}
+        SS_\text{TOT} = SS_\text{A} + SS_\text{B} + SS_\text{AB} + SS_\text{E}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    This identity is proved by writing, follows:
+    \begin{equation*}
+        Y_{ijk} - \bar{Y}_{...} = (Y_{ijk} - \bar{Y}_{ij.}) + (\bar{Y}_{i..} - \bar{Y}_{...}) + (\bar{Y}_{.j.} - \bar{Y}_{...}) + (\bar{Y}_{ij.} - \bar{Y}_{i..} - \bar{Y}_{.j.} + \bar{Y}_{...})
+    \end{equation*}
+    Squaring both side, summing and verifying that the cross product vanishes. 
+\end{proof}
+
+\begin{proposition}
+    Under the assumption that the errors are independent with means $0$ and variance $\sigma^2$:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{E}[SS_\text{A}] = (I-1)\sigma^2 + JK\sum^I_{i=1}\alpha_i^2  \\
+        &\mathbb{E}[SS_\text{B}] = (J-1)\sigma^2 + IK\sum^J_{j=1}\beta^2_j \\
+        &\mathbb{E}[SS_\text{AB}] = (I-1)(J-1)\sigma^2 + K\sum^I_{i=1}\sum^J_{j=1}\delta^2_{ij} \\
+        &\mathbb{E}[SS_\text{E}] = IJ(K-1)\sigma^2
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    The result of $SS_\text{A}$, $SS_\text{B}$ and $SS_\text{E}$. Apply the lemma to $SS_\text{TOT}$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[SS_\text{TOT}] &= \mathbb{E}\brackb{\sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}(Y_{ijk} - \bar{Y}_{...})^2}  \\
+        &= (IJK-1)\sigma^2 + \sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}(\alpha_i + \beta_j + \delta_{ij})^2 \\
+        &= (IJK - 1)\sigma^2 + JK\sum^I_{i=1}\alpha_i^2 + IK\sum^J_{j=1}\beta^2_j + K\sum^I_{i=1}\sum^J_{j=1}\delta_{ij}^2
+    \end{aligned}
+    \end{equation*}
+    The last step, we use the constraints on parameter. For example, we have:
+    \begin{equation*}
+        \sum^I_{i=1}\sum^J_{j=1}\sum^K_{k=1}\alpha_i\beta_j = K\bracka{\sum^I_{i=1}\alpha_i}\bracka{\sum^J_{j=1}\beta_j} = 0
+    \end{equation*}
+    The values of expectation now follows.
+\end{proof}
+
+\begin{theorem}
+    Assume that the error are independent and noramlly distributed with mean $0$ and variance $\sigma^2$, then:
+    \begin{itemize}
+        \item $SS_\text{E}/\sigma^2$ follows a $\chi^2$-distribution with $IJ(K-1)$ degree of freedom. 
+        \item Under null hypotheses: $H_A : \alpha_i = 0, i=1,\dots,I$ where $SS_\text{A}/\sigma^2$ follows a $\chi^2_{I-1}$-distribution 
+        \item Under null hypotheses: $H_B : \beta_j = 0, j=1,\dots,J$ where $SS_\text{B}/\sigma^2$ follows a $\chi^2_{J-1}$-distribution
+        \item Under null hypotheses: $H_{AB} : \beta_{ij} = 0, i=1,\dots,I, j=1,\dots,J$ where $SS_\text{AB}/\sigma^2$ follows a $\chi^2_{(I-1)(J-1)}$-distribution
+        \item Sums of squares are independently distributed
+    \end{itemize}
+\end{theorem}
+
+\begin{remark}{\textbf{(On the use of F-Test)}}
+    The format of F-Test is the same. The mean squares are the sums of squares divided by their degree of freedom and $F$ statistics are ratios of means squares. Let's consider the example:
+    \begin{itemize}
+        \item We have the following quantities $\mathbb{E}[MS_\text{A}] = \sigma^2 + (JK/(I-1))\sum_i\alpha_i^2$ and $\mathbb{E}[MS_\text{E}]= \sigma^2$
+        \item If the ratio $MS_\text{A}/MS_\text{E}$ is large, it suggested that some $\alpha_i$ is non-zero. 
+        \item The null distribution of this $F$-statistics is $F_{(I-1), IJ(K-1)}$
+    \end{itemize}
+\end{remark}
+
+\subsection{Randomized Block Design}
+
+\begin{definition}{\textbf{(Randomized Block Design)}}
+    We want to study the effects of $I$ different fertilizers, with $J$ relatively homogeneous plots of land, each is divided into $I$ plots. Within each block the assignment of fertilizer to plot is made at random, by comparing fertilizers within blocks, the variablity between blocks, which would contribute \correctquote{noise} to the result is control. 
+\end{definition}
+
+\begin{remark}{\textbf{(Deriving the Null Distribution)}}
+    The null distribution of a test statistics can be dervied from the permuation argument just like null distribution of the Mann-Whitney test. The parameteric test can be a good approximation as we use the following model:
+    \begin{equation*}
+        a
+    \end{equation*}
+    We will assume no interaction between the blocks and treatements. 
+\end{remark}
+
+\begin{proposition}
+    We can show that, using the same calculation as above result, and consider no interaction:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{E}[MS_\text{A}] = \sigma^2 + \frac{J}{I-1}\sum^I_{i=1}\alpha_i^2 \\
+        &\mathbb{E}[MS_\text{B}] = \sigma^2 + \frac{I}{J-1}\sum^J_{j=1}\beta_j^2 \\
+        &\mathbb{E}[MS_\text{AB}] = \sigma^2
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}
+    We can see that we can estimate $\sigma^2$ from $MS_\text{AB}$. The mean squares are independently distributed, $F$ test can be performed to test, the hypotheses: $H_A : \forall i \in [I] : \alpha_i = 0$ uses the following statistics
+    \begin{equation*}
+        F = \frac{MS_\text{A}}{MS_\text{AB}}
+    \end{equation*}
+    where under $H_A$, this statistics follows an $F$-distribution with $I-1$ and $(I-1)(J-1)$ degree of freedom. Contrary to the assumption, there is an interaction then:
+    \begin{equation*}
+        \mathbb{E}[MS_\text{AB}] = \sigma^2 + \frac{1}{(I-1)(J-1)}\sum^I_{i=1}\sum^J_{j=1}\delta_{ij}^2
+    \end{equation*}
+    As $MS_\text{AB}$ will tend to overestimate $\sigma^2$ making $F$ statistics to be small that it should be. 
+\end{remark}
+
+\begin{definition}{\textbf{(Friedman's Test)}}
+    Like all non-parameteric methods, Friedman's test relies on ranks and doesn't assume normality. Within each of $J$ blocks, the observation is ranked. To test the hypothesis that there is no effect due to factor corresponding to treatments $I$, we use the following statistics:    
+    \begin{equation*}
+        SS_\text{A} = J\sum^I_{i=1}(\bar{R}_{i.} - \bar{R}_{..})^2
+    \end{equation*}
+    Under null hypothesis there is no treatment effect, the permuation distribution of the statistics can be calculated. 
+\end{definition}
+
+\begin{definition}{\textbf{(Approxiation of Friedman's Test)}}
+    For the large sample sizes, we can use the approximation of friedman's test where the null distribution is, given as:
+    \begin{equation*}
+        Q = \frac{12J}{I(I+1)}\sum^I_{i=1}(\bar{R}_{i.} - \bar{R}_{..})^2
+    \end{equation*} 
+    is approximately $\chi^2_{I-1}$.
+\end{definition}
+

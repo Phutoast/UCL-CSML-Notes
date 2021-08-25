@@ -1,0 +1,302 @@
+\section{Support Vector Machine}
+
+\subsection{Forming Problems}
+
+\begin{definition}{\textbf{(Seperating Hyperplane)}}
+    Let the dataset be $S = \brackc{(\boldsymbol x_i, y_i)}^m_{i=1} \in \mathbb{R}^n \times \brackc{-1, 1}$. The hyperplane is the set such that:
+    \begin{equation*}
+        \mathcal{H}_{\boldsymbol w, b} = \brackc{\boldsymbol x\in \mathbb{R}^n : \boldsymbol w^T\boldsymbol x + b = 0}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Linearly Separatable)}}
+    The data are linearly separatable if there exists $\boldsymbol w \in \mathbb{R}^n$ and $b\in \mathbb{R}$ such that:
+    \begin{equation*}
+        y_i(\boldsymbol w^T\boldsymbol x_i + b) > 0
+    \end{equation*}
+    for $i=1,\dots,m$, which we call $\mathcal{H}_{\boldsymbol w, b}$ a separating hyperplane. Note that it is a strict inequality. 
+\end{definition}
+
+\begin{proposition}{\textbf{(Finding A distance from Plane)}}
+    If $\mathcal{H}_{\boldsymbol w, b}$ is a hyperplane, we also define the distance from a point $\boldsymbol x$ to be:
+    \begin{equation*}
+        \frac{\boldsymbol w^T\boldsymbol x + b}{\norm{\boldsymbol w}}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the projection from the point $\boldsymbol x$ to $\mathcal{H}_{\boldsymbol w, b}$ as we have:
+    \begin{equation*}
+        \boldsymbol p = \boldsymbol x - \frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}
+    \end{equation*}
+    To show that $\boldsymbol p$ is indeed a projection:
+    \begin{itemize}
+        \item We will have to show that $\boldsymbol p$ is on hyperplane 
+        \begin{equation*}
+            \boldsymbol w^T\boldsymbol p + b = \boldsymbol w^T\boldsymbol x - \frac{\boldsymbol w^T\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2} + b = 0
+        \end{equation*}
+        \item $\boldsymbol x-p$ is orthogonal to $\boldsymbol p - \boldsymbol x'$ where $\boldsymbol x'$ is any point from on the hyperplane:
+        \begin{equation*}
+        \begin{aligned}
+        (\boldsymbol p-\boldsymbol x)^T(\boldsymbol p-\boldsymbol x')
+        &= \brackd{-\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \boldsymbol p - \boldsymbol x'} \\
+        &= \brackd{-\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \boldsymbol x - \frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2} - \boldsymbol x'} \\
+        &= \brackd{-\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \boldsymbol x - \boldsymbol x'} + \brackd{\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}} \\
+        &= \brackd{-\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \boldsymbol x - \boldsymbol x'} + \frac{\norm{\boldsymbol w}^2(b + \boldsymbol w^T\boldsymbol x)^2}{\norm{\boldsymbol w}^4} \\
+        &= -\frac{b + \boldsymbol w^T\boldsymbol x}{\norm{\boldsymbol w}^2}\brackd{\boldsymbol w, \boldsymbol x - \boldsymbol x'} + \frac{(b + \boldsymbol w^T\boldsymbol x)^2}{\norm{\boldsymbol w}^2} \\
+        &= -\frac{(b + \boldsymbol w^T\boldsymbol x)(\boldsymbol w^T\boldsymbol x - \boldsymbol w^T\boldsymbol x')}{\norm{\boldsymbol w}^2}\brackd{\boldsymbol w, \boldsymbol x - \boldsymbol x'} + \frac{(b + \boldsymbol w^T\boldsymbol x)^2}{\norm{\boldsymbol w}^2} \\
+        &= -\frac{b(\boldsymbol w^T\boldsymbol x) - b(\boldsymbol w^T\boldsymbol x') + (\boldsymbol w^T\boldsymbol x)^2 - (\boldsymbol w^T\boldsymbol x)(\boldsymbol w^T\boldsymbol x')}{\norm{\boldsymbol w}^2} + \frac{(b + \boldsymbol w^T\boldsymbol x)^2}{\norm{\boldsymbol w}^2} \\
+        &= -\frac{b(\boldsymbol w^T\boldsymbol x) + b^2 + (\boldsymbol w^T\boldsymbol x)^2 + (\boldsymbol w^T\boldsymbol x)b}{\norm{\boldsymbol w}^2} + \frac{(b + \boldsymbol w^T\boldsymbol x)^2}{\norm{\boldsymbol w}^2} =0 \\
+        \end{aligned}
+        \end{equation*}
+        Please note that $\boldsymbol w^T\boldsymbol x' + b = 0$.
+    \end{itemize}
+    Now, we are left to find the distance between $\boldsymbol p$ and $\boldsymbol x$, which we can find it to be:
+    \begin{equation*}
+        \sqrt{(\boldsymbol p - \boldsymbol x)^T(\boldsymbol p - \boldsymbol x)} = \sqrt{\brackd{\frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}, \frac{\boldsymbol w(b + \boldsymbol w^T\boldsymbol x)}{\norm{\boldsymbol w}^2}}} = \frac{\abs{b + \boldsymbol x^T\boldsymbol w}}{\norm{\boldsymbol w}}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{definition}{\textbf{(Margin)}}
+    As we have the distance from a point $\boldsymbol x$ to the plane $\mathcal{H}_{\boldsymbol w, b}$ to be $\rho_{\boldsymbol x}(\boldsymbol w, b)$ . If $\mathcal{H}_{\boldsymbol w, b}$ separates the training set $S$, we define a margin as:
+    \begin{equation*}
+        \rho_S(\boldsymbol w, b ) = \min_{i \in [m]}\rho_{\boldsymbol x_i}(\boldsymbol w, b)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Optimal Separating Hyper-Planes)}}
+    We want to find the weight and bias of a separating hyperplane such that the the margin is maximized :
+    \begin{equation*}
+        \rho(S) = \max_{\boldsymbol w, b}\min_{i\in[m]}\brackc{\frac{y_i(\boldsymbol w^T\boldsymbol x_i + b)}{\norm{\boldsymbol w}} : y_j (\boldsymbol w^T\boldsymbol x_j + b) > 0 \text{ for } j \in [m] }
+    \end{equation*}
+    Furthermore, to get the unqiue $\boldsymbol w, b$, we may consider $2$ choices:
+    \begin{itemize}
+        \item Set $\norm{\boldsymbol w} = 1$, so $\rho_{\boldsymbol x}(\boldsymbol w, b) = \abs{\boldsymbol w^T\boldsymbol x + b}$ and so:
+        \begin{equation*}
+            \rho_S = \min_{i\in[m]}y_i(\boldsymbol w^T\boldsymbol x_i + b)
+        \end{equation*}
+        \item Choose $\norm{\boldsymbol w}$ such that $\rho_S(\boldsymbol w, b) = 1/\norm{\boldsymbol w}$ or:
+        \begin{equation*}
+            \min_{i\in[m]} y_i(\boldsymbol w^T\boldsymbol x_i + b) = 1
+        \end{equation*}
+    \end{itemize}
+    We will consider the second case.
+\end{definition}
+
+\begin{proposition}
+    The optimal separating hyperplane is equivalent to following optimization problem:
+    \begin{equation*}
+        \begin{aligned}
+        \min_{w,b} \quad & \frac{1}{2}\boldsymbol w^{T}\boldsymbol w \\
+        \text{\emph{s.t}} \quad & y_{i}(\boldsymbol w^T\boldsymbol x_i + b)\ge1\\
+        \end{aligned}
+    \end{equation*}
+    for $\boldsymbol w \in \mathbb{R}^n$. The quantity $1/\norm{\boldsymbol w}$ is the margin of optimal separating hyperplane.
+\end{proposition}
+\begin{proof}
+    We have following the second case:
+    \begin{equation*}
+    \begin{aligned}
+        \rho(S) &= 
+        \max_{\boldsymbol w, b}\brackc{\frac{1}{\norm{\boldsymbol w}} : \min_{j\in[m]}\brackc{y_j (\boldsymbol w^T\boldsymbol x_j + b)} = 0, y_k(\boldsymbol w^T\boldsymbol x_k + b)>0 \text{ for } k \in [m]} \\
+        &= \max_{\boldsymbol w, b}\brackc{\frac{1}{\norm{\boldsymbol w}} : \brackc{y_j (\boldsymbol w^T\boldsymbol x_j + b)} \ge 1} = \frac{1}{\min_{\boldsymbol w, b}\brackc{\norm{\boldsymbol x} : \brackc{y_j (\boldsymbol w^T\boldsymbol x_j + b)} \ge 1}} \\
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    To minimize a differentiable convex function $f(\boldsymbol z) : \mathbb{R}^n \rightarrow \mathbb{R}$ subjected to linear inequality $\boldsymbol A\boldsymbol z \le \boldsymbol c$. We may solve the problem with Lagragian:
+    \begin{equation*}
+        L(\boldsymbol x, \boldsymbol \alpha) = f(\boldsymbol x) - \boldsymbol \alpha^T(\boldsymbol A\boldsymbol x - c)
+    \end{equation*}
+    If the optimization problem is feasible that is $\brackc{\boldsymbol x : \boldsymbol A\boldsymbol x \le \boldsymbol c} \ne \emptyset$, we can show that:
+    \begin{equation*}
+        \max_{\boldsymbol \alpha\ge\boldsymbol 0}\min_{\boldsymbol x}L(\boldsymbol x, \boldsymbol \alpha) = \min_{\boldsymbol x}f(\boldsymbol x) \text{ s.t } \boldsymbol A\boldsymbol x\le \boldsymbol c
+    \end{equation*}
+    And there is a necessary and sufficient condition called KKT for a solution $(\boldsymbol \alpha^*\boldsymbol z^*)$:
+    \begin{itemize}
+        \item $\boldsymbol A\boldsymbol x^* \le \boldsymbol c$
+        \item $\boldsymbol \alpha^* \ge \boldsymbol 0$
+        \item $\nabla_{\boldsymbol x}L(\boldsymbol x, \boldsymbol \alpha) | _{\boldsymbol x^*} = \boldsymbol 0$
+        \item $(\boldsymbol A\boldsymbol x^* - \boldsymbol c)_i\boldsymbol \alpha^*_i = \boldsymbol 0_i$ for $i\in[m]$
+    \end{itemize}
+\end{proposition}
+
+\begin{proposition}
+    The dual form for the SVM is:
+    \begin{equation*}
+    \begin{aligned}
+        \max_{\boldsymbol \alpha} \quad &-\frac{1}{2}\boldsymbol \alpha^T\boldsymbol A\boldsymbol \alpha + \sum^m_{i=1}\alpha_i \\
+        \text{\emph{s.t}} \quad &\begin{aligned}[t]
+            &\sum^m_{i=1}y_i\alpha_i = 0 \text{ \emph{for} } i \in [m] \\
+            &\alpha_i \ge 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $\boldsymbol A = (y_iy_j\boldsymbol x_i^T\boldsymbol x_j : i,j\in[m])$. The solution to the primal problem is:
+    \begin{equation*}
+        \boldsymbol w^* = \sum^m_{i=1}\alpha^*_iy_i\boldsymbol x_i
+    \end{equation*}
+    as the weight is the linear combination of the data. Finally the variable $b^*$ can be determine by find the weight $\boldsymbol x_j$ that satisfies the condition:
+    \begin{equation*}
+        y_i((\boldsymbol w^*)^T\boldsymbol x_i + b) - 1 = 0
+    \end{equation*}
+    Then we bias can be found by rearrange as we have $b^* = y_i- (\boldsymbol w^*)^T\boldsymbol x_j$. The point that satisfies this conditon is called \emph{support vector}.
+\end{proposition}
+\begin{proof}
+    We consider the Lagragian to be:
+    \begin{equation*}
+        L(\boldsymbol w, b; \boldsymbol \alpha) = \frac{1}{2}\boldsymbol w^T\boldsymbol w - \sum^m_{i=1}\alpha_i[y_i(\boldsymbol w^T\boldsymbol x_i + b) - 1]
+    \end{equation*}
+    where $\alpha_i\ge0$ is Lagragian multipler. Let's minimize $L$ over $\boldsymbol w$ and $b$ and maximized over $\boldsymbol \alpha$ with $\boldsymbol \alpha \ge \boldsymbol 0$. We can see that the partial derivative is:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial L}{\partial b} = -\sum^m_{i=1}y_i\alpha_i = 0 \\
+        &\frac{\partial L}{\partial \boldsymbol w} = \boldsymbol w - \sum^m_{i=1}\alpha_iy_i\boldsymbol x_i = 0 \implies \boldsymbol w = \sum^m_{i=1}\alpha_iy_i\boldsymbol x_i
+    \end{aligned}
+    \end{equation*}
+    Now, we can see that the optimal weight will have the linear combination term. Let's plugging this back into Lagragian and we have:
+    \begin{equation*}
+        \frac{1}{2}\underbrace{\boldsymbol w^T\boldsymbol w}_{\boldsymbol \alpha^T\boldsymbol A\boldsymbol \alpha} - \underbrace{\sum^m_{i=1}\alpha_iy_i\boldsymbol w^T\boldsymbol x_i}_{\boldsymbol \alpha^T\boldsymbol A\boldsymbol \alpha} - \underbrace{b\sum^m_{i=1}\alpha_iy_i}_{0} + \sum^m_{i=1}\alpha_i
+    \end{equation*}
+\end{proof}
+\begin{remark}
+    The new point $\boldsymbol x$ can be classified as:
+    \begin{equation*}
+        \operatorname{sign}\bracka{\sum^m_{i=1}y_i\alpha^*_i\boldsymbol x_i^T\boldsymbol x_i + b^*}
+    \end{equation*}   
+    One can show that the expected generalization error of SVM trained on $m-1$ sample is bounded by $n_\text{sv}/m$, where $n_\text{sv}$ is the number of support vector.
+\end{remark}
+
+\begin{remark}{\textbf{(Linear Non-Separatable Case)}}
+    We would like to minimize the following objective function:
+    \begin{equation*}
+        \frac{1}{2}\boldsymbol w^T\boldsymbol w + C\sum^m_{i=1}V_\text{mc}(y_i, \boldsymbol w^T\boldsymbol x_i + b)
+    \end{equation*}
+    as we have $V_\text{mc}(y, \hat{y}) = \mathbb{I}[y = \operatorname{sign}(\hat{y})]$ but it is NP-Hard and so we will have to convexify the problem by consider the hinge loss, instead:
+    \begin{equation*}
+        V_\text{hinge}(y, \hat{y}) = \max(0, 1-h\hat{y})
+    \end{equation*}
+    This will gives us the convex optimization. 
+\end{remark}
+
+\begin{proposition}
+    The hinge loss can be reformulated using the slack variable and gives us the following optimization problem:
+    \begin{equation*}
+        \begin{aligned}
+        \min_{w,b} \quad & \frac{1}{2}\boldsymbol w^{T}\boldsymbol w + C\sum^m_{i=1}\xi_i \\
+        \text{\emph{s.t}} \quad & \begin{aligned}[t]
+            &y_{i}(\boldsymbol w^T\boldsymbol x_i + b)\ge1-\xi_i\\
+            &\xi_i \ge 0 \text{ for } i \in i=1,\dots,m
+        \end{aligned} 
+        \end{aligned}
+    \end{equation*}
+    This would in turn, gives us the following dual problem:
+    \begin{equation*}
+    \begin{aligned}
+        \max_{\boldsymbol \alpha} \quad &-\frac{1}{2}\boldsymbol \alpha^T\boldsymbol A\boldsymbol \alpha + \sum^m_{i=1}\alpha_i \\
+        \text{\emph{s.t}} \quad &\begin{aligned}[t]
+            &\sum^m_{i=1}y_i\alpha_i = 0 \text{ \emph{for} } i \in [m] \\
+            &0\le\alpha_i \le C
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    We will consider the implication of KKT conditon afterward.
+\end{proposition}
+\begin{proof}
+    We now have the following Lagragian to be:
+    \begin{equation*}
+        L(\boldsymbol w, b; \boldsymbol \alpha) = \frac{1}{2}\boldsymbol w^T\boldsymbol w + C\sum^m_{i=1}\xi_i - \sum^m_{i=1}\alpha_i[y_i(\boldsymbol w^T\boldsymbol x_i + b) - 1] - \sum^m_{i=1}\beta_i\xi_i
+    \end{equation*}
+    where $\alpha_i, \beta_i \ge 0$ are Lagragian multipler. We minimize $L$ over $(\boldsymbol w, \boldsymbol \xi, b)$ and maxmize $L$ with respected to the variables as:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial L}{\partial b} = -\sum^m_{i=1}y_i\alpha_i = 0  \\
+        &\frac{\partial L}{\partial \boldsymbol w} = \boldsymbol w - \sum^m_{i=1}\alpha_iy_i\boldsymbol x_i = 0 \implies \boldsymbol w = \sum^m_{i=1}\alpha_iy_i\boldsymbol x_i  \\
+        &\frac{\partial L}{\partial \xi_i} = c - \alpha_i - \beta_i = 0 \implies 0 \le \alpha_i \le C  \\
+    \end{aligned}
+    \end{equation*}
+    Plugging this back gives us the dual form. Please note that both $\alpha_i, \beta_i \ge 0$
+\end{proof}
+
+\begin{remark}{\textbf{(Interpretation of The Results)}}
+    The dual problem is similar to the eariler linear separatable case, as we have additional box constraint. The weight is given as:
+    \begin{equation*}
+        \boldsymbol w^* = \sum^m_{i=1}\alpha_i^*y_i\boldsymbol x_i
+    \end{equation*}
+    where $\boldsymbol b^*$ is the same. For a new KKT conditon, we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\alpha_i^*(y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* - 1 + \xi^*_i) = 0 \\
+        &(C-\alpha^*_i)\xi^*_i = 0
+    \end{aligned}
+    \end{equation*}
+    where the second equation follows from $\beta_i^* = C - \alpha^*_i$. There are difference points to consider:
+    \begin{itemize}
+        \item $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* > 1$ implies that $\alpha_i^* = 0$ where the point isn't support vector. 
+        \item $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* < 1$ implies that $\alpha_i^* = C$ where the point is a support vector slack $\xi^*_i$ outlier. 
+        \item $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* = 1$ implies that $\alpha_i^* \in [0, C]$ and if $\alpha_i^*>0$, it is a support vector on a margin. 
+    \end{itemize}
+    On the otherhand, we have:
+    \begin{itemize}
+        \item $\alpha_i^* = 0$ then we have $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* \ge 1$ and $\xi_i^*=0$
+        \item $\alpha_i^* \in (0, C)$ then we have $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* = 1$ and $\xi_i^*=0$
+        \item $\alpha_i^* = C$ then we have $y_i(\boldsymbol w^*)^T\boldsymbol x_i + b^* \le 1$ and $\xi_i^*\ge0$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    The role of parameter $C$ is that:
+    \begin{itemize}
+        \item The parameter $C$ controls the trade-off between $\norm{\boldsymbol w}^2$ and the training error $\sum^m_{i=1}\xi_i$
+        \item The value of $\alpha_i^*$ is piecewise quadratic of $C$
+        \item $C$ is selected by minimizing leave-one-out (LOO) cross-validation error.
+    \end{itemize}
+    To compute the LOO error, we need to retrain the SVM no more than the number of support vector making it fast to train. One can observe that we can use the $n_\text{sv}/m$ as an upper bound on LOO error.
+\end{remark}
+
+
+\begin{definition}{\textbf{(Kernelized SVM)}}
+    Given the feature map $\boldsymbol \phi(\boldsymbol x) : \mathcal{X} \rightarrow \mathcal{W}$, we can replace $\boldsymbol x$ with $\boldsymbol \phi(\boldsymbol x)$ and $\boldsymbol x^T\boldsymbol t$ by $\brackd{\boldsymbol \phi(\boldsymbol x), \boldsymbol \phi(\boldsymbol t)}$. The result function is:
+    \begin{equation*}
+        f(\boldsymbol x) = \sum^m_{i=1}y_i\alpha_i k(\boldsymbol x_i, \boldsymbol x) + b
+    \end{equation*}
+    The parameter can be found using the matrix $\boldsymbol A = (y_iy_jk(\boldsymbol x_i, \boldsymbol x_j) : i, j \in[m])$ and the new point is classified the same. 
+\end{definition}
+
+\begin{remark}{\textbf{(Connection to the Regularization)}}
+    SVM formulation is equivalent to the following problem:
+    \begin{equation*}
+        \mathcal{E}_\lambda = \sum^m_{i=1} \max\Big( 1 - y_i\bracka{\brackd{\boldsymbol w, \boldsymbol \phi(\boldsymbol x_i)} + b}, 0 \Big) + \lambda\norm{\boldsymbol w}^2
+    \end{equation*}
+    where we set $\lambda = 1/(2C)$ and so we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{\boldsymbol w, b, \boldsymbol \xi} \brackc{C\sum^m_{i=1} \xi_i + \frac{1}{2}\norm{\boldsymbol w}^2 : y_i\bracka{\brackd{\boldsymbol w, \boldsymbol \phi(\boldsymbol x_i)} + b } \ge 1 - \xi_i, \xi_i\ge0} \\
+        =&\min_{\boldsymbol w, b} \brackc{\min_{\boldsymbol \xi}\brackc{C\sum^m_{i=1} \xi_i + \frac{1}{2}\norm{\boldsymbol w}^2 : y_i\bracka{\brackd{\boldsymbol w, \boldsymbol \phi(\boldsymbol x_i)} + b } \ge 1 - \xi_i, \xi_i\ge0}} \\
+        =&\min_{\boldsymbol w, b} \brackc{C\sum^m_{i=1} \Big( 1 - y_i\bracka{\brackd{\boldsymbol w, \boldsymbol \phi(\boldsymbol x_i)} + b}, 0 \Big) + \frac{1}{2}\norm{\boldsymbol w}^2} = C\mathcal{E}_{1/(2C)}(\boldsymbol w, b)
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(SVM for Regression)}}
+    If we have the regression for the SVM, then we use the following loss:
+    \begin{equation*}
+        \abs{y - f(\boldsymbol x)}_\varepsilon = \max(\abs{y - f(\boldsymbol x)} - \varepsilon, 0)
+    \end{equation*}
+    This would gives the following optimization problem:
+    \begin{equation*}
+    \begin{aligned}
+        \min & \quad \frac{1}{2}\boldsymbol w^T\boldsymbol w + C\sum^m_{i=1}(\xi_i + \xi_i^*) \\
+        \text{s.t}& \quad \begin{aligned}[t]
+            &\boldsymbol w^T\boldsymbol x_i + b - y_i \le \varepsilon + \xi_i \\
+            &y_i-\boldsymbol w^T\boldsymbol x_i - b \le \varepsilon + \xi_i^* \\
+            &\xi_i,\xi_i^* \ge 0 \text{ for } i \in [m]
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    Please note that the loss function is scale sensitive as the error below certain. This gives the sparse solution. One can use decompositve to solve all of the KKT problems.
+\end{remark}
+
+
+

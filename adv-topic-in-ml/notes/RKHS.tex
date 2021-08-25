@@ -1,0 +1,2279 @@
+\section{Introduction to RKHS}
+
+\subsection{Building a Kernel}
+
+\begin{definition}{\textbf{(Kernel)}}
+    Let $ \mathcal{X} $ be non-empty set, a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \mathbb{R} $ is a kernel if there exists a Hilbert space $\mathcal{H}$ and a feature map $\phi:\mathcal{X}\rightarrow\mathcal{H}$ such that for all $x, x'\in\mathcal{X}$:
+    \begin{equation*}
+        k(x, x') = \brackd{\phi(x), \phi(x)}_\mathcal{H}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    For a single kernel, there can be multiple features. For example, the map 
+    \begin{equation*}
+        \phi_1(x) = x \qquad \phi_2(x) = \begin{bmatrix}
+            x/\sqrt{2} \\ x/\sqrt{2}
+        \end{bmatrix}
+    \end{equation*}
+    corresponds to the same kernel.
+\end{remark}
+
+\begin{theorem}
+    \label{thm:scalar-add-mult}
+    Given $\alpha>0$ and $k, k_1, k_2$ be kernel on $\mathcal{X}$, then: $\alpha k$, $k_1 + k_2$, and $k_1\times k_2$ are kernels.
+\end{theorem}
+\begin{proof}
+    \textbf{Scalar Multiplication: } Suppose $k(\cdot, \cdot) = \brackd{\phi(\cdot), \phi(\cdot)}_\mathcal{H}$, with a feature map $\phi(\cdot) : \mathcal{X}\rightarrow\mathcal{H}$ and some points $x, x'\in\mathcal{X}$ ,we can see that 
+    \begin{equation*}
+        \alpha k(x, x') = \brackd{\sqrt{\alpha}\phi(x), \sqrt{\alpha}\phi(x')}_\mathcal{H}
+    \end{equation*} 
+    where the new feature map is $\sqrt{\alpha}\phi(\cdot)$
+
+    \textbf{Kernel Addition: } Suppose $k_1(\cdot, \cdot) = \brackd{\phi(\cdot), \phi(\cdot)}_\mathcal{A}$ and $k_2(\cdot, \cdot) = \brackd{\psi(\cdot),\psi(\cdot)}_\mathcal{B}$, where $\phi:\mathcal{X}\rightarrow\mathcal{A}$ and $\psi:\mathcal{X}\rightarrow\mathcal{A}$ are features map. Then, we can see that, for point $x, x'\in\mathcal{X}$:
+    \begin{equation*}
+        (k_1 + k_2)(x,x') = k_1(x,x') + k_2(x,x') = \brackd{ (\phi\|\psi)(\cdot), (\phi\|\psi)(\cdot) }_{\mathcal{A}}
+    \end{equation*}
+    where we define: 
+    \begin{equation*}
+        \phi(x) = \begin{bmatrix}
+            \phi_1(x) \\ \phi_2(x) \\ \phi_3(x) \\ \phi_4(x) \\\vdots 
+        \end{bmatrix} \qquad \psi(x) = \begin{bmatrix}
+            \psi_1(x) \\ \psi_2(x) \\ \psi_3(x) \\ \phi_4(x) \\\vdots 
+        \end{bmatrix} \qquad 
+        (\phi||\psi)(x) = \begin{bmatrix}
+            \phi_1(x) \\ \psi_1(x) \\ \phi_2(x) \\ \psi_2(x) \\\vdots 
+        \end{bmatrix} \qquad 
+    \end{equation*}
+
+    \textbf{Kernel Multiplication: } We assume same kernel $k_1, k_2$. We have 
+    \begin{equation*}
+    \begin{aligned}
+        k_1(x_1, x_2)k(x_1, x_2) &= \Big(\phi^T(x)\phi(x)\Big)\cdot\Big(\psi^T(x)\psi(x)\Big)\\
+        &= \text{tr}\Big(\phi^T(x)\phi(x)\psi^T(x)\psi(x)\Big) \\
+        &= \text{tr}\Big(\psi(x)\phi^T(x)\phi(x)\psi^T(x)\Big) \\
+        &= \text{tr}\Big(\brackb{\phi(x)\psi^T(x)}^T\phi(x)\psi^T(x)\Big) \\
+    \end{aligned}
+    \end{equation*}
+    The feature map for product kernel is $\Phi(\cdot) = \phi(\cdot)\psi^T(\cdot)$, and the inner product is defined as: for matrix $A, B$: 
+    \begin{equation*}
+        \brackd{A, B} = \text{tr}(A^TB)
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    Let $ \mathcal{X} $ and $\tilde{\mathcal{X}}$ be a set, and define a map $A:\mathcal{X}\rightarrow\tilde{\mathcal{X}}$ we can define a kernel $k(\cdot, \cdot)$ on $\tilde{\mathcal{X}}$, then:
+    \begin{equation*}
+        k(A(\cdot), A(\cdot))
+    \end{equation*}
+    is a kernel. 
+\end{proposition}
+\begin{proof}
+    the new kernel $\tilde{k}$ can be expressed as $\brackd{\psi(\cdot), \psi(\cdot)}_{\tilde{\mathcal{X}}}$, where $\psi = \phi\circ A$.
+\end{proof}
+
+\begin{proposition}
+    Given the kernel $k_1, k_2$ (with associated feature map $\phi$ and $\psi$ ,respectively -- note that they don't have to be unique), $k_1-k_2$ doesn't need to be kernel, nor $|k_1-k_2|$
+\end{proposition}
+\begin{proof}
+    Given $x$ where $k(x, x')=\brackd{\phi(x),\phi(x')}_\mathcal{H}$, we can see that $(k - k)(x, x) = (|k-k|)(x, x) = 0$, however as the feature map doesn't maps all $x$ to zero vector, it contradicts the definition of inner product as the product can't be zero unless both of the vectors are zero.
+\end{proof}
+
+\begin{definition}{\textbf{(Polynomial Kernel)}}
+    Given theorem \ref{thm:scalar-add-mult}, we can construct a polynomial kernel as:
+    \begin{equation*}
+        k(x, x') = (c + \brackd{x, x'})^m
+    \end{equation*}
+    and it is valid kernel. 
+\end{definition}
+
+\begin{definition}{\textbf{(Taylor Series Kernel)}}
+    For $r\in(0,\infty]$ with $a_n\ge0$ for all $n\ge0$, we have: 
+    \begin{equation*}
+        f(z) = \sum^\infty_{n=0}a_nz^n
+    \end{equation*}
+    for $|z|<r, z\in \mathbb{R}$ and we define $\mathcal{X}$ to be $\sqrt{r}$-ball in $\mathbb{R}^d$, then the Taylor series kernel is defined as:
+    \begin{equation*}
+        k(x, x') = f(\brackd{x, x'}) = \sum^\infty_{n=0}a_n\brackd{x, x'}^n
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    Taylor series kernel is kernel
+\end{lemma}
+\begin{proof}
+    There are $2$ points we have to proof:
+    \begin{itemize}
+        \item \textbf{Taylor Series Converges: } Let's show that the value of $\brackd{x, x'}$ is less than or equal to $r$ to make sure that Taylor series converges. This is the application of Cauchy-Schwarz inequality as $|\brackd{x,x'}|\le\norm{x}\cdot\norm{x'} < r$. 
+        \item \textbf{Taylor Series Kernel is Kernel: } Now, from theorem \ref{thm:scalar-add-mult}, we have an addition of kernels and multiplication to scalar, thus being a kernel.
+    \end{itemize}
+\end{proof}
+
+\begin{definition}{\textbf{(Exponentiated Quadratic Kernel)}}
+    We define an exponentiated Quadratic kernel to be 
+    \begin{equation*}
+        k(x, x') = \exp\bracka{-\gamma^{-2}\norm{x-x'}^2}
+    \end{equation*}
+\end{definition}
+
+\begin{corollary}
+    Exponentiated Quadratic Kernel is kernel.
+\end{corollary}
+\begin{proof}
+    Let's expand the definition of a square normed, then we have:
+    \begin{equation*}
+    \begin{aligned}
+        \exp\bracka{-\gamma^{-2}\norm{x-y}^2} &= \exp\bracka{-\gamma^{-2}\brackb{\norm{x}^2 - 2\brackd{x, y} + \norm{y}^2}} \\
+        & = \underbrace{\exp\bracka{-\gamma^{-2}\norm{x}^2}\exp\bracka{-\gamma^{-2}\norm{y}^2}}_{k_1(x, y)}\cdot \underbrace{\exp\bracka{2\gamma^{-2}\brackd{x, y}}}_{k_2(x, y)}
+    \end{aligned}
+    \end{equation*}
+    Thus, we have a product of $2$ kernels, where one of them is produced from a feature map $\exp(-\gamma^{-2}\norm{\cdot}^2)$ and the other comes from the Taylor series Kernel together with non-negative multiplication.
+\end{proof}
+
+\begin{definition}{\textbf{($\boldsymbol{l_2}$-Space)}}
+    The space $l_2$ comprised of all sequences $a=(a_i)_{i\ge1}$ for which 
+    \begin{equation*}
+        \norm{a}^2_{l_2} = \sum^\infty_{l=1}a_l^2 <\infty
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Infinity Dimension Kernel)}}
+    Given a sequence of function $(\phi(x)_i)_{i\ge1}$ in $l_2$ where $\phi_i:\mathcal{X}\rightarrow \mathbb{R}$ being the $i$-th coordinate of $\phi$, then we can define an infinity dimension kernel to be 
+    \begin{equation*}
+        k(x,x') = \sum^\infty_{i=1}\phi_i(x)\phi_i(x')
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    Infinity Dimension Kernel is a kernel.
+\end{theorem}
+\begin{proof}
+    We consider the norm of the kennel, and apply Cauchy Schwarz i.e:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{k(x,x')} = \norm{\sum^\infty_{i=1}\phi_i(x)\phi_i(x')} \le \norm{\phi(x)}\cdot\norm{\phi(x')} \le\infty 
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\subsection{Further Notions of Kernels and RKHS}
+
+\begin{definition}{\textbf{(Positive Definite)}}
+    A symmetric function $k:\mathcal{X}\times\mathcal{X}\rightarrow \mathbb{R}$ is positive definite if: for all $a_1,a_2,\dots,a_n\in \mathbb{R}^n$ and for all $x_1,x_2,\dots,x_n\in\mathcal{X}^n$
+    \begin{equation*}
+        \sum^n_{i=1}\sum^n_{j=1}a_ia_jk(x_i, x_j)\ge0
+    \end{equation*}
+    The function $k(\cdot,\cdot)$ is strictly positive definite if equality holds when $a_i,a_j\ne0$.
+\end{definition}
+
+\begin{theorem}
+    Let $\mathcal{H}$ be Hilbert space, $\mathcal{X}$ be non-empty set and $\phi:\mathcal{X}\rightarrow\mathcal{H}$. Then $k(x, y) = \brackd{\phi(x), \phi(y)}$ is positive definite. 
+\end{theorem}
+\begin{proof}
+    For all $a_1,a_2,\dots,a_n\in \mathbb{R}^n$ and for all $x_1,x_2,\dots,x_n\in\mathcal{X}^n$
+    \begin{equation*}
+    \begin{aligned}
+        \sum^n_{i=1}\sum^n_{j=1}a_ia_jk(x_i, x_j) &= \sum^n_{i=1}\sum^n_{j=1}\brackd{a_i\phi(x_i), a_j\phi(x_j)} \\
+        &= \brackd{\sum^n_{i=1}a_i\phi(x_i), \sum^n_{j=1}a_j\phi(x_j)} = \norm{\sum^n_{j=1}a_j\phi(x_j)}^2\ge0
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Notion of Function)}}
+    \label{def:function-dot}
+    We will represent a function, throughout the note, as a vector of real numbers; for instance, $f(\cdot) = [f_1 \ f_2 \ f_3]^T$, its evaluation will be based on a feature map $\phi(x)$, as $f(x) = \brackd{f, \phi(x)}_\mathcal{H}$ as $\mathcal{H}$ is space of functions. 
+\end{definition}
+
+\begin{remark}
+    Let's consider the example of $f:\mathbb{R}^2\rightarrow \mathbb{R}$ as:
+    \begin{equation*}
+        f(x) = \brackd{f, \phi(x)} = f_1x_1 + f_2x_2 + f_3(x_1x_2) \quad \text{ where } \quad \phi(x) = \begin{bmatrix}
+            x_1\\x_2\\x_1x_2
+        \end{bmatrix}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Representing Function as Finite Sum of Kernels)}}
+    This notion of function can be represented by infinity many feature of $f$ and $\phi(\cdot)$ as the function, which will be shown as:
+    \begin{equation*}
+        f(x) = \brackd{f, \phi(x)}_\mathcal{H} = \sum^\infty_{l=1} f_l\phi_l(x)
+    \end{equation*}
+    As we required that $\sum^\infty_{l=1}f^2_l\le\infty$ We will assume that $f_l$ can be represented in finite linear combination of the features $\phi_l(x)$:
+    \begin{equation*}
+        f_l = \sum^m_{i=1}\alpha_i \phi_l(x_i)
+    \end{equation*}
+    Then, we have:
+    \begin{equation*}
+    \begin{aligned}
+        f(x) = \brackd{\sum^m_{i=1}\alpha_i\phi(x_i), \phi(x)}_\mathcal{H} = \sum^m_{i=1}\alpha_i k(x_i, x)
+    \end{aligned}
+    \end{equation*}
+    Now, a function with infinite feature can be represented by a finite linear combination of kernels given a certain number of points.
+\end{remark}
+
+\begin{remark}{\textbf{(Feature Map is also a function)}}
+    Let's consider the simpliest case of $m=1$ with $\alpha_1=1$, we have 
+    \begin{equation*}
+        f(x) = k(x_1, x) = \brackd{\underbrace{k(x_1, \cdot)}_{f(\cdot)}, \phi(x)}_\mathcal{H} = \brackd{k(x, \cdot), \phi(x_1)}
+    \end{equation*}
+    And, so we have a kernel parameterized by $x_1$, which is a feature map by definition. And thus, we can \correctquote{swap} the notation around and assigned the coefficient to be $\phi(x_1)$, thus feature map is a function.Please note that, we can write the kernel as 
+    \begin{equation*}
+        k(x, y)=\brackd{k(x_1,\cdot), k(x_2,\cdot)}_\mathcal{H}
+    \end{equation*}
+    Now, $k(x, \cdot)$ is called canonical feature map as it is the simpliest, while there are many feature map (potentially infinite) that can construct this kernel. This means that the space of function $\mathcal{H}$ is bigger than all features at single point as it is an combination of functions. 
+\end{remark}
+
+\begin{definition}{\textbf{(Reproducing Property)}}
+    The features of RKHS have reproducing property, where for all $x\in\mathcal{X}$ and for $f(\cdot)\in\mathcal{H}$:
+    \begin{equation*}
+        f(x) = \brackd{f(\cdot), k(\cdot, x)}_\mathcal{H}
+    \end{equation*}
+    The feature map of every point is a function of kernel $k(\cdot, x) = \phi(x)\in\mathcal{H}$ where for any $x\in\mathcal{X}$, we have:
+    \begin{equation*}
+        k(x,x') = \brackd{\phi(x), \phi(x')}_\mathcal{H} = \brackd{k(\cdot,x), k(\cdot, x')}_\mathcal{H}
+    \end{equation*}
+\end{definition}
+
+\section{Smoothness of RKHS}
+
+\subsection{Periodic Case}
+
+\begin{definition}{\textbf{(Fourier Series)}}
+    We define a fourier series that represents the function on interval $[-\pi, \pi]$ with periodic boundary as:
+    \begin{equation*}
+        f(x) = \sum^\infty_{l=-\infty} \hat{f}_l \exp(ilx) = \sum^\infty_{l=-\infty}\hat{f}_l(\cos(lx) + \sin(lx))
+    \end{equation*}
+    We would like to note that the basis functions are orthogonal to each other as 
+    \begin{equation*}
+        \frac{1}{2\pi}\int^\pi_{-\pi}\exp(ilx)\overline{\exp(imx)}\dby x = \begin{cases}
+            1 & l=m \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Translation Invariance)}}
+    Translation invariance kernel is kernel that is defined by 
+    \begin{equation*}
+        k(x, y)= k(x-y)    
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    \label{remark:kernel-fourier-coeff}
+    Fourier representation of translation invariance kernel is 
+    \begin{equation*}
+        k(x, y) = \sum^\infty_{l=-\infty} \hat{k}_l \exp(il(x-y)) = \sum^\infty_{l=-\infty}\underbrace{\brackb{\sqrt{\hat{k}_l} \exp(ilx) }}_{\phi_l(x)}\underbrace{\brackb{\sqrt{\hat{k}_l}\exp(-ily)}}_{\overline{\phi_l(y)}}
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    The $L_2$ inner product of the function can be represented by Fourier series as:
+    \begin{equation*}
+        \brackd{f, g}_{L_2} = \sum^\infty_{l=-\infty}\hat{f}_l\overline{\hat{g}_l}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We expand on the definition of inner product in $L_2$:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{f, g}_{L_2} &= \int^\infty_{-\infty} f(x)\overline{g(x)}\dby x \\
+        &=\int^\infty_{-\infty}\brackb{\sum^\infty_{l=-\infty} \hat{f}_l \exp(ilx)}\cdot\overline{\brackb{\sum^\infty_{l=-\infty}\hat{g}_l\exp(ilx)}} \\
+        &=\int^\infty_{-\infty}\brackb{\sum^\infty_{l=-\infty} \hat{f}_l \exp(ilx)}\cdot\brackb{\sum^\infty_{l=-\infty}\hat{g}_l\exp(-ilx)} \\
+        &=\int^\infty_{-\infty} \sum^\infty_{l=-\infty}\hat{f}_l\overline{\hat{g}_l}\dby x + \int^\infty_{-\infty}\sum^\infty_{j=-\infty}\sum_{j\ne k}\hat{f}_j\overline{\hat{g}_k}\exp(ijx)\overline{\exp(ikx)}\dby x \\
+        &= \sum^\infty_{l=-\infty}\hat{f}_l\overline{\hat{g}_l}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Smooth Dot Product)}}
+    \label{def:dot-prod-fourier}
+    Recall the coefficient $\hat{k}_l$ from remark \ref{remark:kernel-fourier-coeff}, we define an inner product in $\mathcal{H}$ to be 
+    \begin{equation*}
+        \brackd{f, g}_\mathcal{H} = \sum^\infty_{l=-\infty} \frac{\hat{f}_l\overline{\hat{g}_l}}{\hat{k}_l}
+    \end{equation*}
+    And so, we define a dot product to be:
+    \begin{equation*}
+        \norm{f}^2_\mathcal{H} = \brackd{f, f}_\mathcal{H} = \sum^\infty_{l=-\infty} \frac{\hat{f}_l\overline{\hat{g}_l}}{\hat{k}_l} = \sum^\infty_{l=-\infty} \frac{|\hat{f}_l|^2}{\hat{k}_l}
+    \end{equation*}
+    In the case that $\hat{k}_l$ decays fast, we need to have $\hat{f}_l$ to be fast too in order to have bounded sum.
+\end{definition}
+
+\begin{remark}
+    Given the Jacobi-Theta Kernel:
+    \begin{equation*}
+        k(x, y) = \frac{1}{2\pi}\vartheta\bracka{\frac{x-y}{2\pi}, \frac{i\sigma^2}{2\pi}} \qquad \hat{k}_i =\frac{1}{2\pi}\exp\bracka{-\frac{\sigma^2l^2}{2}}
+    \end{equation*}
+    as it is a Gaussian version of \correctquote{periodic} kernel. Now given the top hat function, which is a function:
+    \begin{equation*}
+        f(x) = \begin{cases}
+            1 &|x|<T \\
+            0 &T\le|x|<\pi
+        \end{cases} \qquad \hat{f}_l = \frac{\sin(lT)}{l\pi}
+    \end{equation*}
+    We can see that the top hat function isn't in a Gaussian spectrum RKHS. As we can show that $\norm{f}^2_\mathcal{H}$ won't converge. This is because $|\hat{f}_l|^2$ decays polynomial in $l$, while $\hat{k}_l$ decays in exponential of $l$. Thus, the norm doesn't converge.
+\end{remark}
+
+\begin{proposition}
+    \label{prop:fourier-reproducing}
+    We can show that 
+    \begin{equation*}
+        \brackd{f(\cdot), k(\cdot, z)}_\mathcal{H} = f(z) 
+    \end{equation*}
+    where $\brackd{\cdot, \cdot}_\mathcal{H}$ is defined in \ref{def:dot-prod-fourier}. Thus, it has the reproducing property. And, we can show that:
+    \begin{equation*}
+        \brackd{k(\cdot, y), k(\cdot, z)} = k(y, z)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    \textbf{First Statement: } We consider the following function:
+    \begin{equation*}
+        g(x) = k(x-z) = \sum^\infty_{l=-\infty} \exp(ilx)\underbrace{\hat{k}_l\exp(-ilz)}_{g_l}
+    \end{equation*}
+    Now, the dot product is equal to:
+    \begin{equation*}
+        \brackd{f(\cdot), g(\cdot)} = \sum^\infty_{l=-\infty} \hat{f}_l\frac{\hat{k}_l\exp(ilz)}{\hat{k}_l} = \sum^\infty_{l=-\infty} \hat{f}_l\exp(ilz) = f(z)
+    \end{equation*}
+    Similarly, we can consider $2$ functions $f(x) = k(x-y)$ and $g(x) = k(x-z)$, where 
+    \begin{equation*}
+    \begin{aligned}
+        &f(x) = \sum^\infty_{l=-\infty} \exp(ilx)\underbrace{\exp(-ily)\hat{k}_l}_{\hat{f}_l}
+        \qquad g(x) = \sum^\infty_{l=-\infty} \exp(ilx)\underbrace{\exp(-ilz)\hat{k}_l}_{\hat{g}_l}
+    \end{aligned}
+    \end{equation*}
+    \textbf{Second Statement: } And, so the reproducing we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{f(\cdot), g(\cdot)} &= \sum^\infty_{l=-\infty}\frac{\hat{k}_l\exp(-ily)\overline{\hat{k}_l \exp(-ilz)} }{\hat{k}_l} \\
+        &= \sum^\infty_{l=-\infty} \hat{k}_l\exp(il(z-y)) = k(z-y)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    Recalling that function can be represented as:
+    \begin{equation*}
+        f(z) = \sum^\infty_{l=-\infty} f_l\overline{\phi_l(z)}
+    \end{equation*}
+    Now, recall the function $f(z)$ shown in proposition \ref{prop:fourier-reproducing}. 
+    \begin{equation*}
+        \brackd{f(\cdot), g(\cdot)} = \sum^\infty_{l=-\infty} \hat{f}_l\frac{\overline{\hat{k}_l\exp(-ilz)}}{\bracka{\sqrt{\hat{k}_l}}^2}
+    \end{equation*}
+    Then, we have 
+    \begin{equation*}
+        f_l = \hat{f}_l/\sqrt{\hat{k}_l} \qquad \phi_l(z) = \sqrt{\hat{k}_l}\exp(-ilz)
+    \end{equation*}
+\end{remark}
+
+\subsection{Eigen Expansion Case}
+
+\begin{remark}
+    We are going to extension of the definition of RKHS to eigenexpansion as fourier series only gives us the periodic domain $[-2\pi, 2\pi]$
+\end{remark}
+
+\begin{definition}{\textbf{(Eigenfunction/Eigenvalue)}}
+    We define a probability measure on $\mathcal{X}=\mathbb{R}$, where we will use Gaussian density:
+    \begin{equation*}
+        p(x) = \frac{1}{\sqrt{2\pi}}\exp(-x^2)
+    \end{equation*}
+    We define an eigenfunction $e_l(\cdot)$ and eigenvalue $\lambda_l$ on $k(x,x')$ wrt. to this measure as 
+    \begin{equation*}
+        \lambda_le_l(x) = \int k(x,x')e_l(x')p(x')\dby x'
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Eigen-expansion)}}
+    The eigen-expansion of $k(x, x')$ given eigenfunction $e_l$ and eigenvalue $\lambda_l$ for $l=1,2\dots$ is (it is countable):
+    \begin{equation*}
+        k(x, x') = \sum^\infty_{l=1}\lambda_l(x)e_l(x)e_l(x')
+    \end{equation*}
+    where we can show that 
+    \begin{equation*}
+        \int e_i(x)e_j(x)p(x)\dby x = \begin{cases}
+            0 & i\ne j \\
+            1 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The $L_2(p)$ inner product of function $f(x)=\sum^\infty_{l=1}\hat{f}_le_l(x)$ and $g(x)=\sum^\infty_{l=1}\hat{f}_me_m(x)$ is 
+    \begin{equation*}
+        \brackd{f,g}_{L_2} = \sum^\infty_{l=1}\hat{f}_l\hat{g}_l
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We perform similar calculation as fourier series case:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{f, g}_{L_2} &= \int^\infty_{-\infty} f(x)g(x)p(x)\dby x \\ 
+        &= \int^\infty_{-\infty} \brackb{\sum^\infty_{l=1}\hat{f}_le_l(x)}\brackb{\sum^\infty_{m=1}\hat{f}_me_m(x)}p(x)\dby x = \sum^\infty_{l=1} \hat{f}_l\hat{g}_l
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Smooth Dot Product 2)}}
+    We define a smooth dot product (with the norm) to be:
+    \begin{equation*}
+        \brackd{f, g}_\mathcal{H} = \sum^\infty_{l=1}\frac{\hat{f}\hat{g}}{\lambda_l} \qquad \norm{f}^2_\mathcal{H} = \sum^\infty_{l=1}\frac{\hat{f}_l^2}{\lambda_l}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    We can show that 
+    \begin{equation*}
+        \brackd{f(\cdot), k(\cdot, z)} = f(z)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We have 
+    \begin{equation*}
+        \brackd{f(\cdot), k(\cdot, z)} = \sum^\infty_{l=1}\frac{\hat{f}_l\lambda_le_l(z)}{\lambda_l} = \sum^\infty_{l=1}\hat{f}_le_l(z) = f(z)
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    Let's try to find the original definition of function evaluation as in definition \ref{def:function-dot}. Since we have:
+    \begin{equation*}
+        \brackd{f(\cdot), k(\cdot, z)}_\mathcal{H} = \sum^\infty_{l=1}\frac{\hat{f}_l(\lambda_le_l(z))}{\bracka{\sqrt{\lambda_l}}^2}
+    \end{equation*} 
+    and so we have $f_l = \hat{f}_l/\sqrt{\lambda_l}$ and $\phi_l(z) = \sqrt{\lambda_l}e_l(z)$, and so we have
+    \begin{equation*}
+        f(x) = \sum^m_{i=1}\alpha_ik(x_i, x) = \sum^m_{i=1}\alpha_i\brackb{\sum^\infty_{j=1}\lambda_je_i(x_i)e_j(x)} = \sum^\infty_{l=1}f_l\brackb{\sqrt{\lambda_j}e_l(x)}
+    \end{equation*}
+    where $f_l = \sum^m_{i=1}\alpha_i\sqrt{\lambda_l}e_l(x_l)$. As $\lambda_l$ decays as $e_l$ becomes rougher, then $f_l$ decays since $\norm{f}^2_\mathcal{H}<\infty$. This reinforce smoothness.
+\end{remark}
+
+\section{More of RKHS}
+
+\begin{definition}{\textbf{(Reproducing Kernel Hilbert Space)}}
+    Let $\mathcal{H}$ be a Hilbert space of $\mathbb{R}$-valued function on non-empty set $\mathcal{X}$. A function $k:\mathcal{X}\times\mathcal{X}\rightarrow \mathbb{R}$ is reproducing kernel of $\mathcal{H}$ and $\mathcal{H}$ is RKHS if:
+    \begin{itemize}
+        \item For all $x\in\mathcal{X}$, $k(\cdot, x) \in\mathcal{H}$, then $k(\cdot, x)\in\mathcal{H}$
+        \item For all $x\in\mathcal{X}$, $\brackd{f(\cdot), k(\cdot,x)}_\mathcal{H} = f(x)$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Eval Operators)}}
+    For all $f\in\mathcal{H}, x\in\mathcal{X}$ then we have $\delta_x f = f(x)$
+\end{definition}
+
+\begin{theorem}{\textbf{(Riesz Representation)}}
+    In Hilbert space $\mathcal{H}$, all bounded linear function $f$ is of form $\brackd{\cdot,g}_\mathcal{H}$ for some $g\in\mathcal{H}$.
+\end{theorem}
+
+\begin{theorem}
+    $\mathcal{H}$ is RKHS ($\delta_x$ is bounded and linear) iff $\mathcal{H}$ has a reproducing kernel. 
+\end{theorem}
+\begin{proof}
+    \textbf{(If $\boldsymbol{\mathcal{H}}$ has reproducing kernel, then $\boldsymbol{\delta_x}$ is bounded): }Starting with the first direction, we have:
+    \begin{equation*}
+    \begin{aligned}
+        |\delta_xf| &= |f(x)| = |\brackd{f, k(\cdot, x)}_\mathcal{H}| \\
+        &\le \norm{k(\cdot, x)}_\mathcal{H}\norm{f}_\mathcal{H} \\
+        &=\brackd{k(\cdot, x), k(\cdot, x)}^{1/2}_\mathcal{H}\norm{f}_\mathcal{H} \\
+        &=\sqrt{k(x,x)}\norm{f}_\mathcal{H}
+    \end{aligned}
+    \end{equation*}
+    \textbf{(If $\boldsymbol{\delta_x}$ is bounded, then $\boldsymbol{\mathcal{H}}$ has reproducing kernel): } We will utlize riesz representation. As the evaluation operator is bounded and linear, then there exists $f_{\delta_x}\in\mathcal{H}$ such that for all $f\in\mathcal{H}$, we have:
+    \begin{equation*}
+        \delta_x f = \brackd{f, f_{\delta_x}}_\mathcal{H}        
+    \end{equation*}
+    We can define $k(\cdot, x) = f_{\delta_x}(\cdot)$ for all $x\in\mathcal{X}$. It is clear that $k$ is reproducing kernel.
+\end{proof}
+
+\begin{definition}{\textbf{(Alternative Definition RKHS)}}
+    $\mathcal{H}$ is an RKHS if the evaluation operator is bounded i.e for all $x\in\mathcal{X}$ there exists $\lambda_x\ge0$ such that for all $f\in\mathcal{H}$:
+    \begin{equation*}
+        |f(x)| = |\delta_x| \le \lambda_x\norm{f}_\mathcal{H}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    This definition implies that $2$ functions that are identical in RKHS will agree at every point, for all $f, g\in\mathcal{H}$:
+    \begin{equation*}
+        \abs{f(x)-g(x)} = \abs{\delta_x(f-g)} \le \lambda_x\norm{f-g}_\mathcal{H}
+    \end{equation*}
+\end{remark}
+
+\begin{theorem}{\textbf{(Moore-Aronszajn)}}
+    Let $k:\mathcal{X}\times\mathcal{X}\rightarrow \mathbb{R}$ be positive define, then there is unique RKHS $\mathcal{H}\subset \mathbb{R}^{ \mathcal{X}}$ with reproducing kernel $k$
+\end{theorem}
+
+
+\section{Application of Kernel}
+
+\begin{proposition}
+    Given the sample $(x_i)^m_{i=1}$ from $p$ and $(y_i)^m_{i=1}$ from $q$. The distance between their mean in a feature space is:
+    \begin{equation*}
+        \norm{ \frac{1}{m}\sum^m_{i=1}\phi(x_i) - \frac{1}{n}\sum^n_{i=1}\phi(y_i) }^2_\mathcal{H} = 
+        \frac{1}{m^2}\sum^m_{i=1}\sum^m_{j=1}k(x_i,x_j) + \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(y_i, y_j) - \frac{2}{mn}\sum^m_{i=1}\sum^n_{j=1}k(x_i, y_i)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Let's just expand the definition:
+    \begin{equation*}
+    \begin{aligned}
+        &\norm{ \frac{1}{m}\sum^m_{i=1}\phi(x_i) - \frac{1}{n}\sum^n_{i=1}\phi(y_i) }^2_\mathcal{H} \\ 
+        =& \brackd{\frac{1}{m}\sum^m_{i=1}\phi(x_i) - \frac{1}{n}\sum^n_{i=1}\phi(y_i), \frac{1}{m}\sum^m_{i=1}\phi(x_i) - \frac{1}{n}\sum^n_{i=1}\phi(y_i)} \\
+        =&\frac{1}{m^2}\brackd{\sum^m_{i=1}\phi(x_i), \sum^m_{i=1}\phi(x_i)} - \frac{2}{mn}\brackd{\sum^m_{i=1}\phi(x_i), \frac{1}{n}\sum^n_{i=1}\phi(y_i)} + \frac{1}{n^2}\brackd{\frac{1}{n}\sum^n_{i=1}\phi(y_i), \frac{1}{n}\sum^n_{i=1}\phi(y_i)} \\
+        =& \frac{1}{m^2}\sum^m_{i=1}\sum^m_{j=1}k(x_i,x_j) + \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(y_i, y_j) - \frac{2}{mn}\sum^m_{i=1}\sum^n_{j=1}k(x_i, y_i)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+\begin{remark}
+    When we can have $\phi(x) = x$, we distinguish a mean and when we use $\phi(x) = [x, x^2]$, we can distinguish the mean and variance. There is a possibility that we can use kernel to distinguish for $2$ distribution. \emph{Please note that, we don't have to explicitly calculate the feature.}
+\end{remark}
+
+\subsection{Kernel PCA}
+
+\begin{definition}{\textbf{(Centering Matrix)}}
+    The centering matrix $H$ is defined as 
+    \begin{equation*}
+        I-n^{-1}\boldsymbol 1_{n\times n}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Principle Component Analysis)}}
+    PCA is a method of finding $d$-dimensional sub-space of a higher dimensional space $D$ that contains the direction in the highest variance. Consider the first principle component:
+    \begin{equation*}
+        u_1 = \argmax{\norm{u}\le1}\frac{1}{n}\bracka{u^T\bracka{x_i - \frac{1}{n}\sum^n_{j=1}x_j}}^2 = \argmax{\norm{u}\le1} u^TCu
+    \end{equation*}
+    where matrix $C$ is defined by:
+    \begin{equation*}
+        C = \frac{1}{n}\sum^n_{i=1}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}^T = \frac{1}{n}XHX^T
+    \end{equation*}
+    where $X = [\boldsymbol{x}_1,\dots,\boldsymbol{x}_n]$ and $H$ is a centering matrix. To see the expansion please go to appendix \ref{appendix:pca-center-matrix}.
+\end{definition}
+
+\begin{definition}{\textbf{(Tensor Product)}}
+    We define tensor product as:
+    \begin{equation*}
+        (a\otimes b)c = \brackd{b,c}_\mathcal{H}a
+    \end{equation*}
+    This is analogous to the matrix notation $(ab^T)c = b^Tca$
+\end{definition}
+
+\begin{definition}{\textbf{(Kernelized Version of PCA)}}
+    Let's consider the PCA model but with a feature map, starting from the first component:
+    \begin{equation*}
+    \begin{aligned}
+        f_1 &= \argmax{\norm{f}_\mathcal{H}\le1}\frac{1}{n}\sum^n_{i=1}\bracka{\brackd{f, \phi(x_i) - \frac{1}{n}\sum^n_{j=1}\phi(x_i)}}^2 \\ 
+        &= \argmax{\norm{f}_\mathcal{H}\le1}\frac{1}{n}\sum^n_{i=1}\bracka{f(x_i) - \hat{\mathbb{E}}[f]}^2 = \argmax{\norm{f}_\mathcal{H}\le1}\text{var}(f)
+    \end{aligned}
+    \end{equation*}
+    Note that the second equality comes from reproducing property of kernel. We will consider the infinite dimension analogous of covariance:
+    \begin{equation*}
+    \begin{aligned}
+        C &= \frac{1}{n}\sum^n_{i=1}\bracka{\phi(x_i) - \frac{1}{n}\sum^n_{j=1}\phi(x_j)}\otimes\bracka{\phi(x_i) - \frac{1}{n}\sum^n_{j=1}\phi(x_j)} \\ 
+        &= \frac{1}{n}\sum^n_{i=1}\tilde{\phi}(x_i)\otimes\tilde{\phi}(x_i)
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    We can consider the function: 
+    \begin{equation*}
+        f = \sum^n_{i=1}\alpha_i\bracka{\phi(x_i)-\frac{1}{n}\sum^n_{j=1}\phi(x_j)}=\sum_{i=1}^n\alpha_i\tilde{\phi}(x_i)
+    \end{equation*} 
+    Suppose $f$ is constructed as a sum of $f_{\|} + f_\bot$ where $f_{\|}$ is function component that parallels to the $\tilde{\phi}(x_i)$, and $f_\bot$ is function perpendicular to $\tilde{\phi}(x_i)$. However, as we perform inner product, the component $f_\bot$ is gone. Thus, we can write it, in the case of a linear combination.
+\end{remark}
+
+\begin{proposition}
+    The matrix equation of kernel PCA is 
+    \begin{equation*}
+        n\lambda_l\alpha_l = \tilde{K}\alpha_l
+    \end{equation*}
+    where $\tilde{K} = HKH$ as $H$ is centering matrix.
+\end{proposition}
+\begin{proof}
+    We will start by consider the application of applying $C$ to $f$:
+    \begin{equation*}
+    \begin{aligned}
+        Cf &= \bracka{\frac{1}{n}\sum^n_{i=1}\tilde{\phi}(x_i)\otimes\tilde{\phi}(x_i)}\sum_{j=1}^n\alpha_j\tilde{\phi}(x_j) \\
+        &= \frac{1}{n}\sum^n_{i=1}\tilde{\phi}(x_i)\brackd{\tilde{\phi}(x_i), \sum_{j=1}^n\alpha_j\tilde{\phi}(x_j)} \\
+        &= \frac{1}{n}\sum^n_{i=1}\tilde{\phi}(x_i)\bracka{\sum^n_{j=1}\alpha_j \tilde{k}(x_i, x_j)}
+    \end{aligned}
+    \end{equation*}
+    as $\tilde{k}(x_i, x_j)$ is $i,j$-entry of the matrix $\tilde{K}=HKH$. To show this please go to appendix \ref{appendix:kernel-pca-centering}. Now, we consider the eigenfunction and eigenvalue equation $\lambda_l f_l = Cf_l$, where we will project both side with $\tilde{\phi}(x_q)$:
+    \begin{itemize}
+        \item Left Hand Side:
+        \begin{equation*}
+        \begin{aligned}
+            \brackd{\tilde{\phi}(x_q), f_l\lambda_l} &= \lambda_l\brackd{\tilde{\phi}(x_q), f_l}_\mathcal{H} = \lambda_l \sum^n_{i=1}\alpha_{li}\tilde{k}(x_q, x_i)
+        \end{aligned}
+        \end{equation*}
+        \item Right Hand Side:
+        \begin{equation*}
+            \brackd{\tilde{\phi}(x_q), Cf_l} = \frac{1}{n}\sum^n_{i=1}\tilde{k}(x_q, x_i) \bracka{\sum^n_{j=1}\alpha_{li}\tilde{k}(x_q, x_i)}
+        \end{equation*}
+    \end{itemize}
+    These equation leads to matrix equation $n\lambda_l\tilde{K}\alpha_l = \tilde{K}^2\alpha_l$, by rearrangement, we get the statement. 
+\end{proof}
+
+\begin{proposition}
+    The norm of the function $f$ is equal to 
+    \begin{equation*}
+        \norm{f}_\mathcal{H} = n\lambda\norm{\alpha}^2
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{f}_\mathcal{H} &= \brackd{f, f}_\mathcal{H} \\
+        &=\brackd{\sum_{i=1}^n\alpha_i\tilde{\phi}(x_i), \sum_{i=1}^n\alpha_i\tilde{\phi}(x_i)} \\
+        &=\sum^n_{i=1}\sum^n_{j=1}\alpha_i\alpha_j \tilde{k}(x_i, x_j) \\
+        &= \alpha^T\tilde{K}\alpha = \alpha^Tn\lambda\alpha = n\lambda\norm{\alpha}^2
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    Given the norm of the function, we have to set $\alpha \leftarrow \alpha/\sqrt{n\lambda}$ assuming that $\norm{\alpha} = 1$.
+\end{remark}
+
+\begin{proposition}
+    The projection of a test vector $x^*$ to principle component $f$ is 
+    \begin{equation*}
+        P_f\phi(x^*) = \brackd{\phi(x^*), f}f = \bracka{\sum^n_{i=1}\alpha_i\bracka{k(x^*, x_i) - \frac{1}{n}\sum^n_{j=1}k(x^*, x_j)}} \sum_{i=1}^n\alpha_i\tilde{\phi}(x_i)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We start by expanding the definiton of $f$ and $\tilde{f}$:
+    \begin{equation*}
+    \begin{aligned}
+        P_f\phi(x^*) &= \brackd{\phi(x^*), f}f = \brackd{\phi(x^*), \sum_{i=1}^n\alpha_i\tilde{\phi}(x_i)}f \\
+        &= \sum^n_{i=1}\alpha_i\brackd{\phi(x^*), \phi(x_i) - \frac{1}{n} \sum^n_{j=1}\phi(x_j) }f \\
+        &= \bracka{\sum^n_{i=1}\alpha_i \brackd{\phi(x^*), \phi(x_i)} - \frac{1}{n}\sum^n_{j=1}\brackd{\phi(x^*), \phi(x_j)}}f \\
+        &= \bracka{\sum^n_{i=1}\alpha_i\bracka{k(x^*, x_i) - \frac{1}{n}\sum^n_{j=1}k(x^*, x_j)}} f
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    We can consider the application of denoising a hand-written digit. Suppose, we are given a noisy digit $x^*$:
+    \begin{equation*}
+        P_d\phi(x^*) = P_{f_1}\phi(x^*) + \cdots + P_{f_d}\phi(x^*)
+    \end{equation*}
+    as we can project onto the first $d$ eigenvectors $\{f_l\}^d_{i=1}$ from kernel PCA. The nearby point $y^*\in\mathcal{X}$ as:
+    \begin{equation*}
+        y^* = \argmin{y\in\mathcal{X}}\norm{\phi(y) - P_d\phi(x^*)}^2_{\mathcal{H}}
+    \end{equation*}
+    This is how the image can be denoised, which can be done without the access to feature map. 
+\end{remark}
+
+\subsection{Kernel Ridge Regression}
+
+\begin{definition}{\textbf{(Ridge Regression)}}
+    Given $n$ training points (in $\mathbb{R}^D$) and labels:
+    \begin{equation*}
+        X = \begin{bmatrix}
+            x_1 & \cdots & x_n
+        \end{bmatrix} \in \mathbb{R}^{D\times n} \qquad y = \begin{bmatrix}
+            y_1 & \cdots & y_n
+        \end{bmatrix}^T
+    \end{equation*}
+    We define $\lambda > 0$, and our goal is to find $a^*$:
+    \begin{equation*}
+        a^* = \argmin{a\in \mathbb{R}^D} \bracka{\norm{y - X^Ta}^2 + \lambda\norm{a}^2}
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    We can show that for ridge regression:
+    \begin{equation*}
+        a^* = (XX^T+\lambda I)^{-1}Xy
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Instead of proving using derivative, we will consider an alternative; that is because when dealing with infinite dimension, derivative is troublesome. Starting expanding the terms:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{y-X^Ta}^2 +\lambda\norm{a} &= y^Ty - 2y^TX^Ta + a^TX^TXa+\lambda a^Ta \\
+        &= y^Ty - 2y^TX^T a + a^T(XX^T-\lambda I)a \\
+        &= y^Ty - 2y^TX^T (XX^T+\lambda I)^{-1/2}b + b^Tb \\
+        &= y^Ty + \norm{(XX^T + \lambda I)^{-1/2}Xy-b}^2 - \norm{y^TX^T(XX^T+\lambda I)^{-1/2}}^2
+    \end{aligned}
+    \end{equation*}
+    where we define $b = (XX^T+\lambda I)^{1/2}a$. To see the expansion, we have appendix \ref{appendix:ridge-regression}. Note that matrix $b$ is semi-positive definite, therefore the square is defined. Further, $XX^T$ may not be invertible of $D>n$ but by adding $\lambda I$ will have full rank. To minimize the objective, we have to get:
+    \begin{equation*}
+        b^* = (XX^T+\lambda I)^{-1/2}Xy \implies a^* = (XX^T+\lambda I)^{-1}Xy
+    \end{equation*} 
+\end{proof}
+
+\begin{definition}{\textbf{Singular Value Decomposition (SVD)}}
+    We assume $D>n$, and we perform SVD on $X$ such that $X=USV^T$, where:
+    \begin{equation*}
+        U = \begin{bmatrix}
+            u_1 & \cdots & u_D
+        \end{bmatrix} \qquad S = \begin{bmatrix}
+            \tilde{S} & 0 \\ 0 & 0
+        \end{bmatrix} \qquad V = \begin{bmatrix}
+            \tilde{V} & 0
+        \end{bmatrix}
+    \end{equation*}
+    where we have:
+    \begin{itemize}
+        \item $U$ is $D\times D$ matrix where $U^TU = UU^T = I_D$ 
+        \item $S$ is $D\times D$ where $\tilde{S}$ has $n$ non-zero entry
+        \item $V$ is $n\times D$ where $\tilde{V}^T\tilde{V} = \tilde{V}\tilde{V}^T = I_n$
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}
+    \label{thm:ridge-regression-soln}
+    We can write the solution in $a^*$ by a linear combination of training points:
+    \begin{equation*}
+        a^* = \sum^n_{i=1}\alpha^*_ix_i
+    \end{equation*}  
+    where $\alpha_i = \sum^n_{j=1}y_j\beta_{ij}$ as $\beta_{ij}$ is $(i,j)$-entry of $(X^TX+\lambda In)$
+\end{theorem}
+\begin{proof}
+    We start by defining a SVD of $X = USV^T$, then we have:
+    \begin{equation*}
+    \begin{aligned}
+        a^* &= (XX^T+\lambda I_D)^{-1}Xy = (US^2U^T + \lambda I_D)^{-1}USV^Ty \\
+        &= U(S^2 + \lambda I_D)^{-1}U^TUSV^Ty \\
+        &= US(S^2 + \lambda I_D)^{-1}V^Ty \\ 
+        &= USV^TV(S^2 + \lambda I_D)^{-1}V^Ty \\ 
+        &= XV(S^2+\lambda I_D)^{-1}V^Ty \\
+        &= X(X^TX + \lambda I_n)^{-1}y
+    \end{aligned}
+    \end{equation*}
+    For the last equality, we have $V(S^2+\lambda I_D)^{-1}V^T$, and so:
+    \begin{equation*}
+    \begin{aligned}
+        V(S^2+\lambda I_D)^{-1}V^T &= \begin{bmatrix}
+            \tilde{V} & 0
+        \end{bmatrix}  \begin{bmatrix}
+            (\tilde{S}^2+\lambda I_n)^{-1} & 0 \\
+            0 & (\lambda I_{D-n})
+        \end{bmatrix} \begin{bmatrix}
+            \tilde{V}^T \\ 0
+        \end{bmatrix} \\
+        &= \tilde{V}(\tilde{S}^2+\lambda I_n)^{-1}\tilde{V}^T = \tilde{V}(\tilde{S}^2+\lambda I_n)^{-1} \tilde{V}^{-1} \\
+        &= \tilde{V}(\tilde{V}(\tilde{S}^2 + \lambda I_n))^{-1} \\
+        &= (\tilde{V}^T)^{-1}(\tilde{V}(\tilde{S}^2 + \lambda I_n))^{-1} \\
+        &= (\tilde{V}(\tilde{S}^2 + \lambda I_n)\tilde{V}^T)^{-1} \\
+        &= (\tilde{V}\tilde{S}^2\tilde{V}^{T} + \lambda I_n \tilde{V}\tilde{V}^T)^{-1} \\
+        &= (VS^TV + \lambda I_n)^{-1} = (VSU^TUSV^T + \lambda I_n)^{-1} \\
+        &= (X^TX + \lambda I_n)^{-1}
+    \end{aligned}
+    \end{equation*}
+    For the $\alpha_i$ value, we have \ref{appendix:representor-ridge} i.e:
+    \begin{equation*}
+        X(X^TX + \lambda I_n)^{-1}y = X\begin{bmatrix}
+            \beta_{11} & \beta_{12} & \cdots & \beta_{1n} \\
+            \beta_{21} & \beta_{22} & \cdots & \beta_{2n} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            \beta_{n1} & \beta_{n2} & \cdots & \beta_{nn} \\
+        \end{bmatrix}y = \begin{bmatrix}
+        \sum^n_{i=1} x_{1i} \sum^n_{j=1} y_j\beta_{ij} \\
+        \sum^n_{i=1} x_{2i} \sum^n_{j=1} y_j\beta_{ij} \\
+        \vdots \\
+        \sum^n_{i=1} x_{ni} \sum^n_{j=1} y_j\beta_{ij} \\
+    \end{bmatrix} = \sum^n_{i=1}\underbrace{\bracka{\sum^n_{j=1}y_j\beta_{ij}}}_{\alpha_i}x_i
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Kernel Ridge Regression)}}
+    We consider the following optimization problem:
+    \begin{equation*}
+        a^* = \argmin{a\in\mathcal{H}}\bracka{\sum^n_{i=1}(y_i-\brackd{a, \phi(x_i)})^2 + \lambda\norm{a}^2_\mathcal{H}}
+    \end{equation*}
+\end{definition}
+
+\begin{corollary}
+    The kernel ridge regression solution $a^*$ is 
+    \begin{equation*}
+        a^* = X(K+\lambda I_n)^{-1}y = \sum^n_{i=1}\alpha^*\phi(x_i)
+    \end{equation*}
+    where $K$ is the gram matrix.
+\end{corollary}
+\begin{proof}
+    We can consider a ridge regression with the data matrix:
+    \begin{equation*}
+        X = \begin{bmatrix}
+            \phi(x_1) & \cdots & \phi(x_n)
+        \end{bmatrix}
+    \end{equation*}
+    Please note that $(X^TX)_{ij} = \brackd{\phi(x_i), \phi(x_j)}_\mathcal{H} = k(x_i, x_j)$, given the result in theorem \ref{thm:ridge-regression-soln}. Or, $X^TX = K$
+\end{proof}
+\begin{remark}
+    We have the following, in tensor product:
+    \begin{equation*}
+        XX^T = \sum^n_{i=1}\phi(x_i)\otimes\phi(x_i)
+    \end{equation*}
+\end{remark}
+
+\begin{remark}
+    We can see that the smoothness property of RKHS
+    \begin{equation*}
+        \norm{f}^2_\mathcal{H} = \sum^\infty_{l=1}\frac{\hat{f}^2_l}{\lambda_l}\qquad \norm{f}^2_\mathcal{H} = \sum^\infty_{l=1}\frac{|\hat{f}_l|^2}{\hat{k}_l}
+    \end{equation*}
+    on the left hand side, we eigenvalues based norm and the right hand side is the fourier based norm.
+\end{remark}
+
+\section{Maximum Mean Discrepancy}
+
+\subsection{Mean Embedding}
+\begin{definition}{\textbf{(Feature Map of Probability $\boldsymbol P$)}}
+    Given $P$ a Borel probability measure on $\mathcal{X}$, define a feature map of probability $P$ to be:
+    \begin{equation*}
+        \mu_P = \begin{bmatrix}
+            \cdots & \mathbb{E}_P[\phi_i(x)] & \cdots
+        \end{bmatrix}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Kernel of Probability)}}
+    For positive definite $k(x,x')$ where:
+    \begin{equation*}
+        \brackd{\mu_P, \mu_Q} = \mathbb{E}_{P, Q}[k(x, y)]
+    \end{equation*}
+    where $x\sim P$ and $y \sim Q$. We can consider the expectation in an RKHS as $\mathbb{E}_P[f(x)] = \brackd{f, \mu_P}_\mathcal{F}$. And, so $\mu_P$ gives the expectation of all RKHS functions.
+\end{definition}
+
+\begin{remark}
+    \label{remark:empitical-mean-embedding}
+    We can see that the empirical mean embedding is 
+    \begin{equation*}
+        \hat{\mu}_P = \frac{1}{m}\sum^m_{i=1}\phi(x_i) \qquad \text{ where } \qquad x_i\sim P
+    \end{equation*}
+\end{remark}
+
+\begin{theorem}{\textbf{(Existance of Mean Embedding)}}
+    The element $\mu_P\in\mathcal{F}$ exist, such that 
+    \begin{equation*}
+        \mathbb{E}_P[f(x)] = \brackd{f, \mu_P}_\mathcal{F}    
+    \end{equation*}
+    for all $f\in\mathcal{F}$ if $\mathbb{E}_P[\sqrt{k(x, x)}] = \mathbb{E}_P\norm{\psi(x)}_\mathcal{F} < \infty$
+\end{theorem}
+\begin{proof}
+    We will consider the application of Riesz theorem by assuming a linear operator $T_P f = \mathbb{E}_P[f(x)]$ for all $f\in\mathcal{F}$. We will show that this operator is bounded:
+    \begin{equation*}
+    \begin{aligned}
+        |T_P f| &= |\mathbb{E}_P[f(x)]| \\ 
+        &\le \mathbb{E}_P[|f(x)|] \\
+        &= \mathbb{E}_P[|\brackd{f, \phi(x)}_\mathcal{F}|] \\
+        &\le \mathbb{E}_P[\norm{f}_\mathcal{F}\norm{\phi(x)}_\mathcal{F}] \\
+        &= \mathbb{E}_P[\sqrt{k(x,x)}] \norm{f}_\mathcal{F}
+    \end{aligned}
+    \end{equation*}
+    By Riesz theorem, since the operator is bounded, then there exists $\mu_P\in\mathcal{F}$ that $T_Pf = \brackd{f, \mu_P}_\mathcal{F}$
+\end{proof}
+
+\begin{remark}
+    The probability feature map looks like the following:
+    \begin{equation*}
+        \mu_P(t) = \brackd{\mu_P, \phi(t)}_\mathcal{F} = \brackd{\mu_P, k(\cdot, t)}_\mathcal{F} = \mathbb{E}_P[k(x, t)]
+    \end{equation*}
+\end{remark}
+
+\subsection{Algorithm}
+
+\begin{definition}{\textbf{(Maximum Mean Discrepancy)}}
+    Maximum Mean Discrepancy (MMD) is the distance between probability feature mean:
+    \begin{equation*}
+        \text{MMD}^2(P, Q) = \norm{\mu_P-\mu_Q}^2_\mathcal{F}
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    We can show that MMD is equal to 
+    \begin{equation*}
+        \operatorname{MMD}^2(P,Q) = \mathbb{E}_P[k(x, x')] + \mathbb{E}_Q[k(y, y')] - 2\mathbb{E}_{P, Q}[k(x, y)]
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \norm{\mu_P-\mu_Q}^2_\mathcal{F} &= \brackd{\mu_P-\mu_Q, \mu_P-\mu_Q}_\mathcal{F} \\
+        &= \brackd{\mu_P, \mu_P}_\mathcal{F} - 2\brackd{\mu_P, \mu_Q}_\mathcal{F} + \brackd{\mu_Q, \mu_Q}_\mathcal{F} \\
+        &= \mathbb{E}_P[\mu_P(x)] + \mathbb{E}_Q[\mu_Q(y)] - 2\mathbb{E}_{P}[\mu_Q(x)] \\
+        &= \mathbb{E}_P[\mathbb{E}_P[k(x, x')]] + \mathbb{E}_Q[\mathbb{E}_Q[k(y, y')]] + 2\mathbb{E}_P[\mathbb{E}_Q[k(x, y)]]
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Empirical Mean MMD)}}
+    We have the following unbiased empirical mean $\operatorname{MMD}$:
+    \begin{equation*}
+        \text{MMD}^2(P, Q) = \frac{1}{n(n-1)}\sum_{i\ne j}k(x_i, x_j) + \frac{1}{n(n-1)}\sum_{i\ne j}k(y_i, y_j) - \frac{1}{n^2}\sum_{i,j}k(x_i, y_j)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Integral Probability Metrics)}}
+    Integral Probability Metrics is divergence measure, which has the form:
+    \begin{equation*}
+        \sup_{g\in\mathcal{H}}\Big(\mathbb{E}_{x\sim P}[g(x)] - \mathbb{E}_{y\sim Q}[g(y)]\Big)
+    \end{equation*}
+    The examples of Integral Probability Metrics are MMD and Wassertein.
+\end{definition}
+
+\begin{definition}{\textbf{($\textbf{F}$-Divergence)}}
+    F-divergence is divergence measure, which has the form:
+    \begin{equation*}
+        D_f(P, Q) = \int_\mathcal{H} q(x)f\bracka{\frac{p(x)}{q(x)}}\dby x
+    \end{equation*}
+    The example of $F$-divergence are KL-divergence, Hellinger, and Pearson-Chi Square.
+\end{definition}
+
+\begin{remark}
+    Total Variation can be shown to be both Integral Probability Metrics and $F$-Divergence. For instance:
+    \begin{equation*}
+        \text{TV}(p, q) = \sup_{A\in\mathcal{F}}\abs{p(A)-q(A)} = \frac{1}{2}\int \abs{\frac{p(x)}{q(x)} - 1}q(x)\dby x
+    \end{equation*}
+\end{remark}
+
+\begin{theorem}
+    We can show that $\operatorname{MMD}$ can be represented by:
+    \begin{equation*}
+        \operatorname{MMD}(P, Q) = \sup_{\norm{f}\le1}\brackb{\mathbb{E}_P[f(x)] - \mathbb{E}_Q[f(x)]}
+    \end{equation*}
+    Note that $f$ is unit ball of $\mathcal{F}$.
+\end{theorem}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \sup_{\norm{f}\le1}\brackb{\mathbb{E}_P[f(x)] - \mathbb{E}_Q[f(x)]} &= \sup_{\norm{f}\le1} \brackd{f, \mu_P}  - \brackd{f, \mu_Q} \\
+        &= \sup_{\norm{f}\le1}\brackd{f, \mu_P - \mu_Q} \\
+    \end{aligned}
+    \end{equation*}
+    To maximize the dot product, we need $f$ should be in the same direction as $\mu_P - \mu_Q$. Therefore, we set
+    \begin{equation*}
+        f^* = \frac{\mu_P - \mu_Q}{\norm{\mu_P - \mu_Q}}
+    \end{equation*}
+    Thus, the dot product to this is:
+    \begin{equation*}
+        \sup_{\norm{f}\le1}\brackd{f, \mu_P - \mu_Q} = \norm{\mu_P-\mu_Q}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    The reason we need a constrain $\norm{f}\le1$ because the function has to be smooth as too \correctquote{sharp} will lead to perfect seperation i.e maximizing the MMD.
+\end{remark}
+
+\begin{corollary}{\textbf{(Empirical Witness Function)}}
+    The empirical witness function is:
+    \begin{equation*}
+        f^*(v) = \frac{1}{n}\sum^n_{i=1}k(x_i, v) - \frac{1}{n}\sum^n_{i=1}k(y_i, v)
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    Since $f \propto \mu_P-\mu_Q$, and the empirical mean embedding shown in remark \ref{remark:empitical-mean-embedding}.
+    we have the following:
+    \begin{equation*}
+    \begin{aligned}
+        f(v) &\propto \brackd{\hat{\mu}_P - \hat{\mu}_Q, \phi(v)} \\ 
+        &= \brackd{\frac{1}{n}\sum^n_{i=1}\phi(x_i) - \frac{1}{n}\sum^n_{i=1}\phi(y_i), \phi(v)} = \frac{1}{n} \sum^n_{i=1} k(x_i, v) - k(y_i, v)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\subsection{Statistical Testing of MMD}
+\begin{theorem}
+    When $P\ne Q$, the statistics of empirical MMD is asympototic normal:
+    \begin{equation*}
+        \frac{\widehat{\operatorname{MMD}}^2 - \operatorname{MMD}(P, Q)^2}{\sqrt{V_n(P, Q)}} \xrightarrow{D} \mathcal{N}(0, 1)
+    \end{equation*}
+    where the variance $V_n(P, Q) = \mathcal{O}(n^{-1})$ but affected by kernel. However, when $P=Q$, the statistics has asympototic distribution of:
+    \begin{equation*}
+        n\widehat{\operatorname{MMD}}^2 \sim \sum^\infty_{l=1} \lambda_l[z^2_l - 2] \qquad \text{ where } \qquad \lambda_i\phi_i(x) = \int_\mathcal{X}\tilde{k}(x,\tilde{x})\phi_i(x)\dby P(x)
+    \end{equation*}
+    and $z_l\sim\mathcal{N}(0, 2)$
+\end{theorem}
+
+\begin{remark}
+    In the perspective of statistical hypothesis testing, we want to find a threshold $c_\alpha$ for which $\widehat{\operatorname{MMD}}^2$ has false positive $\alpha$. To estimate the $c_\alpha$, we consider estimating the null-hypothesis $P=Q$, by permuting the items, so that they are uncorrelated. 
+\end{remark}
+
+\begin{definition}{\textbf{(MMD Test Power)}}
+    Test power is defined as 
+    \begin{equation*}
+       \text{Pr}_1\bracka{n\widehat{\operatorname{MMD}} > \hat{c}_\alpha } \rightarrow  \Phi\bracka{\frac{\operatorname{MMD}^2(P, Q)}{\sqrt{V_n(P, Q)}} - \frac{c_\alpha}{n\sqrt{V_n(P, Q)}} }
+    \end{equation*}
+    where $\text{Pr}_1$ is the probability that $P\ne Q$, and $\Phi$ is cumulative distribution function of standard normal distribution.
+\end{definition}
+
+\begin{remark}
+    To find the best kernel, we can find the kernel that minimizes the false negative rate, by maximize the test power. We would like to note the following:
+    \begin{equation*}
+        \frac{\operatorname{MMD}^2(P, Q)}{\sqrt{V_n(P, Q)}} = \mathcal{O}(\sqrt{n}) \qquad \frac{c_\alpha}{n\sqrt{V_n(P, Q)}} =\mathcal{O}(n^{-1/2})
+    \end{equation*}
+    Then, for a large $n$, the second term won't matter, and so we can just maximize:
+    \begin{equation*}
+        \frac{\operatorname{MMD}^2(P, Q)}{\sqrt{V_n(P, Q)}}
+    \end{equation*}
+    which we can use neural network to perform gradient descent on this objective.
+\end{remark}
+
+\subsection{Characteristic RKHS}
+
+\begin{definition}{\textbf{(Characteristic RKHS)}}
+    A characteristic RKHS, where $\operatorname{MMD}(P, Q; \mathcal{F}) = 0$ iff $P = Q$
+\end{definition}
+
+\begin{theorem}
+    The MMD metrics can be written as, for periodic kernel:
+    \begin{equation*}
+        \operatorname{MMD}^2(P, Q;\mathcal{F}) = \sum^\infty_{l=-\infty} |\phi_{P,l} - \phi_{Q, l}|^2\hat{k}_l
+    \end{equation*} 
+    where $\phi_{P, l}, \phi_{Q, l}$ are fourier coefficient of the probability distributions, while $\hat{k}_l$ is the fourier coefficient of the kernel.
+\end{theorem}
+\begin{proof}
+    Let's consider the fourier coefficient of $\mu_P$:
+    \begin{equation*}
+    \begin{aligned}
+        \mu_P(x) = \brackd{\mu_P, k(x, \cdot)}_\mathcal{F} = \mathbb{E}_{t\sim P}[k(x-t)] = \int^\pi_{-\pi} k(x-t)\dby P(t)
+    \end{aligned}
+    \end{equation*}
+    Now, we have 
+    \begin{equation*}
+    \begin{aligned}
+        \int^\pi_{-\pi} k(t-x) P(t)\dby t &=  \int^\pi_{-\pi} \brackb{\sum^\infty_{l=-\infty} \hat{k}_l\exp(il(x-t)) }\brackb{\sum^\infty_{l=-\infty}\hat{\phi}_{P, l}\exp(ilt)} \dby t \\
+        &= \int^\pi_{-\pi}\brackb{\sum^\infty_{l=-\infty} \hat{k}_l\overline{\exp(ilt)}\exp(ilx) }\brackb{\sum^\infty_{l=-\infty} \hat{\phi}_{P, l} \exp(ilt) }\dby t \\
+        &= \int^\pi_{-\pi} \brackb{\sum^\infty_{l=-\infty}\sum^\infty_{m=-\infty} \hat{k}_l\overline{\exp(ilt)}\exp(ilx) \hat{\phi}_{P, m} \exp(imt) } \dby t \\
+        &= \int^\pi_{-\pi} \sum^\infty_{l=-\infty}\brackb{\sum_{m\ne l} \hat{k}_l\hat{\phi}_{P, m}\overline{\exp(ilt)}\exp(ilx) \exp(imt)} + \brackb{\sum_{m=l} \hat{k}_l\hat{\phi}_{P, m}\exp(imx) }\dby t \\
+        &= \sum^{\infty}_{l=-\infty} \int^{\pi}_{-\pi}\brackb{\sum_{m\ne l} \hat{k}_l\hat{\phi}_{P, m}\overline{\exp(ilt)}\exp(-ilx) \exp(-imt)}\dby t + \sum_{m=l} \hat{k}_l\hat{\phi}_{P, m}\exp(imx) \\
+        &= \sum^\infty_{l=-\infty} \hat{k}_l\hat{\phi}_{P, l}\exp(ilx) \\
+    \end{aligned}
+    \end{equation*}
+    Thus the fourier coefficient of $\mu_P$ is $\hat{\mu}_{P, l} = \hat{k}_l\cdot\hat{\phi}_{P, l}$. This is related to convolution theorem as the convolution in normal domain (time) is equivalent to multiplcation in fourier transformed domain (frequency). We can see that the MMD can be written as:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{MMD}^2(P, Q; \mathcal{F}) &= \norm{\mu_P - \mu_Q}_\mathcal{F}^2 \\ 
+        &= \norm{\sum^\infty_{l=-\infty} \bracka{\hat{\phi}_{P, l} - \hat{\phi}_{Q, l}}\hat{k}_l\exp(ilx) }_\mathcal{F}^2 \\
+        &= \sum^\infty_{l=-\infty} \frac{|\hat{\phi}_{P, l} - \hat{\phi}_{Q, l}|^2\hat{k}_l^2}{\hat{k}_l} = \sum^\infty_{l=-\infty}|\hat{\phi}_{P, l} - \hat{\phi}_{Q, l}|^2\hat{k}_l
+    \end{aligned}
+    \end{equation*}
+    Recalling the square norm for function $f$ in $\mathcal{F}$ defined in \ref{def:dot-prod-fourier}.
+\end{proof}
+
+\begin{corollary}
+    The kernel is characteristic iff none of $\hat{k}_l$ is equal to zero.
+\end{corollary}
+\begin{proof}
+    Suppose the kernel at $l'$ is zero i.e $\hat{k}_{l'} = 0$, then
+    we can find $2$ difference distributions $P$ and $Q$ such that its fourier coefficients are equal $\hat{\phi}_{P, l} = \hat{\phi}_{Q, l}$ where $l \ne l'$. Then the MMD will be zero, i.e: 
+    \begin{equation*}
+        \operatorname{MMD}^2(P, Q;\mathcal{F}) = 0
+    \end{equation*}
+    where $P\ne Q$ and the kernel isn't characteristic. 
+\end{proof}
+
+\begin{theorem}{\textbf{(Bochner's Theorem)}}
+    For a translation invariance kernel $k(x - y)$, we have 
+    \begin{equation*}
+        k(x-y) = \int_{\mathbb{R}^d}\exp(-i(x-y)^T\omega)\dby\Lambda(\omega)
+    \end{equation*}
+    Where the characteristic function of $P$ is equality to
+    \begin{equation*}
+        \phi_P(\omega) = \int_{\mathbb{R}^d}\exp(ix^T\omega)\dby P(x)
+    \end{equation*}
+\end{theorem}
+
+\begin{definition}{\textbf{(Measure Theoretic Integration)}}
+    We define the following integration, for probability measure $P, Q$:
+    \begin{equation*}
+        \int f(s) \dby(P-Q)(s) = \mathbb{E}_{P}[f(s)] - \mathbb{E}_Q[f(s)]
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    The Fourier representation MMD for $\mathbb{R}^d$:
+    \begin{equation*}
+        \operatorname{MMD}^2(P, Q;\mathcal{F}) = \int \abs{\phi_P(\omega) - \phi_Q(\omega)}^2\dby\Lambda(\omega)
+    \end{equation*}
+    where $\Lambda(w)$ is finite non-negative Borel measure, for translation invariance kernel.
+\end{theorem}
+\begin{proof}
+    We have:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{MMD}^2(P, Q;\mathcal{F}) &= \mathbb{E}_P[k(x, x')] + \mathbb{E}_Q[k(y,y')] - 2\mathbb{E}_{P, Q}[k(x, y)] \\ 
+        &= \int\brackb{\int k(s-t)\dby(P-Q)(s)}\dby(P-Q)(t) \\
+        &= \int\brackb{\iint_{\mathbb{R}^d}\exp(-i(s-t)^T\omega)\dby\Lambda(\omega)\dby(P-Q)(t)}\dby(P-Q)(t) \\
+        &=\int\brackb{\int_{\mathbb{R}^d}\exp(-is^T\omega)\dby(P-Q)(s)}\brackb{\int_{\mathbb{R}^d}\exp(it^T\omega)\dby(P-Q)(t)}\dby\Lambda(\omega) \\
+        &= \int \abs{\phi_P(\omega) - \phi_Q(\omega)}^2 \dby\Lambda(\omega) \\
+    \end{aligned}
+    \end{equation*}
+    For the expansion of the first integration please see appendix \ref{appendix:MMD-integration}. 
+\end{proof}
+
+\begin{corollary}
+    A translation invariance $k$ is characteristic for probability measure on $\mathbb{R}^d$ iff 
+    \begin{equation*}
+        \text{supp}(\Lambda) = \mathbb{R}^d
+    \end{equation*}
+    as the support can be zero at most countable set. Furthermore, any continuous, compactly support $k$ is characteristic.
+\end{corollary}
+
+\begin{theorem}
+    Probability $P = Q$ iff 
+    \begin{equation*}
+        \mathbb{E}_{P}[x] = \mathbb{E}_Q[x]
+    \end{equation*}
+    for all $f\in C(\mathcal{X})$, the space of bounded continuous function on $\mathcal{X}$.
+\end{theorem}
+
+\begin{definition}{\textbf{(Universal RKHS)}}
+    A universal RKHS is where $k(x, x')$ is continuous, $\mathcal{X}$ is compact and $\mathcal{F}$ is dense in $C(\mathcal{X})$ with respect to $L_\infty$. This meanse that for any given $\varepsilon > 0$ and $f\in C(\mathcal{X})$, there exists $g\in\mathcal{F}$, such that
+    \begin{equation*}
+        \norm{f-g}_\infty \le \varepsilon
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    If $\mathcal{F}$ is universal then $\operatorname{MMD}(P, Q;\mathcal{F}) = 0$ iff $P = Q$
+\end{theorem}
+\begin{proof}
+    It is clear that if $P=Q$ then $\operatorname{MMD}(P, Q;\mathcal{F}) = 0$. Now, for the converse, let's consider the following inequality:
+    \begin{equation*}
+    \begin{aligned}
+        \Big|\mathbb{E}_P&[f(x)] - \mathbb{E}_Q[f(y)] \Big|  \\
+        &\le\Big| \mathbb{E}_P[f(x)] - \mathbb{E}_P[g(x)] \Big| + \Big| \mathbb{E}_P[g(x)] - \mathbb{E}_Q[g(y)] \Big| + \Big| \mathbb{E}_Q[g(y)] - \mathbb{E}_Q[f(y)] \Big| \\
+        &\le\Big| \mathbb{E}_P[f(x)] - \mathbb{E}_P[g(x)] \Big| + \Big| \mathbb{E}_Q[g(y)] - \mathbb{E}_Q[f(y)] \Big| \\
+        &\le\mathbb{E}_P[|f(x) - g(x)|] + \mathbb{E}_Q[|g(y) - f(y)|] \le 2\varepsilon
+    \end{aligned}
+    \end{equation*}
+    For all $f\in C(\mathcal{X})$ and $\varepsilon>0$, which implies $P=Q$. For the second inequality, we would like to note that (As MMD is equal to zero)
+    \begin{equation*}
+    \begin{aligned}
+        \Big| \mathbb{E}_P[g(x)] - \mathbb{E}_Q[g(y)] \Big|  = \Big| \brackd{g, \mu_P-\mu_Q} \Big| \le \norm{g}_\mathcal{F}\norm{\mu_p-\mu_Q}_\mathcal{F} = 0
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\section{Testing Dependencies}
+
+\subsection{Covariance Operators}
+
+\begin{remark}
+    We might use MMD to measure the statistical dependence between $2$ samples $X$ and $Y$. However, we will have the following problem:
+    \begin{itemize}
+        \item We don't have $Q = P_{X}P_Y$ as we need to have a pair $\brackc{(x_i, y_i)}^n_{i=1} \sim P_{XY}$. 
+        \item What kernel to use for the pair ?
+    \end{itemize}
+    For the first problem, we can simular $Q$ by drawing a pair $(x_i, y_j)$. Also, for the second problem, we can use \emph{product} kernel. But why product ? and is there are more interpretable definition of dependence measure ?
+\end{remark}
+
+\begin{definition}{\textbf{(Hilbert-Schmidt Operators)}}
+    Given $\mathcal{F}$ and $\mathcal{G}$, which are seperatable Hilbert space. $(g_j)_{j\in J}$ is an orthogonal basis in $\mathcal{G}$, where $J$ is an index set either finite or countable infinite and:
+    \begin{equation*}
+        \brackd{g_i, g_j} = \begin{cases}
+            0 & i\ne j \\
+            1 & i = j
+        \end{cases}
+    \end{equation*}
+    Given a linear operators $L:\mathcal{G}\rightarrow\mathcal{F}$ and $M:\mathcal{G}\rightarrow\mathcal{F}$, then Hilbert-Schmidt operator is defined as:
+    \begin{equation*}
+        \brackd{L, M}_{\operatorname{HS}} = \sum_{j\in J}\brackd{Lg_j, Mg_j}_\mathcal{F}
+    \end{equation*}
+    Please note that the sum is finite if $\norm{L}$ and $\norm{M}$ are finite, which is by Cauchy-Schwarz. Similarly, we can define a norm to be:
+    \begin{equation*}
+        \norm{L}^2_{\operatorname{HS}} = \sum_{j\in J}\norm{Lg_i}^2_\mathcal{F}
+    \end{equation*}
+    If the norm of $L$ is finite, then $L$ is called Hilbert-Schmidt. 
+\end{definition}
+
+\begin{lemma}
+    Given a matrix $A$ and $B$ both in $\mathbb{R}^{n\times n}$, then Hilbert-Schmidt inner product is (together with the basis vectors):
+    \begin{equation*}
+        \brackd{A, B} = \sum_{j\in J} \brackd{Ag_j, Bg_j} = \operatorname{tr}(A^TB) 
+    \end{equation*}
+\end{lemma}
+
+\begin{remark}
+    We can consider the covariance operator in finite dimension, which we have: 
+    \begin{equation*}
+        \brackd{C_{xy}, fg^T} = \operatorname{tr}(C_{xy}^T(fg^T)) = \operatorname{tr}(g^TC_{xy}^Tf) = f^TC_{xy}g = \mathbb{E}_{xy}[f(x)g(y)]
+    \end{equation*}
+\end{remark}
+
+\begin{lemma}
+    \begin{equation*}
+        \norm{a\otimes b}_{\operatorname{HS}}^2 = \norm{a}^2_\mathcal{F}\norm{b}^2_\mathcal{F}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \norm{a\otimes b}_{\operatorname{HS}}^2 &= \sum_{j\in J}\norm{(a\otimes b)g_j}^2_\mathcal{F} = \sum_{j\in J} \norm{\brackd{b,g_j}_\mathcal{F}a}_\mathcal{F}^2 \\
+        &= \sum_{j\in J}\brackd{\brackd{b,g_j}_\mathcal{F}a, \brackd{b,g_j}_\mathcal{F}a}_\mathcal{F}  
+        = \sum_{j\in J} |\brackd{b,g_j}_\mathcal{F}|^2\brackd{a, a}_\mathcal{F} \\
+        &= \norm{a}_\mathcal{F} \sum_{j\in J} |\brackd{b,g_j}_\mathcal{F}|^2 = \norm{a}^2_\mathcal{F}\norm{b}^2_\mathcal{F}
+    \end{aligned}
+    \end{equation*}
+    The last equality is called Parseval's identity.
+\end{proof}
+\begin{lemma}
+    \begin{equation*}
+        \brackd{L, a\otimes b}_{\operatorname{HS}} = \brackd{a, Lb}_\mathcal{F}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    Consider the left hand side
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{L, a\otimes b}_{\operatorname{HS}} &= \sum_{j\in J} \brackd{Lg_j, (a\otimes b)g_j}_\mathcal{F} \\
+        &= \sum_{j\in J} \brackd{ Lg_j, \brackd{b, g_j}_\mathcal{F}a }_\mathcal{F} = \sum_{j\in J}\brackd{b, g_j}_\mathcal{F} \brackd{ a, Lg_j }_\mathcal{F}
+    \end{aligned}
+    \end{equation*}
+    We consider the right hand side 
+    \begin{equation*}
+        \brackd{a, Lb}_\mathcal{F} = \brackd{a, \sum_{j\in J}Lg_j\brackd{b, g_j}_\mathcal{F}} = \sum_{j\in J}\brackd{a, Lg_j}\brackd{b, g_j}_\mathcal{F}
+    \end{equation*}
+\end{proof}
+
+\begin{corollary}
+    \begin{equation*}
+        \brackd{u\otimes v, a\otimes b}_{\operatorname{HS}} = \brackd{u, a}_\mathcal{F}\brackd{v, b}_\mathcal{F}
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    \begin{equation*}
+        \brackd{u\otimes v, a\otimes b}_{\operatorname{HS}} = \brackd{a, (u\otimes v)b}_\mathcal{F} = \brackd{a, \brackd{v, b}_\mathcal{F}u}_\mathcal{F} = \brackd{a, u}_\mathcal{F}\brackd{v, b}_\mathcal{F}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}
+    There exists $C_{xy}:\mathcal{G}\rightarrow\mathcal{F}$ in Hilbert space such that:
+    \begin{equation*}
+        \brackd{C_{xy}, A}_{\operatorname{HS}} = \mathbb{E}_{xy}[\brackd{\psi(x)\otimes\phi(y), A}_{\operatorname{HS}}]
+    \end{equation*}
+    if the kernels associated with $\psi$ and $\phi$, $k_1$ and $k_2$, respectively are bounded i.e $k_1(x,x) < \infty$ and $k_2(y,y)<\infty$
+\end{theorem}
+\begin{proof}
+    We consider Riesz representation thoerem, which we will have to show that $\mathbb{E}_{xy}[\brackd{\psi(x)\otimes\phi(y), A}_{\operatorname{HS}}]$ is bounded, which:
+    \begin{equation*}
+    \begin{aligned}
+        \Big|\mathbb{E}_{xy}[\brackd{\psi(x)\otimes\phi(y), A}_{\operatorname{HS}}]\Big| &\le \mathbb{E}_{xy}\brackb{\Big|\brackd{\psi(x)\otimes\phi(y), A}_{\operatorname{HS}} \Big|} \\
+        &\le \mathbb{E}_{xy}\brackb{\norm{\psi(x)\otimes\phi(y)}_{\operatorname{HS}}\cdot\norm{A}_{\operatorname{HS}}} \\
+        &= \mathbb{E}_{xy}\brackb{\norm{\psi(x)\otimes\phi(y)}_{\operatorname{HS}}}\norm{A}_{\operatorname{HS}} \\
+    \end{aligned}
+    \end{equation*}
+    Now, we will show that $\mathbb{E}_{xy}\brackb{\norm{\psi(x)\otimes\phi(y)}_{\operatorname{HS}}} <\infty$ is bounded. 
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_{xy}\brackb{\norm{\psi(x)\otimes\phi(y)}_{\operatorname{HS}}} &= \mathbb{E}_{xy}\brackb{\norm{\psi(x)}_\mathcal{F}\norm{\phi(y)}_\mathcal{F}} \\
+        &= \mathbb{E}_x[\sqrt{k_1(x,x)}]\mathbb{E}_y[\sqrt{k_2(y,y)}] < \infty
+    \end{aligned}
+    \end{equation*}
+    Thus the Riesz theorem's condition is satisfied.
+\end{proof}
+
+\begin{corollary}
+    \begin{equation*}
+        \brackd{C_{xy}, f\otimes g} = \mathbb{E}_{xy}[f(x)g(y)]
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{C_{xy}, f\otimes g} &= \mathbb{E}_{xy}\brackb{\brackd{\psi(x)\otimes\phi(x), f\otimes g}} \\
+        &= \mathbb{E}_{xy}\brackb{\brackd{\psi(x), f}, \brackd{\phi(x), g}} \\
+        &= \mathbb{E}_{xy}[f(x)g(y)]
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Covariance Operator)}}
+    The covariance operators $C_{xy} : \mathcal{G} \rightarrow \mathcal{F}$ is an analogous to covariance matrix of infinite dimension, and it is defiend as:
+    \begin{equation*}
+        \brackd{f, C_{xy}g}_\mathcal{F} = \mathbb{E}_{xy}[f(x)g(y)]
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Empirical Covariance Operator)}}
+    We define an empirical covariance operator as:
+    \begin{equation*}
+        \hat{C}_{xy} = \frac{1}{n}\sum^n_{i=1}\psi(x_i)\otimes\phi(y_i)
+    \end{equation*}
+\end{definition}
+
+\subsection{COCO}
+\begin{definition}{\textbf{(Constrained Covariance)}}
+    We have the following covariance problem 
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{COCO}(P_{XY}) &= \sup_{\norm{f}_\mathcal{H} \le 1 \ \norm{g}_\mathcal{H} \le 1} \operatorname{Cov}[f(x)g(y)] \\
+        % &= \sup_{\norm{f}_\mathcal{H} \le 1 \ \norm{g}_\mathcal{H} \le 1} \operatorname{Cov}\brackb{\bracka{\sum^\infty_{j=1} f_j\psi_j(x) }\bracka{\sum^\infty_{j=1} g_j\phi_j(x) } } \\
+        &= \sup_{\norm{f}_\mathcal{H} \le 1 \ \norm{g}_\mathcal{H} \le 1} \brackd{f, \tilde{C}_{xy} g} \\
+        &= \sup_{\norm{f}_\mathcal{H} \le 1 \ \norm{g}_\mathcal{H} \le 1} \mathbb{E}_{xy}\brackb{\bracka{\sum^\infty_{j=1} f_j\tilde{\psi}_j(x) }\bracka{\sum^\infty_{j=1} g_j\tilde{\phi}_j(x) } } \\
+    \end{aligned}
+    \end{equation*}
+    where $\tilde{\psi}(x) = \psi(x)-\mathbb{E}_x\psi(x)$ and $\tilde{\phi}(x) = \phi(x) - \mathbb{E}_x\phi(x)$
+     and $\tilde{C}$ being a covariance operator with centered feature map. We will use it to determine the dependence between variables. However, please note that covariance isn't the same as dependency.
+\end{definition}
+
+\begin{definition}{\textbf{(Empircal COCO)}}
+    We define an empirical COCO problem to be
+    \begin{equation*}
+        \widehat{\operatorname{COCO}} = \sup_{\norm{f}_\mathcal{H} \le 1 \ \norm{g}_\mathcal{H} \le 1} \frac{1}{n}\sum^n_{i=1}\brackb{ \bracka{f(x_i) - \frac{1}{n}\sum^n_{j=1}f(x_j)} \bracka{g(y_i) - \frac{1}{n}\sum^n_{j=1}g(y_j)} }
+    \end{equation*}
+    Given a sample $\{(x_i, y_i)\}^n_{i=1}$ sample iid from $P_{xy}$
+\end{definition}
+
+\begin{theorem}
+    The empirical $\widehat{\operatorname{COCO}}$ is the largest eigenvalue $\gamma_\text{max}$ i.e:
+    \begin{equation*}
+        \begin{bmatrix}
+            0 & \frac{1}{n}\tilde{K}\tilde{L} \\
+            \frac{1}{n}\tilde{K}\tilde{L} & 0 \\ 
+        \end{bmatrix}
+        \begin{bmatrix}
+            \alpha \\ \beta
+        \end{bmatrix} = \gamma\begin{bmatrix}
+            \tilde{K} & 0 \\
+            0 & \tilde{L} \\
+        \end{bmatrix}\begin{bmatrix}
+            \alpha \\ \beta
+        \end{bmatrix}
+    \end{equation*}
+    where $\tilde{K} = HKH, \tilde{L} = HLH$ are center kernel matrix
+\end{theorem}
+\begin{proof}
+    We consider the following Lagragian:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{L}(f,g,\lambda,\gamma) = &-\frac{1}{n}\sum^n_{i=1}\brackb{ \bracka{f(x_i) - \frac{1}{n}\sum^n_{j=1}f(x_j)} \bracka{g(y_i) - \frac{1}{n}\sum^n_{j=1}g(y_j)} } \\
+        &+ \frac{\lambda}{2} \bracka{\norm{f}^2_\mathcal{F}-1} + \frac{\gamma}{2}\bracka{\norm{g}^2_\mathcal{F}-1}
+    \end{aligned}
+    \end{equation*}
+    We assume that the function $f$ and $g$ are 
+    \begin{equation*}
+        f=\sum^n_{i=1}\alpha_i\tilde{\psi}(x_i) \qquad g=\sum^n_{i=1}\beta_i\tilde{\phi}(x_i)
+    \end{equation*}
+    Now, consider the smoothness constrain, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{f}^2_\mathcal{F}-1 &= \brackd{f, f}_\mathcal{F} - 1 \\
+        &= \brackd{\sum^n_{i=1}\alpha_i\tilde{\psi}(x_i), \sum^n_{i=1}\alpha_i\tilde{\psi}(x_i)} - 1 \\
+        &=\alpha^T\tilde{K}\alpha  
+    \end{aligned}
+    \end{equation*}
+    For the covariance, we have
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{n}\sum^n_{i=1}&\brackb{ \bracka{f(x_i) - \frac{1}{n}\sum^n_{j=1}f(x_j)} \bracka{g(y_i) - \frac{1}{n}\sum^n_{j=1}g(y_j)} } \\
+        &= \frac{1}{n}\sum^n_{i=1}\brackd{f, \tilde{\psi}(x_i)}_\mathcal{F}\brackd{g, \tilde{\phi}(y_i)}_\mathcal{G} = \frac{1}{n}\sum^n_{i=1}\brackd{\sum^n_{i=1}\alpha_i\tilde{\psi}(x_i), \tilde{\psi(x_i)}}\brackd{\sum^n_{i=1}\beta_i\tilde{\phi}(x_i), \tilde{\phi}(y_i)}_\mathcal{G} \\
+        &= \frac{1}{n}\alpha^T\tilde{K}\tilde{L}\beta
+    \end{aligned}
+    \end{equation*}
+    Now, we have the following Lagragian:
+    \begin{equation*}
+        \mathcal{L}(f,g,\lambda,\gamma) = -\frac{1}{n}\alpha^T\tilde{K}\tilde{L}\beta + \frac{\lambda}{2}(\alpha^T\tilde{K}\alpha-1) +\frac{\gamma}{2}(\beta^T\tilde{L}\beta-1)
+    \end{equation*}
+    Now, we differentiate that Lagragian with respect to $\alpha$ and $\beta$, which we have (respectively) and set to zero:
+    \begin{equation*}
+        0 = -\frac{1}{n}\tilde{K}\tilde{L}\beta + \lambda\tilde{K}\alpha \qquad 0 = -\frac{1}{n}\tilde{L}\tilde{K}\alpha + \gamma\tilde{L}\beta
+    \end{equation*}
+    By multiplying the first equation with $ \alpha^T $ and the second one by $ \beta^T $, we have:
+    \begin{equation*}
+        0 = -\frac{1}{n}\alpha^T\tilde{K}\tilde{L}\beta + \lambda\alpha^T\tilde{K}\alpha \qquad 0 = -\frac{1}{n}\beta^T\tilde{L}\tilde{K}\alpha + \gamma\beta^T\tilde{L}\beta 
+    \end{equation*}
+    Subtract both equation, yields:
+    \begin{equation*}
+        \lambda\alpha^T\tilde{K}\alpha = \gamma\beta^T\tilde{L}\beta
+    \end{equation*}
+    when $\lambda\ne0$ and $\gamma\ne0$, by complementary slackness we have $\alpha^T\tilde{K}\alpha = \beta^T\tilde{L}\beta = 1$, thus $\lambda=\gamma$. And so, COCO is the largest eigenvalue. 
+\end{proof}
+
+\begin{definition}{\textbf{(Empirical witness Function)}}
+    We define the empirical witness function as:
+    \begin{equation*}
+        f(x)\propto\sum^n_{i=1}\alpha_i\brackb{k(x_i, x) - \frac{1}{n}\sum^n_{j=1}k(x_j, x)}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    Even with indepdent variable, COCO won't give us zero at finite sample, since there can be some mild linear dependence found by $f, g$, which is a bias. Good news, this will be decrease if the sample size is higher.
+\end{remark}
+
+\subsection{HSIC}
+\begin{definition}{\textbf{(Hilbert-Schmidt Indepdent Criterion)}}
+    We would like to just find the norm of the centered covariance operator i.e
+    \begin{equation*}
+        \operatorname{HSIC}(P_{XY};\mathcal{F}, \mathcal{G}) = \norm{C_{xy} - \mu_x\otimes\mu_y}_{\operatorname{HS}} = \norm{\tilde{C}_{xy}}_{\operatorname{HS}}
+    \end{equation*}
+\end{definition}
+\begin{theorem}
+    MMD with product kernel:
+    \begin{equation*}
+        \operatorname{HSIC}^2(P_{XY};\mathcal{F}, \mathcal{G}) = \operatorname{MMD}^2(P_{XY}, P_X, P_Y ; \mathcal{H}_k)
+    \end{equation*}
+    where $k((x, y), (x', y')) = k(x,x')l(y,y')$
+\end{theorem}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \norm{C_{xy} - \mu_x\otimes\mu_y}_{\operatorname{HS}}^2 &= \brackd{C_{xy} - \mu_x\otimes\mu_y, C_{xy} - \mu_x\otimes\mu_y}_{\operatorname{HS}} \\
+        &= \underbrace{\brackd{C_{xy}, C_{xy}}_{\operatorname{HS}}}_{\circled{1}} - 2\underbrace{\brackd{C_{xy}, \mu_x\otimes\mu_y}_{\operatorname{HS}}}_{\circled{2}}  + \underbrace{\brackd{\mu_x\otimes\mu_y, \mu_x\otimes\mu_y}_{\operatorname{HS}}}_{\circled{3}}
+    \end{aligned}
+    \end{equation*}
+    Let's consider $\circled{1}$, first
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{C_{xy}, C_{xy}}_{\operatorname{HS}} &= \mathbb{E}_{xy}\brackb{\brackd{\psi(x)\otimes \phi(y), C_{xy}}_{\operatorname{HS}}} \\
+        &= \mathbb{E}_{xy}\mathbb{E}_{x'y'}\brackb{\brackd{\psi(x)\otimes \phi(y), \psi(x')\otimes \phi(y')}_{\operatorname{HS}}} \\
+        &= \mathbb{E}_{xy}\mathbb{E}_{x'y'}\brackb{\brackd{\psi(x), \psi(x')}_\mathcal{F}\brackd{\phi(x), \phi(x')}_\mathcal{G} } \\
+        &= \mathbb{E}_{xy}\mathbb{E}_{x'y'}\brackb{k(x, x')k(y, y')} \\
+    \end{aligned}
+    \end{equation*}
+    For the $\circled{2}$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{C_{xy}, \mu_x\otimes\mu_y}_{\operatorname{HS}} &= \mathbb{E}_{xy}\brackb{\brackd{\psi(x)\otimes \phi(y), \mu_x\otimes\mu_y}_{\operatorname{HS}}} \\
+        &= \mathbb{E}_{xy}\brackb{\brackd{\psi(x), \mu_x}_\mathcal{F}\brackd{\phi(y), \mu_y}_\mathcal{G}} \\
+        &= \mathbb{E}_{xy}\brackb{\mathbb{E}_{x'}[k(x, x')\mathbb{E}_{y'}[l(y, y')]]} \\
+    \end{aligned}
+    \end{equation*}
+    Finally, for $\circled{3}$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{\mu_x\otimes\mu_y, \mu_x\otimes\mu_y}_{\operatorname{HS}} &= \brackd{\mu_x,\mu_x}_\mathcal{F}\brackd{\mu_y,\mu_y}_\mathcal{G} \\
+        &= \mathbb{E}_{x}[\mu_x(x)]\mathbb{E}_{y}[\mu_y(y)]\\
+        &= \mathbb{E}_{xx'}\brackb{k(x, x')}\mathbb{E}_{yy'}\brackb{l(y, y')}
+    \end{aligned}
+    \end{equation*}
+    Combining them, gives us MMD with product kernel.
+\end{proof}
+
+\begin{proposition}
+    If we define $i$-th eigenvalue from $\operatorname{COCO}$ (eigenvevalue of $\tilde{C}_{XY}$) as $\gamma_i$, then we can show that 
+    \begin{equation*}
+        \operatorname{HSIC}^2(P_{XY};\mathcal{F}, \mathcal{G}) = \sum^\infty_{i=1} \gamma^i
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We will proof in finite case first, starting by noting that $\operatorname{HSIC}^2(P_{XY};\mathcal{F}, \mathcal{G}) = \norm{\tilde{C}_{xy}}^2 = \text{tr}(C_{xy}^TC_{xy})$. Then, we will show the following:
+    \begin{itemize}
+        \item Trace is sum of eigenvalues. To show this, we cosnider an eigen-decomposition $A = Q\Lambda Q^{-1}$, which $\Lambda$ is diagonal matrix of eigenvalues. Thus we have 
+        \begin{equation*}
+            \text{tr}(A) = \text{tr}(Q\Lambda Q^{-1}) = \text{tr}(\Lambda Q^{-1}Q) = \text{tr}(\Lambda)    
+        \end{equation*}
+        \item For matrix $A^TA$ is eigenvalue is $\lambda_i^2$ where $\lambda_i$ is the eigenvalue of $A$. Assume an eigenvector $v_i$.
+        \begin{equation*}
+            A^TA = (Q\Lambda Q^{-1})^T(Q\Lambda Q^{-1}) = Q\Lambda^TQ^TA\Lambda Q^T = Q\Lambda^2Q^T
+        \end{equation*}
+    \end{itemize}
+\end{proof}
+
+\begin{definition}{\textbf{(Unbiased Estimate of $\boldsymbol{\norm{C_{xy}}^2_{\operatorname{HS}}}$ )}}
+    \label{def:unbias-C-norm}
+    The empirical estimator of $\norm{C_{xy}}^2_{\operatorname{HS}}$ is
+    \begin{equation*}
+        \hat{A} = \frac{1}{n(n-1)}\sum^n_{i=1}\sum_{j\ne i} k(x_i, x_j)l(y_i, y_j)
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    \label{lem:emph-C-xy}
+    \begin{equation*}
+        \norm{\hat{C}_{xy}}^2_{\operatorname{HS}} = \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(x_i, x_j)l(x_i, x_j)
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \norm{\hat{C}_{xy}}^2_{\operatorname{HS}} &= \brackd{\frac{1}{n}\sum^n_{i=1}\psi(x_i)\otimes\phi(y_i), \frac{1}{n}\sum^n_{i=1}\psi(x_i)\otimes\phi(y_i)} \\ 
+        &= \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}\brackd{\psi(x_i)\otimes\phi(y_i),\psi(x_j)\otimes\phi(y_j)}_{\operatorname{HS}} \\
+        &= \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}\brackd{\psi(x_i), \psi(x_j)}_{\mathcal{F}}\brackd{\phi(y_i), \phi(y_j)}_{\mathcal{F}} = \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(x_i, x_j)l(x_i, x_j) 
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Biased Esimate of $\boldsymbol{\norm{C_{xy}}^2_{\operatorname{HS}}}$)}}
+    The biased estimate of $\norm{C_{xy}}^2_{\operatorname{HS}}$ is 
+    \begin{equation*}
+        \hat{A}_b = \norm{\hat{C}_{xy}}^2_{\operatorname{HS}} = \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(x_i, x_j)l(x_i, x_j) = \frac{1}{n^2}\operatorname{tr}(KL)
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The differences between unbiased estimate and biased estimate is:
+    \begin{equation*}
+        \hat{A} - \hat{A}_b = \frac{1}{n}\bracka{\frac{1}{n} \sum^n_{i=1}k_{ii}l_{ii} - \frac{1}{n(n-1)}\sum^n_{i\ne j}k_{ij}l_{ij} }
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \hat{A} - \hat{A}_b &= \frac{1}{n(n-1)}\sum^n_{i=1}\sum_{j\ne i} k(x_i, x_j)l(y_i, y_j) - \frac{1}{n^2}\sum^n_{i=1}\sum^n_{j=1}k(x_i, x_j)l(x_i, x_j) \\
+        &= \frac{1}{n} \sum^n_{i=1} \bracka{\frac{1}{n-1}\sum^n_{j\ne i} k_{ij}l_{ij} - \frac{1}{n}\sum^n_{j=1}k_{ij}l_{ij} } \\
+        &= \frac{1}{n} \sum^n_{i=1}\bracka{\frac{1}{n} k_{ii}k_{jj} - \frac{1}{n-1}\brackb{\sum_{j\ne i}^n k_{ij}l_{ij} } - \frac{1}{n}\brackb{\sum_{j\ne i}^n k_{ij}l_{ij} } } \\
+        &= \frac{1}{n} \sum^n_{i=1}\bracka{\frac{1}{n} k_{ii}k_{jj} - \frac{1}{n(n-1)}\brackb{\sum_{j\ne i}^n k_{ij}l_{ij} } } \\
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    The biased estimate of $\operatorname{HSIC}^2$ is equal to:
+    \begin{equation*}
+        \widehat{\operatorname{HSIC}}^2 = \frac{1}{n^2}\operatorname{tr}(KHLH)
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the empirical estimate of 
+    \begin{equation*}
+    \begin{aligned}
+        \norm{ \hat{C}_{xy} - \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}}^2 &= \brackd{\hat{C}_{xy} - \hat{\mu}_x\otimes\hat{\mu}_y, \hat{C}_{xy} - \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}} \\
+        &= \underbrace{\brackd{\hat{C}_{xy}, \hat{C}_{xy}}_{\operatorname{HS}}}_{\circled{1}} - 2\underbrace{\brackd{\hat{C}_{xy}, \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}}}_{\circled{2}}  + \underbrace{\brackd{\hat{\mu}_x\otimes\hat{\mu}_y, \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}}}_{\circled{3}} 
+    \end{aligned}
+    \end{equation*}
+    For $\circled{1}$, we use the result from lemma \ref{lem:emph-C-xy}. Let's consider the second one $\circled{2}$:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{\hat{C}_{xy}, \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}} &= \brackd{\hat{\mu}_x, \hat{C}_{xy}\hat{\mu}_y}_{\operatorname{HS}}\\ 
+        &= \brackd{\frac{1}{n}\sum^n_{a=1} \psi(x_a), \bracka{\frac{1}{n}\sum^n_{b=1} \psi(x_b)\otimes\phi(x_b) }\bracka{\frac{1}{n}\sum^n_{c=1}\phi(y_c)}  } \\
+        &= \frac{1}{n^3}\brackd{\sum^n_{a=1} \psi(x_a), \bracka{\sum^n_{b=1}\sum^n_{c=1} \Big[\psi(x_b)\otimes\phi(y_b)\Big]\phi(y_c)}  } \\
+        &= \frac{1}{n^3}\brackd{\sum^n_{a=1} \psi(x_a), \bracka{\sum^n_{b=1}\sum^n_{c=1}  \brackd{\phi(y_b), \phi(y_c)}\psi(x_b)}  } \\
+        &= \frac{1}{n^3}\sum^n_{b=1}\sum^n_{c=1}l(y_b, y_c)\brackd{\sum^n_{a=1}\phi(x_a), \phi(x_b)} \\
+        &= \frac{1}{n^3}\sum^n_{a=1}\sum^n_{b=1}\sum^n_{c=1}l(y_b, y_c)k(x_a, x_b) = \frac{1}{n^3} \boldsymbol 1^T KL\boldsymbol 1
+    \end{aligned}
+    \end{equation*}
+    For the expansion please see appendix \ref{appendix:HSIC-bias-2}. For $\circled{3}$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{ \hat{\mu}_x \otimes\hat{\mu}_y, \hat{\mu}_x\otimes\hat{\mu}_y}_{\operatorname{HS}} &= \brackd{\hat{\mu}_x, \hat{\mu}_x}_\mathcal{F}\brackd{\hat{\mu}_y, \hat{\mu}_y}_\mathcal{G} \\
+        &= \brackd{\frac{1}{n}\sum^n_{i=1}\psi(x_i),\frac{1}{n}\sum^n_{i=1}\psi(x_i)}\cdot\brackd{\frac{1}{n}\sum^n_{i=1}\phi(y_i),\frac{1}{n}\sum^n_{i=1}\phi(y_i)} \\
+        &= \bracka{\frac{1}{n^2}\sum^n_{a=1}\sum^n_{b=1}k(x_a, x_b)}\bracka{\frac{1}{n^2}\sum^n_{c=1}\sum^n_{d=1}k(y_c, y_d)} \\
+        &= \frac{1}{n^4}(\boldsymbol1^T K \boldsymbol1)(\boldsymbol 1^TL\boldsymbol 1)
+    \end{aligned}
+    \end{equation*}
+    Then we have:
+    \begin{equation*}
+    \begin{aligned}
+        \widehat{\operatorname{HSIC}}^2 &= \frac{1}{n^2}\operatorname{tr}(KL) - \frac{2}{n^3}\boldsymbol 1^TKL\boldsymbol 1 + \frac{1}{n^4}(\boldsymbol1^T K \boldsymbol1)(\boldsymbol 1^TL\boldsymbol 1) \\
+        &= \frac{1}{n^2}\bracka{ \operatorname{tr}(KL) - \frac{2}{n}\operatorname{tr}(\boldsymbol1^TKL\boldsymbol1) + \frac{1}{n^2}\operatorname{tr}(\boldsymbol1^TK\boldsymbol1\boldsymbol1^TL\boldsymbol1) } \\
+        &= \frac{1}{n^2}\bracka{ \operatorname{tr}(KL) - \frac{1}{n}\operatorname{tr}(\boldsymbol1\boldsymbol1^TKL) - \frac{1}{n}\operatorname{tr}(K\boldsymbol1\boldsymbol1^TL) + \frac{1}{n^2}\operatorname{tr}(\boldsymbol1\boldsymbol1^TK\boldsymbol1\boldsymbol1^TL) } \\
+        &= \frac{1}{n^2}\operatorname{tr}\bracka{\bracka{I - \frac{1}{n}\boldsymbol1\boldsymbol1^T}KL - \frac{1}{n}\bracka{I - \frac{1}{n}\boldsymbol1\boldsymbol1^T}K\boldsymbol1\boldsymbol1^TL} \\
+        &= \frac{1}{n^2}\operatorname{tr}\bracka{\bracka{I - \frac{1}{n}\boldsymbol1\boldsymbol1^T}\bracka{L - \frac{1}{n}\boldsymbol1\boldsymbol1^TL}} = \frac{1}{n^2}\operatorname{tr}\bracka{\bracka{I - \frac{1}{n}\boldsymbol1\boldsymbol1^T}\bracka{I - \frac{1}{n}\boldsymbol1\boldsymbol1^T}L} \\
+    \end{aligned}
+    \end{equation*}
+    Note that the third equality comes from
+    \begin{equation*}
+        \text{tr}( \boldsymbol1^TKL\boldsymbol1) = \operatorname{tr}(\boldsymbol1^TL^TK^T\boldsymbol1) = \operatorname{tr}(\boldsymbol1^TLK\boldsymbol1) = \operatorname{tr}(K\boldsymbol1\boldsymbol1^TL)
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    The unbiased estimate of $\operatorname{HSIC}^2$ is equal to:
+    \begin{equation*}
+        \operatorname{HSIC}^2 = \frac{1}{n(n-3)}\brackb{\bracka{{K'}\odot{L'}}_{++} - \frac{2}{(n-2)}\boldsymbol1^T{K'}{L'}\boldsymbol1 + \frac{1}{(n-1)(n-2)}\bracka{\boldsymbol1^T{K'}\boldsymbol1}\bracka{\boldsymbol1^T{L'}\boldsymbol1} }
+    \end{equation*}
+    where $(\cdot)_{++}$ is elementwise sum, and where $K', L'$ is this cases are $K$ and $L$ with zero diagonal entries.
+\end{proposition}
+% \begin{proof}
+%     Starting with the operators, we want to estimate with:
+%     \begin{equation*}
+%     \begin{aligned}
+%         \norm{C_{xy} - \mu_x\otimes\mu_y}_{\operatorname{HS}}^2 &= \brackd{C_{xy} - \mu_x\otimes\mu_y, C_{xy} - \mu_x\otimes\mu_y}_{\operatorname{HS}} \\  
+%         &= \underbrace{\brackd{C_{xy}, C_{xy}}_{\operatorname{HS}}}_{\circled{1}} - 2\underbrace{\brackd{C_{xy}, \mu_x\otimes\mu_y}_{\operatorname{HS}}}_{\circled{2}}  + \underbrace{\brackd{\mu_x\otimes\mu_y, \mu_x\otimes\mu_y}_{\operatorname{HS}}}_{\circled{3}}
+%     \end{aligned}
+%     \end{equation*}
+%     Now, for the part $\circled{1}$, we have the following \emph{unbiased} estimator, from definition \ref{def:unbias-C-norm}:
+%     \begin{equation*} 
+%         \hat{A} = \frac{1}{n(n-1)}\sum^n_{i=1}\sum_{j\ne i} k_{ij}l_{ij} = \frac{1}{n(n-1)}\bracka{K'\odot L'}_{++}
+%     \end{equation*}
+%     For part $\circled{2}$, we have the unbiased estimator to be:
+%     \begin{equation*}
+%         \frac{(n-3)!}{n!}\brackb{\sum^n_{i,j=1}\sum^n_{q\ne(i, j)}k_{iq}l_{qj} -  \sum^n_{i=1}\sum_{q\ne i}k_{iq}l_{iq}}
+%     \end{equation*}
+%     For part $\circled{3}$, we have the unbiased estimator to be (modified):
+%     \begin{equation*}
+%     \begin{aligned}
+%         \frac{(n-4)!}{n!}\brackb{} 
+%     \end{aligned}
+%     \end{equation*}
+% \end{proof}
+
+
+\begin{theorem}
+    The asympototic of HSIC when $P_{XY} = P_xP_y$ is given by
+    \begin{equation*}
+        n\widehat{\operatorname{HSIC}}\xrightarrow{D}\sum^\infty_{l=1}\lambda_lz^2_l
+    \end{equation*}
+    where $z_l\sim\mathcal{N}(0, 1)$, which is sampled iid, and
+    \begin{equation*}
+        \lambda_l\psi_l(z_j) = \int h_{ijqr}\psi_l(z_i)\dby F_{iqr} \qquad h_{ijqr}=\frac{1}{4!}\sum^{(ijqr)}_{(tuvw)} k_{tu}l_{tu} + k_{tu}l_{vw}-2k_{tu}l_{tv}
+    \end{equation*}
+\end{theorem}
+
+\begin{remark}
+    We can find the null hypothesis by permuting the set. We will repeat many difference parameters to get the empirical CDF, and the threshold $c_\alpha$, which is $1-\alpha$ quantile with moment matching:
+    \begin{equation*}
+        n\operatorname{HSIC}_b(z) \sim \frac{x^{\alpha-1}\exp(1-x/\beta)}{\beta^\alpha\Gamma(\alpha)}
+    \end{equation*}
+    as we set 
+    \begin{equation*}
+        \alpha = \frac{\mathbb{E}[\operatorname{HSIC}_b]^2}{\operatorname{var}(\operatorname{HSIC}_b)} \qquad \beta = \frac{\operatorname{var}(\operatorname{HSIC}_b)}{n\mathbb{E}[\operatorname{HSIC}_b]}
+    \end{equation*}
+    Note that this moment matching is purely heuristic, and therefore, there is no guarantee for this.
+\end{remark}
+
+\section{Testing Goodness of Fit}
+
+\begin{remark}
+    We would like to compare a sample $Q$ with a distribution $P$. However, to use MMD:
+    \begin{equation*}
+        \operatorname{MMD}(P, Q) = \sup_{\norm{f}_\mathcal{H}\le1}\Big[ \mathbb{E}_Q[f] - \mathbb{E}_P[f] \Big]
+    \end{equation*}
+    we could sample from $P$ but that isn't efficient nor possible (if we only know $P$ up to a constant), while we can't also compute $\mathbb{E}_P[f]$ in a closed form.
+\end{remark}
+
+\begin{definition}{\textbf{(Stein Operator)}}
+    The operator is defined as:
+    \begin{equation*}
+        [T_P f](x) = \frac{1}{P(x)}\frac{d}{dx}(f(x)P(x))
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    $\mathbb{E}_P[T_Pf] = 0$
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+    \begin{aligned}
+        \int \frac{P(x)}{P(x)}\frac{d}{dx}(f(x))P(x) \dby x &= \int  \frac{d}{dx}(f(x)P(x)) \dby x \\
+        &= f(x)P(x)\Big|^\infty_{-\infty} = 0
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Kernel Stein Discrepancy)}}
+    We define the metrics as:
+    \begin{equation*}
+        \operatorname{KSD}(P, Q;\mathcal{F}) = \sup_{\norm{f}_\mathcal{H}\le1}\Big[ \mathbb{E}_Q[T_P f] - \mathbb{E}_P[T_Pf] \Big] = \sup_{\norm{f}_\mathcal{H}\le1} \mathbb{E}_Q[T_P f] 
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    Stein Operator can be re-written as:
+    \begin{equation*}
+        [T_Pf] (x) = \frac{d}{dx} f(x) + f(x)\frac{d}{dx}\log P(x)
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    We can write the expression as:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{P(x)}\frac{d}{dx}(f(x)P(x)) &= \frac{1}{P(x)}\brackb{f(x)\frac{d}{dx}P(x) + P(x)\frac{d}{dx}f(x)} \\
+        &= \frac{f(x)}{P(x)}\frac{d}{dx}P(x) + \frac{d}{dx}f(x) \\
+        &= f(x)\frac{d}{dx}\log P(x) + \frac{d}{dx}f(x) \\
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    Consider the fourier transform, $f(x)$ where we have 
+    \begin{equation*}
+        f(x) = \sum^\infty_{l=-\infty}\hat{f}_l\exp(ilx) \qquad \hat{f}_l = \int^\pi_{-\pi} f(x)\exp(-ilx)\dby x
+    \end{equation*}
+    The fourier representation of the derivative is:
+    \begin{equation*}
+        \frac{d}{dx}f(x) \xrightarrow{\mathcal{F}}\{ (il)\hat{f}_l \}^\infty_{i=-\infty}
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    We can show the reproducbility of the differentaible:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{d}{dx} f(x) = \brackd{f, \frac{d}{dx}k(\cdot, x)} \\
+        &\frac{d}{dx}\frac{d}{dx'} k(x-x') = \brackd{\frac{d}{dx'}k(\cdot, x'), \frac{d}{dx}k(\cdot, x)} \\
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We will consider the periodic kernel, where $\mathcal{X} = [-\pi,\pi]$, We define:
+    \begin{equation*}
+        g(y) = \frac{d}{dx}k(x-y) = \sum^\infty_{l=-\infty} (il)\hat{k}_l\exp(il(x-y))
+    \end{equation*}
+    Since we can see that $g(y)$ is real, we can have:
+    \begin{equation*}
+        g(y) = \overline{g(y)} = \sum^\infty_{l=-\infty} (-il)\hat{k}_l\exp(il(y-x)) 
+    \end{equation*}
+    Let's consider the inner product on the 
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{f, \frac{d}{dx}k(x,\cdot)} &= \brackd{f, g(\cdot)}_\mathcal{F} \\
+        &=\sum^\infty_{l=-\infty} \frac{\hat{f}_l\bar{\hat{g}}_l }{\hat{k}_l}\\
+        &= \sum^\infty_{l=-\infty} \frac{\hat{f}_l \overline{-il\hat{k}_l\exp(il(x-y))} }{\hat{k}_l} \\
+        &= \sum^\infty_{l=-\infty}(il)\hat{f}_l\exp(ilx) = \frac{d}{dx}f(x)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}
+    There exists an feature map, where:
+    \begin{equation*}
+        \mathbb{E}_{z\sim Q} [T_Pf] = \mathbb{E}_{z\sim Q}\brackd{f, \xi_z}_\mathcal{F} = \brackd{f, \mathbb{E}_{z\sim Q}[\xi_z]}_\mathcal{F} \quad \text{ where } \quad \xi_z = k(\cdot, z)\frac{d}{dz} \log p(z) + \frac{d}{dz} k(\cdot, z) 
+    \end{equation*}
+    If 
+    \begin{equation*}
+        \mathbb{E}_{z\sim Q}\bracka{\frac{d}{dz}\log p(z)}^2<\infty
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We will proof this by Riesz theorem, where we need a boundness. We can consider the Jensen's inequality and Cauchy-Schwarz:
+    \begin{equation*}
+    \begin{aligned}
+        \abs{\mathbb{E}_{z\sim Q} \brackd{f, \xi_z}_\mathcal{F}} &\le \mathbb{E}_{z\sim Q}\abs{\brackd{f, \xi_z}_\mathcal{F}} \\
+        &\le \norm{f}\mathbb{E}_{z\sim Q}\norm{\xi_z}_\mathcal{F}
+    \end{aligned}
+    \end{equation*}
+    We will have to show that this square norm $\norm{\xi_z}_\mathcal{F}$ is bounded:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{\xi_z}_\mathcal{F} &= \brackd{\xi_z, \xi_z}_\mathcal{F} \\
+        &= \brackd{k(\cdot, z)\frac{d}{dz} \log p(z) + \frac{d}{dz} k(\cdot, z) , k(\cdot, z)\frac{d}{dz} \log p(z) + \frac{d}{dz} k(\cdot, z) }_\mathcal{F} \\
+        &= \begin{aligned}[t]
+            &\underbrace{\brackd{k(\cdot, z)\frac{d}{dz} \log p(z), k(\cdot, z)\frac{d}{dz} \log p(z)}}_{\circled{1}}  +\underbrace{\left.\brackd{\frac{d}{dx} k(\cdot, x), \frac{d}{dx'} k(\cdot, x')}\right|_{x=x'=z}}_{\circled{2}} \\
+            &+ \underbrace{\left.\brackd{k(\cdot, x)\frac{d}{dx} \log p(x), \frac{d}{dx'} k(\cdot, x')}\right|_{x=x'=z}}_{\circled{3}}
+        \end{aligned} \\
+        &= c + \bracka{\frac{d}{dz}\log p(z)}^2c
+    \end{aligned}
+    \end{equation*}
+    where we set $k(z,z) = c$. Now, consider each terms: Starting with the first term $\circled{1}$:
+    \begin{equation*}
+        \brackd{k(\cdot, z)\frac{d}{dz} \log p(z), k(\cdot, z)\frac{d}{dz} \log p(z)} = \brackb{\bracka{\frac{d}{dz}\log p(z)}^2k(z,z)} = \brackb{\frac{d}{dz}\log p(z)}^2 c
+    \end{equation*}
+    Now, consider the second part $\circled{2}$:
+    \begin{equation*}
+    \begin{aligned}
+        \left.\brackd{\frac{d}{dx} k(\cdot, x), \frac{d}{dx'} k(\cdot, x')}\right|_{x=x'=z} &= \sum^\infty_{l=-\infty} \frac{ \big[-il\hat{k}_l\exp(-ilx)\big]\overline{\big[-il\hat{k}_l\exp(-ilx')\big]}}{\hat{k}_l} \\
+        &= \sum^\infty_{l=-\infty}-(il)^2\hat{k}_l\cancelto{1}{\exp(il(x'-x))} = \sum^\infty_{l=-\infty}l^2\hat{k}_l = c >0 \\
+    \end{aligned}
+    \end{equation*}
+    For the final part $\circled{3}$, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \brackd{k(\cdot, z)\frac{d}{dz} \log p(z), \frac{d}{dz} k(\cdot, z)} &= \bracka{\frac{d}{dz}\log p(z)}\sum^\infty_{l=-\infty}\frac{\big[ \hat{k}_l\exp(-ilx) \big]\overline{\big[ (-il)\exp(-ilx')\hat{k}_l \big]}}{\hat{k}_l} \\
+        &=\bracka{\frac{d}{dz}\log p(z)}\sum^\infty_{l=-\infty}(il)\hat{k}_l\cancelto{1}{\exp(il(x'-x))} = 0
+    \end{aligned}
+    \end{equation*}
+    Given the boundness, we have 
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}_{z\sim Q}\norm{\xi_z}_\mathcal{F} &= \mathbb{E}_{z\sim Q}\sqrt{c + \bracka{\frac{d}{dz}\log p(z)}^2c} \\
+        &\le\sqrt{\mathbb{E}_{z\sim Q}\brackb{c + \bracka{\frac{d}{dz}\log p(z)}^2c}}
+    \end{aligned}
+    \end{equation*}
+    Thus, we have the condition that riesz to hold.
+\end{proof}
+
+\begin{remark}
+    However, the bound condition might not hold. Consider the normal distribution:
+    \begin{equation*}
+        P(x) = \frac{1}{\sqrt{2\pi}}\exp(-x^2/x)
+    \end{equation*}
+    Then its derivative is $-x$. If $q$ is Cauchy distribution, then the integral is 
+    \begin{equation*}
+        \mathbb{E}_{z\in Q} \bracka{ \frac{d}{dz} \log p(z) }^2 = \int^\infty_{-\infty} z^2q(z)\dby z 
+    \end{equation*}
+    This is undefined.
+\end{remark}
+
+\begin{proposition}
+    The closed form expression of KSD given indepdent $z,z'\sim q$, then:
+    \begin{equation*}
+        \operatorname{KSD}(P, Q, \mathcal{F}) = \norm{\mathbb{E}_{z\in Q}\xi_z}_\mathcal{F}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+\begin{equation*}
+\begin{aligned}
+    \operatorname{KSD}(P, Q, \mathcal{F}) &= \sup_{\norm{g}_\mathcal{F}\le1}\mathbb{E}_{z\sim Q}[(T_Pg)(z)]  \\
+    &=  \sup_{\norm{g}_\mathcal{F}\le1}\mathbb{E}_{z\sim Q} \brackd{g, \xi_z}_\mathcal{F} \\
+    &=  \sup_{\norm{g}_\mathcal{F}\le1} \brackd{g, \mathbb{E}_{z\sim Q}\xi_z}_\mathcal{F} = \norm{\mathbb{E}_{z\sim Q}\xi_z}_\mathcal{F}
+\end{aligned}
+\end{equation*}
+\end{proof}
+
+\begin{proposition}
+    We can have the following test statistics:
+    \begin{equation*}
+        \norm{\mathbb{E}_{z\sim Q}\xi_z}_\mathcal{F}^2 = \mathbb{E}_{z,z'\sim q}h_p(z,z')
+    \end{equation*}
+    where we have 
+    \begin{equation*}
+    \begin{aligned}
+        h_p(x, y) = &\frac{d}{dx}\log p(x)\frac{d}{dy}\log p(y)k(x, y) + \frac{d}{dy}\log p(y) \frac{d}{dx}k(x, y) \\
+        &+ \frac{d}{dx}\log p(x)\frac{d}{dy}k(x, y) + \frac{d}{dx}\frac{d}{dy}k(x, y) 
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}
+    Given an example $\{z_i\}^n_{i=1}$ empirical KSD is 
+    \begin{equation*}
+        \widehat{\operatorname{KSD}}(P, Q;\mathcal{F}) = \frac{1}{n(n-1)}\sum^n_{i=1}\sum^n_{j\ne i} h_p(z_i, z_j)
+    \end{equation*}
+    when $q = p$ we obtain the estimate of null distribution with wild bootstrap: 
+    \begin{equation*}
+        \widetilde{\operatorname{KSD}}(P, Q;\mathcal{F}) = \frac{1}{n(n-1)}\sum^n_{i=1}\sum^n_{j\ne i} \sigma_i\sigma_j h_p(z_i, z_j)
+    \end{equation*}
+    when $\brackc{\sigma_i}^n_{i=1}$ is sampled iid where $\mathbb{E}[\sigma_i] = 0$ and $\mathbb{E}[\sigma^2_i] = 1$
+\end{remark}
+
+\section{Support Vector Machine}
+
+\subsection{Introduction}
+
+\begin{definition}{\textbf{(Learning Problem)}}
+    Given a set of paired observation $(x_1,y_1),\dots,(x_n, y_n)$ either for regression or classification task. We would like to find a function $f^*$ in RKHS $\mathcal{H}$ that satisfies:
+    \begin{equation*}
+        f^*=\argmin{f\in\mathcal{H}}J(f) = \argmin{f\in\mathcal{H}}L_y(f(1),\dots,f(x_n)) + \Omega\bracka{\norm{f}^2_\mathcal{H}}
+    \end{equation*}
+    where $\Omega$ is non-decreasing, $y$ is the vector of $y_i$ and loss $L$ that depends on $x_i$ only via $f(x_i)$.
+\end{definition}
+
+\begin{theorem}
+    The representor theorem is a solution to:
+    \begin{equation*}
+        \min_{f\in\mathcal{H}}\brackb{L_y(f(x_1), \dots,f(x_n)) + \Omega\bracka{\norm{f}^2_\mathcal{H}}}
+    \end{equation*}
+    which takes the form:
+    \begin{equation*}
+        f^* = \sum^n_{i=1} \alpha_ik(x_i, \cdot) 
+    \end{equation*}
+    If $\Omega$ is strictly increasing, then the solution must take this form.
+\end{theorem}
+\begin{proof}
+    Denote $f_S$ is the projection of $f$ onto the subspace: $\operatorname{span}\brackc{k(x,\cdot) : 1\le i\le n}$, such that $f = f_S + f_\bot$ where $f_S = \sum^n_{i=1}\alpha_ik(x_i, \cdot)$. The regularizer is given by $\norm{f}^2_\mathcal{H} = \norm{f_\bot}^2_\mathcal{H} + \norm{f_S}^2_\mathcal{H} \ge \norm{f_S}^2_\mathcal{H}$. Then by the definition of $\Omega$:
+    \begin{equation*}
+        \Omega\bracka{\norm{f}^2_\mathcal{H}}\ge\Omega\bracka{\norm{f_S}^2_\mathcal{H}}
+    \end{equation*}
+    This is clear that this minimize for $f=f_S$. The individual terms $f(x_i)$ in the loss is:
+    \begin{equation*}
+        f(x_i) = \brackd{f, k(x_i,\cdot)}_\mathcal{H} = \brackd{f_S + f_\bot, k(x_i, \cdot)}_\mathcal{H} = \brackd{f_S, k(x_i,\cdot)}
+    \end{equation*}
+    And, so we have $L_y(f(x_1),\dots,f(x_n)) = L_y(f_S(x_1),\dots,f_S(x_n))$. Hence, it is clear tha the loss $L(\cdot)$ only depends on the component of $f$ in data subspace:
+    \begin{itemize}
+        \item Regularizer is minimal when $f=f_S$
+        \item If $\Omega$ is non-decreasing, then $\norm{f_\bot}_\mathcal{H}=0$ is minimum. If $\Omega$ strictly increasing, as minimum is unique. 
+    \end{itemize}
+\end{proof}
+
+\begin{definition}{\textbf{(SVM)}}
+    We will classify $2$ clouds of points, where there exists a hyperplane, which linearly separate one cloud from the other without error: The smallest distance each class to the seperating hyperplane $w^Tx+b$ is called margin. We can express the problem as follows:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{w, b}\bracka{\norm{w}^2} = \max_{w, b}\bracka{\frac{2}{\norm{w}}} \\
+        \text{ subject to }& \begin{aligned}[t]
+            &w^Tx_i + b\ge1 \quad i : y_i = +1 \\ 
+            &w^Tx_i + b\le1 \quad i : y_i = -1 \\ 
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Please not that we can solve this problem via convex optimization. 
+\end{definition}
+
+\begin{remark}
+    To have the sepearting hyperplane, the distance between them 
+    \begin{equation*}
+        d = (x_+ - x_-)^T\frac{w}{\norm{w}}
+    \end{equation*}
+    Now, we can see that the constraint is:
+    \begin{equation*}
+    \begin{aligned}
+        w^Tx_+ + b = 1 \qquad w^Tx_- + b = -1 
+    \end{aligned}
+    \end{equation*}
+    If we minus themselves together and we have $w^T(x_+-x_-) = 2$, then it is clear that $d = 2/\norm{w}$ as required.
+\end{remark}
+
+\subsection{Convex Optimization}
+
+\begin{definition}{\textbf{(Convex Set)}}
+    A set $C$ is convex iff for all $x_1, x_2\in C$ and any $0\le\theta\le1$, which we have:
+    \begin{equation*}
+        \theta x_1 + (1-\theta)x_2 \in C
+    \end{equation*}    
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Function)}}
+    A function $f$ is convex if its domain $\operatorname{dom}(f)$ is a convex set if for all $x, y\in\operatorname{dom}(f)$ and for any $0\le\theta\le1$:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y) \le \theta f(x) + (1-\theta)f(y)
+    \end{equation*}
+    The function is strictly convex if the inequality is strict for $x\ne y$. 
+\end{definition}
+
+\begin{definition}{\textbf{(Optimization Problem)}}
+    The optimization problem on $x\in \mathbb{R}^n$:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        \text{ subject to }& \begin{aligned}
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad 1,\dots,p
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The point $p^*$ is optimal value. $\mathcal{D}$ assumed non-empty where:
+    \begin{equation*}
+        \mathcal{D} = \bigcap^m_{i=0}\operatorname{dom}(f_i)\cap\bigcap^m_{i=1}\operatorname{dom}(h_i)
+    \end{equation*}
+\end{definition}
+\begin{remark}
+    Ideally, we have unconstraint problem:
+    \begin{equation*}
+        \min f_0(x) + \sum^m_{i=1}l_-(f_i(x)) + \sum^p_{i=1}l_0(h_i(x)) \quad \text{ where } \quad L_-=\begin{cases}
+            0 & u \le 0 \\
+            \infty & u > 0
+        \end{cases}
+    \end{equation*}
+    and $l_0(u)$ is indicator of $0$.
+\end{remark}
+
+\begin{definition}{\textbf{(Lagrangian)}}
+    The Lagragian is the lower bound on the original problem:
+    \begin{equation*}
+        L(x, \lambda, \nu) = f_0(x) + \sum^m_{i=1}\underbrace{\lambda_if_i(x)}_{\le l_-(f_i(x))} + \sum^p_{i=1}\underbrace{\nu_ih_i(x)}_{\le l_0(h_i(x))}
+    \end{equation*}
+    It has a domain $\operatorname{dom}(L)=\mathcal{D}\times \mathbb{R}^m\times \mathbb{R}^p$. The vector $\lambda$ and $\nu$ are called Lagrange multiplier or dual variable to ensure lower bound, we require $\lambda\succeq0$.
+\end{definition}
+
+\begin{definition}{\textbf{(Dual Function)}}
+    Minimize Lagragian when $\lambda\ge0$ and $f_i(x)\le0$. The Lagrange dual function is:
+    \begin{equation*}
+        g(\lambda, \nu) = \inf_{x\in\mathcal{D}}L(x, \lambda, \nu)
+    \end{equation*}
+    A dual feasible pair $(\lambda, \nu)$ is a pair for which $\lambda\succeq0$ and $(\lambda, \nu)\in\operatorname{dom}(g)$
+\end{definition}
+
+\begin{proposition}
+    For any $\lambda\succeq0$ and $\nu$, we have $g(\lambda,\nu)\le f_0(x)$ whenever $f_i(x)\le0$ and $h_i(x) =0$, including $f_0(x^*)=p^*$
+\end{proposition}
+\begin{proof}
+    Assume $\tilde{x}$ is feasbile i.e $f(\tilde{x})\le0$ and $h_i(\tilde{x})=0$ and $\tilde{x}\in\mathcal{D}$ and $\lambda\succeq0$ then:
+    \begin{equation*}
+        \sum^n_{i=1}\lambda_if_i(\tilde{x}) + \sum^p_{i=1}\nu_ih_i(\tilde{x})\le0
+    \end{equation*}
+    Thus, we have:
+    \begin{equation*}
+    \begin{aligned}
+        g(\lambda, \nu) &= \inf_{x\in\mathcal{D}}\bracka{f_0(x) + \sum^m_{i=1}\lambda_if_i(x) + \sum^p_{i=1}\nu_ih_i(x)} \\
+        &\le f_0(\tilde{x}) + \sum^m_{i=1}\lambda_if_i(\tilde{x}) + \sum^p_{i=1}\nu_ih_i(\tilde{x}) \\
+        &\le f_0(\tilde{x})
+    \end{aligned}
+    \end{equation*}
+    The best lower bound $g(\lambda, \nu)$ on the optimal problem solution $p^*$.
+\end{proof}
+
+\begin{definition}{\textbf{(Lagrange Dual Problem)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\max g(\lambda, \nu) \\
+        &\text{ subject to }\lambda\succeq0
+    \end{aligned}
+    \end{equation*}
+    The dual feasible $(\lambda, \nu)$ with $\lambda\succeq0$ and $g(\lambda, \nu)>-\infty$
+\end{definition}
+
+\begin{definition}{\textbf{(Dual Optimal)}}
+    The solution $(\lambda^*, \nu^*)$ of the maximal dual and $d^*$ is optimal value. The weak duality holds if $d^*\le p^*$. However, the strong duality $d^*=p^*$ might not always holds.
+\end{definition}
+
+\begin{remark}
+    If this strong duality holds, we have easy concave dual problem to find $p^*$. Dual function is a pointwise infininum of affine function of $(\lambda, \nu)$ hence concave in $(\lambda,\nu)$ with convex constraint set $\lambda\succeq0$
+\end{remark}
+
+\begin{proposition}
+    The sufficient condition (non-necessary) for strong duality, which holds if:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        \text{\emph{ subject to }}& \begin{aligned}[t]      
+            &f_i(x)\le 0 \quad i=1,\dots,n \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    as $h_i$ is affine, for convex $f_0,\dots,f_n$. And, Slater's condition holds: if there exists some strictly feasbile points $\tilde{x}\in\operatorname{relint}(\mathcal{D})$ such that: $f_i(\tilde{x}) < 0$ for $i=1,\dots,m$ where $A\tilde{x}=b$. For the case of affine $f_i$, the condition is trivial (the inequality constriants no longer strict, reduces to original inequality constraint): 
+    \begin{equation*}
+        f_i(\tilde{x}) \le 0 \quad i-1,\dots,m \quad A\tilde{x}=b
+    \end{equation*}
+\end{proposition}
+\begin{proposition}{\textbf{(Complementary Slackness)}}
+    The complementary slackness is the consequence of strong duality, where we have:
+    \begin{equation*}
+        \sum^m_{i=1}\lambda_i^*f_i(x^*) = 0
+    \end{equation*}
+    which is the condition of complementary slackness, which implies that:
+    \begin{equation*}
+        \lambda_i^*>0\implies f_i(x^*)=0 \qquad f_i^*(x^*)<0 \implies \lambda^*_i=0
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Assume the primal is equal to dual then we have $x^*$ solution of original problem and $(\lambda^*, \nu^*)$ is the solution to the dual:
+    \begin{equation*}
+    \begin{aligned}
+        f_0(x^*) &= g(\lambda^*, \nu^*) \\
+        &= \inf_{x\in\mathcal{D}}\bracka{f_0(x) + \sum^m_{i=1}\lambda^*_if_i(x) + \sum^p_{i=1}\nu^*_ih_i(x)} \\
+        &\le f_0(x^*) + \sum^m_{i=1}\lambda^*_if_i(x^*) + \sum^p_{i=1}\nu^*_ih_i(x^*) \\
+        &\le f_0(x^*)
+    \end{aligned}
+    \end{equation*}
+    The last inequality comes from $x^*, \lambda^*, \nu^*$ satisfies $\lambda\succeq0$, $f_i(x^*)\le0$, $h_i(x^*)=0$. 
+\end{proof}
+
+\begin{definition}{\textbf{(KKT Condition For Global Optimum)}}
+    Assume function $f_i, h_i$ are differentiable and strong duality, since $x^*$ minimize $L(x, \lambda^*,\nu^*)$ derivative at $x^*$ is zero:
+    \begin{equation*}
+        \nabla f_0(x^*) + \sum^m_{i=1}\lambda^*_i\nabla f_i(x^*) + \sum^p_{i=1}\nu^*\nabla h_i(x^*) = 0
+    \end{equation*}
+    KKT condition means: we are at global optimum $(x, \lambda, \nu) = (x^*, \lambda^*, \nu^*)$ when:
+    \begin{itemize}
+        \item Strong Duality Holds (primal problem convex and constraint functions satisfy Slater's condition)
+        \item Primal Feasibility: 
+        \begin{equation*}
+            \begin{cases}
+                f_i(x) \le 0 & i=1,\dots,m\\
+                h_i(x) = 0 & i=1,\dots,p\\
+            \end{cases}
+        \end{equation*}
+        \item Dual Feasibility: $\lambda_i\ge0$ and $i=1,\dots,m$ 
+        \item Complementary Slackness: $\lambda_if_i(x)=0$ and $i=1,\dots,m$
+        \item Zero Gradient:
+        \begin{equation*}
+            \nabla f_0(x) + \sum^m_{i=1}\lambda\nabla_if_i(x) + \sum^p_{i=1}\nu_i\nabla h_i(x) = 0
+        \end{equation*}
+    \end{itemize}
+    Furthermore, KKT conditions necessary and sufficient for optimality.
+\end{definition}
+
+\begin{definition}{\textbf{(Optimization Problem for SVM)}}
+    The problem can be expressed as follows:
+    \begin{equation*}
+    \begin{aligned}
+        &\max_{w, b}\bracka{\frac{2}{\norm{w}}} \\
+        \text{ subject to }&\begin{aligned}[t]
+            &\min(w^Tx_i + b) = 1 \quad i:y_i=1 \\ 
+            &\max(w^Tx_i + b) = -1 \quad i:y_i=-1 \\ 
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    and we have the classifier to be $y=\operatorname{sign}(w^Tx+b)$, where we can re-write it case:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{w, b}\norm{w}^2 \\
+        \text{ subject to }&\begin{aligned}[t]
+            y_i(w^Tx_i + b)\ge1
+        \end{aligned} 
+    \end{aligned}
+    \end{equation*}
+    We allow error points within a margin, or even on the wrong side of the decision boundary. However, ideally, we need the following optimization:
+    \begin{equation*}
+        \min_{w, b} \bracka{\frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\mathbb{I}\brackb{y_i(w^Tx_i + b) < 0}}
+    \end{equation*}
+    We will replace with convex upper bound, with hinge loss 
+    \begin{equation*}
+        \min_{w, b} \bracka{\frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\theta\bracka{y_i(w^Tx_i + b) < 0}} \quad \text{ where } \quad \theta(\alpha) = (1-\alpha)_+ = \begin{cases}
+            1-\alpha & 1-\alpha > 0 \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Now, we replace a hinge loss with simple inequality constraints:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{w, b,\xi_i}\bracka{\frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\xi_i}\\
+        \text{ subject to }& \begin{aligned}[t]
+            &\xi_i\ge0 \\
+            &y_i(w^Tx_i + b)\ge1-\xi_i
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Please note that:
+    \begin{itemize}
+        \item $y_i(w^Tx_i + b)\ge1$ and $\xi_i=0$. We can minimize if its is correct.
+        \item $y_i(w^Tx_i + b)<1$ and $\xi_i>0$ takes the value satisfying $y_i(w^Tx_i+b) = 1-\xi_i$. We are able to decrease, which looks like the hinge loss. We can decrease till $1-\xi_i$ is equal. 
+    \end{itemize}
+\end{definition}
+
+\begin{remark}
+    The strong duality holds. The optimization problem convex with respect to the variable $w, b, \xi$ turned to ? 
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{w, b, \xi}\bracka{\frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\xi_i} \\
+        \text{ subject to }&\begin{aligned}[t]
+            &\xi_i\ge0 \\
+            &1-\xi_i-y_i(w^Tx_i + b)\le 0 \quad i=1,\dots,n
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This is clear that $f_0, f_1,\dots,f_n$ are convex. The slater's condition holds. It is trivial since inequality constriants affine and there exists some $\xi_i\ge0$:
+    \begin{equation*}
+        y_i(w^Tx_i+b)\ge1-\xi_i
+    \end{equation*}
+    Thus the strong duality holds, the problem is differentaible and so KKT holds at global optimum.
+\end{remark}
+
+\begin{remark}
+    $C$ is a hyperparameter that control the trade-off between the margin size and the error. One can try to reduce the error caused by the points in the margin but this might lead to too small margin i.e overfitting.
+\end{remark}
+
+\begin{remark}
+    The Lagragian of the SVM 
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{L}&(w, b,\xi,\alpha,\lambda) \\
+        &= \frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\xi_i + \sum^n_{i=1}\alpha_i(1-(y_i)(w^Tx_i + b)-\xi_i) + \sum^n_{i=1}\lambda_i(-\xi_i) 
+    \end{aligned}
+    \end{equation*}
+    With dual variable constraint $\alpha_i\ge0$ and $\lambda_i\ge0$. Let's minimize the primal variables are:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial L}{\partial w} = w -\sum^n_{i=1}\alpha_iy_ix_i=0\implies w = \sum^n_{i=1}\alpha_iy_ix_i \\
+        &\frac{\partial L}{\partial b} = \sum_iy_i\alpha_i = 0 \\
+        &\frac{\partial L}{\partial \xi_i} = C-\alpha_i-\lambda_i = 0 \implies \alpha_i = C -\lambda_i
+    \end{aligned}
+    \end{equation*}    
+    Note that $\lambda_i\ge0$ and so $a_i\le C_i$
+\end{remark}
+\begin{remark}
+    We will apply the complementary slackness: 
+    \begin{itemize}
+        \item Non-Margin Support Vector $\alpha_i=C\ne0$ (Error within the margin):
+        \begin{itemize}
+            \item We immediately have $1-\xi_i = y_i(w^Tx_i + b)$
+            \item From the condition $\alpha_i = C-\lambda_i$, we have $\lambda_i = 0$ (hence we have $\xi_i>0$)
+        \end{itemize}
+        \item Margin Support Vector: $0\le\alpha_i\le C$ (The points on the margin)
+        \begin{itemize}
+            \item We again have $1-\xi_i = y_i(w^Tx_i + b)$
+            \item For $\alpha_i = C-\lambda_i$, we have $\lambda_i\ne0$ and hence $\xi_i = 0$
+        \end{itemize}
+        \item Non Support Vector: $\alpha_i=0$
+        \begin{itemize}
+            \item We have $y_i(w^Tx_i + b)>1-\xi_i$
+            \item From $\alpha_i = C-\lambda_i$, we have $\lambda_i\ne0$ hence $\xi_i=0$
+        \end{itemize}
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    We observe that:
+    \begin{itemize}
+        \item The solution is sparse: points not on margine or margine error have $\alpha_i=0$
+        \item The suppor vectors are the points on decision boundary which are margine error contribute.
+        \item The influence of non-margine support vector is bounded since their weight can't exceed $C$.
+    \end{itemize}
+    We can only remember the points that are critical i.e the first and the second one, which we can remove all the third category point, and still have the same training capability. 
+\end{remark}
+
+\begin{proposition}
+    The dual of the SVM is given by:
+    \begin{equation*}
+    \begin{aligned}
+        g(\alpha, \lambda) &= \frac{1}{2}\norm{w}^2 + C\sum^n_{i=1}\xi_i + \sum^n_{i=1}\alpha_i(1-(y_i)(w^Tx_i + b)-\xi_i) + \sum^n_{i=1}\lambda_i(-\xi_i) \\ 
+        &= \begin{aligned}[t]
+            &\frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_j + C\sum^m_{i=1}\xi_i \\
+            &-\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_j-b\sum^m_{i=0}\alpha_iy_i \\
+            &+\sum^m_{i=1}\alpha_i - \sum^m_{i=1}\alpha_i\xi_i - \sum^m_{i=1}(\underbrace{c-\alpha_i}_{\lambda_i})\xi_i
+        \end{aligned} \\
+        &= \sum^m_{i=1} \alpha_i - \frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_j
+    \end{aligned}
+    \end{equation*}
+    We would like to maximize the dual subjected to constraint $0\le\alpha_i\le C$ where $\sum^n_{i=1}y_i\alpha_i=0$. This is quadratic program. For margin SV, we have $1=y_i(w^Tx_i + b)$ to obtain $b$ for any of these or take an average.
+\end{proposition}
+
+\begin{definition}{\textbf{(Kernelized SVM)}}
+    We have max margin classifier in RKHS. Given a hinge loss formulation:
+    \begin{equation*}
+        \min_w \bracka{\frac{1}{2}\norm{w}^2_\mathcal{H} + C\sum^n_{i=1}\theta(y_i, \brackd{w, k(x_i,\cdot)}_\mathcal{H})}
+    \end{equation*}
+    For RKHS with kernel $k(x,\cdot)$. We use a result of representor theorem:
+    \begin{equation*}
+        w(\cdot) = \sum^n_{i=1}\beta_ik(x_i,\cdot)
+    \end{equation*}
+    For maximizing the margin equivalent to minimize $\norm{w}^2_\mathcal{H}$: for any RKHS a smoothness constraint holds. The optimization problem becomes:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{\beta, \xi}\bracka{\frac{1}{2}\beta^TK\beta + C\sum^n_{i=1}\xi_i} \\
+        \text{ subject to }&\begin{aligned}[t]
+            &\xi_i\ge0 \\    
+            &y_i\sum^n_{i=1}\beta_jk(x_i, x_j)\ge1-\xi_i
+        \end{aligned}    
+    \end{aligned}
+    \end{equation*}
+    This is convex in $\beta$ and $\xi$, since $K\succeq0$, which strong duality holds, where the dual is 
+    \begin{equation*}
+    \begin{aligned}
+        &g(\alpha) = \sum^m_{i=1}\alpha_i - \frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jk(x_i, x_j) \\
+        \text{ subject to }& w(\cdot) = \sum^m_{i=1}y_i\alpha_ik(x,\cdot) \quad 0\le \alpha_i\le C
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{($\boldsymbol{\nu}_i$-SVM)}}
+    We have other kind of SVM, where we have intuitive parameter $\nu$ as $C$ is hard to interpret. Let's drop $b$ for simplicity and we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\min_{w,\rho,\xi}\bracka{\frac{1}{2}\norm{w}^2 - \nu\rho + \frac{1}{n}\sum^n_{i=1}\xi_i} \\
+        \text{ subject to }&\begin{aligned}[t]
+            &\rho\ge0 \\
+            &\xi_i\ge0 \\
+            &y_iw^Tx\ge\rho-\xi_i
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Now, we are directly adjusting margin width $\rho$.
+\end{definition}
+
+\begin{remark}
+    We have the following Lagragian:
+    \begin{equation*}
+        \frac{1}{2}\norm{w}^2 + \frac{1}{n}\sum^n_{i=1}\xi_i - \nu\rho + \sum^n_{i=1}\alpha_i(\rho-y_iw^Tx_i - \xi_i) + \sum^n_{i=1}\beta_i(-\xi_i) + \gamma(-\rho)
+    \end{equation*}
+    for dual variable $\alpha_i\ge0$, $\beta_i\ge0$ and $\gamma\ge0$. Differentiating and setting to zero for each of primal variables $w, \xi, \rho$:
+    \begin{equation*}
+        w = \sum^n_{i=1}\alpha_iy_ix_i \quad \alpha_i+\beta_i=\frac{1}{n} \quad \nu = \sum^n_{i=1} \alpha_i-\gamma
+    \end{equation*}
+    from $\beta\ge0$ we have $0\le\alpha_i\le1/n$
+\end{remark}
+
+\begin{remark}
+    For complementary slacknes condition, we assume $\rho>0$ at global solution, hence $\gamma=0$ and $\sum^n_{i=1}\alpha_i=\nu_i$:
+    \begin{itemize}
+        \item Case of $\xi_i>0$: Complementary Slackenss state $\beta_i=0$, hence we have $\alpha_i=n^{-1}$. This denotes this set as $N(\alpha)$, then:
+        \begin{equation*}
+            \sum_{i\in N(\alpha)}\frac{1}{n} = \sum_{i\in N}\alpha_i \le \sum^n_{i=1}\alpha_i = \nu \quad \text{ where } \quad \frac{|N(\alpha)|}{n}\le\nu
+        \end{equation*}
+        \item Case of $\xi_i = 0$: where $\beta_i>0$ then $\alpha_i<n^{-1}$. The set is denoted by $M(\alpha)$. The set of points $n^{-1}>\alpha_i>0$ is
+        \begin{equation*}
+            \nu = \sum^n_{i=1}\alpha_i = \sum_{i\in N(\alpha)}\frac{1}{n} + \sum_{M(\alpha)}\alpha_i \le \sum_{i\in M(\alpha)\cup N(\alpha)}\frac{1}{n} \quad \text{ where } \quad \nu\le\frac{|N(\alpha)| + |M(\alpha)|}{n}
+        \end{equation*}
+        and $\nu$ is the lower bound based on number of support vector with non-zero weight on margin and margin error.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    Let's substute to the Lagragian, as we have:
+    \begin{equation*}
+    \begin{aligned}
+    &\begin{aligned}[t]
+        \frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}&\alpha_i\alpha_jy_iy_jx_i^Tx_j + \frac{1}{n}\sum^n_{i=1}\xi_i - \rho\nu - \sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_j \\
+        &+\sum^n_{i=1}\alpha_i\rho - \sum^n_{i=1}\alpha_i\xi_i - \sum^n_{i=1}\bracka{\frac{1}{n}-\alpha_i}\xi_i - \rho\bracka{\sum^n_{i=1}\alpha-\nu} 
+    \end{aligned} \\
+    &=-\frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx^T_ix_j
+    \end{aligned}
+    \end{equation*}
+    Therefore, the dual is:
+    \begin{equation*}
+    \begin{aligned}
+        &g(\alpha) = -\frac{1}{2}\sum^m_{i=1}\sum^m_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_j \\ 
+        \text{ subject to }&\begin{aligned}[t] 
+            &\sum^n_{i=1}\alpha_i\ge\nu \\
+            &0\le\alpha_i\le\frac{1}{n}
+        \end{aligned}    
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+
+

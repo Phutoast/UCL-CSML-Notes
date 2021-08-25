@@ -1,0 +1,262 @@
+\section{The Analysis of Categorical Data}
+
+\subsection{Fisher's Exact Test}
+
+\begin{remark}{\textbf{(Setting for the Tests)}}
+    Let's consider the data that we are given as:
+    \begin{table}[!h]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{}     & \textbf{Variation 1} & \textbf{Variation 2} & Total  \\
+        \midrule
+        \textbf{Category 1} & $N_{11}$ & $N_{12}$ & $n_{1.}$ \\
+        \textbf{Category 2} & $N_{21}$ & $N_{22}$ & $n_{2.}$ \\
+        Total & $n_{.1}$ & $n_{.2}$ & $n_{..}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+    We want the see whether the count in each category is affected by the some variation of data or not (the null hypothesis is that thet are all randomly assigned). There are auxillary variables denoted (total). 
+\end{remark}
+
+\begin{remark}{\textbf{(Probability Under Null Hypothesis)}}
+    Under the null hypothesis (randomly generated), and so the probability that $N_{11} = n_{11}$ is given as:
+    \begin{equation*}
+        p(n_{11}) = \cfrac{\begin{pmatrix}
+            n_{1.} \\ n_{11}
+        \end{pmatrix}\begin{pmatrix}
+            n_{2.} \\ n_{21}
+        \end{pmatrix}}{\begin{pmatrix}
+            n_{..} \\ n_{.1}
+        \end{pmatrix}}
+    \end{equation*}
+    We can use $N_{11}$ as the test statistics for testing the null hypothesis. We can generate the table to create $2$ sided rejects for extreme value of $N_{11}$
+\end{remark}
+
+\subsection{$\chi^2$-Test for Homogeneity}
+
+\begin{remark}{\textbf{(Settings for $\boldsymbol \chi^2$-Test)}}
+    We consider the larger setting compared to Fisher's exact test, where we comparing $J$ multinomial distribution each having $I$ categories. If the probability of $i$-th category of $j$-th multinomial is denoted as $\pi_{ij}$, the null hypothesis is:
+    \begin{equation*}
+        H_0 : \pi_{i1} = \pi_{i2} = \cdots = \pi_{iJ} \qquad i = 1,\dots,J
+    \end{equation*}
+    Under $H_0$ each of the $J$ multinomial has the same probability for the $i$-th category as $\pi_i$. 
+\end{remark}
+
+\begin{proposition}
+    Under $H_0$, the MLE of the parameter $\pi_1,\pi_2,\dots,\pi_I$ are given as:
+    \begin{equation*}
+        \hat{\pi}_i = \frac{n_{i.}}{n_{..}} \qquad i = 1,\dots,I
+    \end{equation*}
+    where $n_{i.}$ is the total number of response in the $i$-th category and $n_{..}$ is the grand total number of response. 
+\end{proposition}
+\begin{proof}
+    Since the multinomial distribution are independent:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{lik}(\pi_1,\pi_2,\dots,\pi_I) &= 
+        \prod^J_{j=1}\begin{pmatrix}
+            n_{.j} \\ n_{1j}n_{2j}\cdots n_{Ij}
+        \end{pmatrix} 
+        \pi^{n_{1j}}_1\pi^{n_{2j}}_2\cdots\pi^{n_{Ij}}_I \\
+        &=  \pi^{n_{1j}}_1\pi^{n_{2j}}_2\cdots\pi^{n_{Ij}}_I
+        \prod^J_{j=1}
+        \begin{pmatrix}
+            n_{.j} \\ n_{1j}n_{2j}\cdots n_{Ij}
+        \end{pmatrix} 
+    \end{aligned}
+    \end{equation*}
+    Consider maximizing the log-likelihood subject to constraint $\sum^I_{i=1}\pi_i = 1$. Introducing multiplier, we have to maximizing:
+    \begin{equation*}
+        \mathcal{L}(\pi, \lambda) = \sum^J_{j=1}\log  
+        \begin{pmatrix}
+            n_{.j} \\ n_{1j}n_{2j}\cdots n_{Ij}
+        \end{pmatrix} + \sum^I_{i=1}n_{i.}\log\pi_i + \lambda\bracka{\sum^I_{i=1}\pi_i-1}
+    \end{equation*}
+    Now, we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial l}{\partial \pi_i} = \frac{n_{i.}}{\pi_i} + \lambda \qquad i =1,\dots,I \\
+        \iff&\hat{\pi}_i = -\frac{n_i}{\lambda}
+    \end{aligned}
+    \end{equation*}
+    Summing over both sides and applying the constraint, we find that $\lambda = -n_{..}$ and the theorem is proven.
+\end{proof}
+
+\begin{definition}{\textbf{(Peason's $\boldsymbol \chi^2$-Test)}}
+    For $j$-th multinomial, the expected count in the $i$-th category is the etimated probability of the cell times the total number of observation for $j$-th multinomial:
+    \begin{equation*}
+        E_{ij} = \frac{n_{i.}}{n_{..}} n_{.j}
+    \end{equation*}
+    This gives us the Peason's $\chi^2$-statistics as we have:
+    \begin{equation*}
+        X^2 = \sum^I_{i=1}\sum^J_{j=1} \frac{(O_{ij} - E_{ij})^2}{E_{ij}} =  \sum^I_{i=1}\sum^J_{j=1} \frac{(n_{ij} - n_{i.}n_{.j}/n_{..})^2}{n_{i.}n_{.j}/n_{..}}
+    \end{equation*}
+    For large sample size, the approximate null distribution of this statistics is $\chi^2$. We have the degree of freedom are number of independent counts minus the number of independent parameter:
+    \begin{itemize}
+        \item Each multinomial has $I-1$ independent counts, since the total are fixed. 
+        \item $I-1$ independent parameter have been estimated.
+    \end{itemize}
+    And so the degree of freedom are given as $J(I-1)-(I-1) = (I-1)(J-1)$. 
+\end{definition}
+
+\subsection{$\chi^2$-Test of Independent}
+
+\begin{definition}{\textbf{(Contingency Table)}}
+    We will discuss the statistical analysis of sample of size $n$ cross-classifed in table with $I$ rows and $J$ columns. This configuration is called contingency table.
+\end{definition}
+
+\begin{remark}{\textbf{(Settings for the Test)}}
+    We are interested in the relationship between factors on the table. The joint distribution of the counts $n_{ij}$ where $i=1,\dots,I$ and $j=1,\dots,J$ is multinomial with cell probabilities denoted as:
+    \begin{equation*}
+        \pi_{i.} = \sum^J_{j=1}\pi_{ij} \qquad
+        \pi_{.j} = \sum^I_{i=1}\pi_{ij} \qquad
+    \end{equation*}
+    Both are the marginal probability that the observation will fall in $i$-th row or $j$-columns. If both row and columns are independent of each other then: $\pi_{ij} = \pi_{i.}\pi_{.j}$. This leads to the following null hypothesis:
+    \begin{equation*}
+        H_0 : \pi_{ij} = \pi_{i.}\pi_{.j} \qquad i = 1,\dots,I \quad j = 1,\dots,J
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Defining the $\chi^2$-Test)}}
+    Let's consider the MLE estimate under each hypothesis 
+    \begin{itemize}
+        \item Under $H_0$ is the MLE of $\pi_{ij}$ is given as:
+        \begin{equation*}
+            \hat{\pi}_{ij} = \hat{\pi}_{i.}\hat{\pi}_{.j} = \frac{n_{i.}}{n}\frac{n_{.j}}{n}
+        \end{equation*}
+        \item Under alternative MLE of $\pi_{ij}$ is given as:
+        \begin{equation*}
+            \tilde{\pi}_{ij} = \frac{n_{ij}}{n}
+        \end{equation*}
+    \end{itemize}
+    Now we consider $\chi^2$-test as we have:
+    \begin{equation*}
+        X^2 = \sum^I_{i=1}\sum^J_{j=1} \frac{(O_{ij} - E_{ij})^2}{E_{ij}} = \sum^I_{i=1}\sum^J_{j=1} \frac{(n_{ij} -  (n_{i.}n_{.j})/n)^2}{ (n_{i.}n_{.j})/n}
+    \end{equation*}
+    where $O_{ij}$ are the observation count as we have $n_{ij}$. The expected count is $E_{ij} = n\hat{\pi}_{ij} = (n_{i.}n_{.j})/n$. 
+    \begin{itemize}
+        \item Let's consider the degree of freedom as under $\Omega$, the cell probabilities sum to $1$ as it has the dimension to be $IJ-1$. 
+        \item Under the null hypothesis, the marginal probabilities are estimated from the data are specified to $(I-1)+(J-1)$
+    \end{itemize}
+    We have the following degree of freedom: 
+    \begin{equation*}
+        \operatorname{df} = IJ - 1 - (I-1) - (J-1) = (I-1)(J-1)
+    \end{equation*}
+\end{remark}
+
+\subsection{Matched-Pairs Designs}
+
+\begin{remark}{\textbf{(Setting for the test)}}
+    We consider the following table 
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{}     & \textbf{No Cure (Sibling)} & \textbf{Cure (Sibling)} & Total  \\
+        \midrule
+        \textbf{No Cure (Patient)} & $\pi_{11}$ & $\pi_{12}$ & $\pi_{1.}$ \\
+        \textbf{Cure (Patient)} & $\pi_{21}$ & $\pi_{22}$ & $\pi_{2.}$ \\
+        Total & $\pi_{.1}$ & $\pi_{.2}$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+    The appropriate null hypothesis is $\pi_{i.} = \pi_{.i}$, where $i = 1,2$ (the probabilities of cure and no cure should be the same for patient and sibling), and so we have:
+    \begin{equation*}
+        \pi_{11} + \pi_{12} = \pi_{11} + \pi_{21} \qquad 
+        \pi_{12} + \pi_{22} = \pi_{21} + \pi_{22} \qquad 
+    \end{equation*}
+    The equation is simplified to $\pi_{12} = \pi_{21}$, where the null hypothesis is thus:
+    \begin{equation*}
+        H_0 : \pi_{12} = \pi_{21}
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}{\textbf{(MLE of Cell Probabilities)}} 
+    Under the $H_0$, the MLE of the cell probabilities are:
+    \begin{equation*}
+        \hat{\pi}_{11} = \frac{n_{11}}{n} \qquad  \hat{\pi}_{22} = \frac{n_{22}}{n} \qquad \hat{\pi}_{12} = \hat{\pi}_{21} = \frac{n_{12} + n_{21}}{2n}
+    \end{equation*}
+\end{proposition}
+
+\begin{definition}{\textbf{(McNemar's Test)}}
+    The contribution to the $\chi^2$ statistics from $n_{11}$ and $n_{22}$ cells are equal to zero. The remainder of statistics is:
+    \begin{equation*}
+        X^2 =\frac{[n_{12} - (n_{12} + n_{21})/2]^2}{(n_{12} + n_{21})/2} + \frac{[n_{21} - (n_{12} + n_{21})/2]^2}{(n_{12} + n_{21})/2} = \frac{(n_{12} - n_{21})^2}{n_{12} + n_{21}}
+    \end{equation*}
+    Let's consider the degree of freedom, as under $\Omega$ there are $3$ free parameters (since there are $4$ probability that are constrianted to one). On the null hypothesis, there are addiitonal constraint $\pi_{12} = \pi_{21}$ so there are $2$ free parameter. Thus we have $1$ degree of freedom.
+\end{definition}
+
+\subsection{Odd Ratios}
+
+\begin{definition}{\textbf{(Odd)}}
+    If an event $A$ has probability $P(A)$ of occuring, the odds of $A$ occuring are defined as (please note that this works with conditional probability):
+    \begin{equation*}
+        \operatorname{odds}(A) = \frac{P(A)}{1-P(A)} \implies P(A) = \frac{\operatorname{odds}(A)}{1+\operatorname{odds}(A)}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Odds Ratio)}}
+    We have the following:
+    \begin{equation*}
+        \Delta = \frac{\operatorname{odds}(D | X)}{\operatorname{odds}(D|\bar{X})}
+    \end{equation*}
+    where $\bar{X}$ is the complementary element. This measures the influenced of some event $X$ to the event $D$.
+\end{definition}
+
+\begin{remark}{\textbf{(Setting for Test)}}
+    We consider how the odds and odds ratio could be estimated by sampling from a population with joint and marignal probability defined as:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{}     & $\bar{D}$ & $D$ & Total  \\
+        \midrule
+        $\bar{X}$ & $\pi_{00}$ & $\pi_{01}$ & $\pi_{0.}$ \\
+        $X$ & $\pi_{10}$ & $\pi_{11}$ & $\pi_{1.}$ \\
+        Total & $\pi_{.0}$ & $\pi_{.1}$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+    With this notation, as we have:
+    \begin{equation*}
+        P(D | X) =\frac{\pi_{11}}{\pi_{10} + \pi_{11}} \qquad P(D|\bar{X}) = \frac{\pi_{01}}{\pi_{00} + \pi_{01}}
+    \end{equation*}
+    And, so we have:
+    \begin{equation*}
+        \operatorname{odds}(D | X) = \frac{\pi_{11}}{\pi_{10}}
+        \qquad \operatorname{odds}(D | \bar{X}) = \frac{\pi_{01}}{\pi_{00}} \qquad \Delta = \frac{\pi_{11}\pi_{00}}{\pi_{01}\pi_{10}}
+    \end{equation*}
+    The product of diagonal probabilities in the preceding table divided by the product of the off-diagonal probabilities.
+\end{remark}
+
+\begin{remark}{\textbf{(Ways to Sample the Data)}}
+    \begin{itemize}
+        \item \emph{Naive Sample}: We can consider drawing a random sample from the entire population. But if the event $D$ is rare, the total sample size would have to be quite large to guarantee that substantial number of $D$ is included. 
+        \item \emph{Prospective Study}: Fixed number of even $X$ and $\bar{X}$ are sample, then incidence of $D$ are compared. This allow use to compare $P(D|X)$ and $P(D|\bar{X})$ and the odd ratio. However $\pi_{ij}$ can not be estiamte from the data. 
+        \item \emph{Retrospective Study}: We fixed number of $D$ and $\bar{D}$ and we compared the number of $X$ and $\bar{X}$. We can estimate $P(X|D)$ and $P(X|\bar{D})$ by the proportion. But, we can't estimate $P(D|X)$ and $P(D|\bar{X})$ or the joint probability.
+    \end{itemize}
+\end{remark}
+
+\begin{proposition}
+    The odds ratio on the contingency table $\Delta$ can be expressed as:
+    \begin{equation*}
+        \Delta = \frac{\operatorname{odds}(X | D)}{\operatorname{odds}(X|\bar{D})}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    This follows from the calculation of $P(X|D)$ and $1-P(X|D)$ where we have:
+    \begin{equation*}
+        P(X | D) = \frac{\pi_{11}}{\pi_{01} + \pi_{11}} \qquad 1 - P(X|D) = \frac{\pi_{01}}{\pi_{01} + \pi_{11}} \qquad \operatorname{odds}(X |D) = \frac{\pi_{11}}{\pi_{01}} \qquad \operatorname{odds}(X | \bar{D}) = \frac{\pi_{10}}{\pi_{00}}
+    \end{equation*}
+    We can see that the odds ratio $\Delta$ can be expressed as above, thus complete the proof.
+\end{proof}
+
+\begin{remark}{\textbf{(Retrospective Study - Odds Ratio)}}
+    We can't find the odds ratio of given the restrospective study but we can approximate it. Using the above result. where we replace $\pi_{ij}$ with $n_{ij}$ where $n$ is the count of the observation. 
+\end{remark}
+
+\begin{remark}{\textbf{(Statistical Testing)}}
+    Since the value $\hat{\Delta}$ is non-linear function of the counts, we will have to use the boostrap to construct the approximation of the distribution $\hat{\Delta}$
+\end{remark}
+

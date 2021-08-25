@@ -1,0 +1,102 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage[colorlinks]{hyperref}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm} 
+\usepackage{algpseudocode} 
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{cancel}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{minted}
+\usepackage[title]{appendix}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{shadows}
+\usetikzlibrary{positioning}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{example}{Example}[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+ 
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+
+\newcommand{\Phu}[1]{{\bf \color{red} [[Phu: #1]]}}
+\setlength\parindent{0pt}
+\setlength\parskip{5pt}
+\usepackage[margin=1.0in]{geometry}
+
+\newcommand{\dby}{\ \mathrm{d}}
+\newcommand{\argmax}[1]{\underset{#1}{\arg\max \ }}
+\newcommand{\argmin}[1]{\underset{#1}{\arg\min \ }}
+\newcommand{\const}{\text{const.}}
+\newcommand{\bracka}[1]{\left( #1 \right)}
+\newcommand{\brackb}[1]{\left[ #1 \right]}
+\newcommand{\brackc}[1]{\left\{ #1 \right\}}
+\newcommand{\brackd}[1]{\left\langle #1 \right\rangle}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\correctquote}[1]{``#1''}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+% From https://tex.stackexchange.com/questions/194426/split-itemize-into-multiple-columns
+\usepackage{etoolbox,refcount}
+\usepackage{multicol}
+
+\newcounter{countitems}
+\newcounter{nextitemizecount}
+\newcommand{\setupcountitems}{%
+  \stepcounter{nextitemizecount}%
+  \setcounter{countitems}{0}%
+  \preto\item{\stepcounter{countitems}}%
+}
+\makeatletter
+\newcommand{\computecountitems}{%
+  \edef\@currentlabel{\number\c@countitems}%
+  \label{countitems@\number\numexpr\value{nextitemizecount}-1\relax}%
+}
+\newcommand{\nextitemizecount}{%
+  \getrefnumber{countitems@\number\c@nextitemizecount}%
+}
+\newcommand{\previtemizecount}{%
+  \getrefnumber{countitems@\number\numexpr\value{nextitemizecount}-1\relax}%
+}
+\makeatother    
+\newenvironment{AutoMultiColItemize}{%
+\ifnumcomp{\nextitemizecount}{>}{3}{\begin{multicols}{2}}{}%
+\setupcountitems\begin{itemize}}%
+{\end{itemize}%
+\unskip\computecountitems\ifnumcomp{\previtemizecount}{>}{3}{\end{multicols}}{}}
+
+
+\title{Statistics and Data Analysis}
+\author{Phu Sakulwongtana}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{contents/part1.tex}
+
+\end{document}

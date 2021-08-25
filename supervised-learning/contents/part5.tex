@@ -1,0 +1,624 @@
+\section{Online Learning}
+
+\subsection{Introduction}
+
+\begin{definition}{\textbf{(Online Learning with Expert Advice)}}
+    There exists an online sequence of data:
+    \begin{equation*}
+        S = (\boldsymbol x_1, y_1),\dots, (\boldsymbol x_m, y_m) \in \brackc{0, 1}^n \times \brackc{0, 1}
+    \end{equation*} 
+    The vector $\boldsymbol x_t$ is the set of prediction of $n$ experts at time $t$, which we aim to predict $y_t$. We would like to find an algorithm that tried to combine the prediction $\boldsymbol x_t$ of the $n$ expets to predict $\hat{y}_t$, an estimate of $y_t$. The loss of mater algorithm $A$ on sequence $S$:
+    \begin{equation*}
+        L_A(S) = \sum^m_{t=1}\abs{y_t - \hat{y}_t}
+    \end{equation*}
+    We want to find an algorithm with a small loss.
+\end{definition}
+
+\begin{definition}{\textbf{(Regret)}}
+    Recall the loss function $L_A(S)$ and we let:
+    \begin{equation*}
+        L_i(S) = \sum^m_{t=1} \abs{y_t - x_{t, i}}
+    \end{equation*}
+    being the loss of $i$-th expert $E_i$. The aim of our algorithm should that the found of the form, such that for all sequence $S$:
+    \begin{equation*}
+        L_A(S) \le a \min_{i}L_i(S) + b\log(n)
+    \end{equation*}
+    where $a, b$ are small constant. This is known as regret as it is the loss of objective related to the best expert. 
+\end{definition}
+
+\begin{definition}{\textbf{(Halving Algorithm)}}
+    Suppose that there is an expert are consistent (gives correct answer), we can perofrm the search on this consistent expert, in which we will have the correct prediction:
+    \begin{itemize}
+        \item If mistake is mad, the number of consistent experts is (at least) halved. 
+        \item For any sequence with consistent expert Halving algorithm made less than or equal to $\log_2n$ mistakes. 
+    \end{itemize}
+\end{definition}
+
+\subsection{Learning from Expert Algorithm}
+
+\begin{definition}{\textbf{(Weighted Majority)}}
+    This algorithm for non-consistent expert, which we can perform the prediction with larger scale. We have weight of the wrong expert is multiplied by $\beta \in [0, 1)$.
+\end{definition}
+
+\begin{theorem}
+    The number of mistake of master algorithm $M$, with $\beta=1/2$ is given by:
+    \begin{equation*}
+        M \le 2.63\min_iM_i + 2.63\ln n
+    \end{equation*}
+    where $M_i$ is the number of mistakes of expert $E_i$ 
+\end{theorem}
+\begin{proof}
+    We have the following quantities: 
+    \begin{itemize}
+        \item $M_{t, i}$ is the number of mistake of the expert $i$, $E_i$ at the start of trial $t$. 
+        \item $w_{t, i}= \beta^{M_{t, i}}$ weights of $E_i$ at the begin of trial $t$. 
+        \item Please note that $w_{1, i} = 1$, and $W_t = \sum^n_{i=1}w_{t, i}$ is the total weight at trial $t$. 
+    \end{itemize}
+    It is clear that the total weight of the minority is when it is less that $1/2 W_t$, but the total weight of the majority is when it is more than $1/2 W_t$. There are $2$ scenarios, which we have:
+    \begin{itemize}
+        \item If no mistake, the minority expert weight is multiplied by $\beta$ as we have (Trivial Bound): $W_{t+1} \le 1\cdot W_t$
+        \item If there is a mistake, the majority exper weights are multiplied by $\beta$ as:
+        \begin{equation*}
+        \begin{aligned}
+            W_{t+1} &= \text{Minority} + \beta\text{Majority} \\
+            &\le \frac{1}{2}W_t + \beta\text{Majority} \\
+            &\le \frac{1}{2}W_t + \beta\frac{1}{2}W_t \le \frac{1+\beta}{2}W_t \\
+        \end{aligned}
+        \end{equation*}
+        The third inequality comes from the fact that the majority is at least $1/2W_t$, making the upperbound tighter.
+    \end{itemize}
+    This gives us:
+    \begin{equation*}
+        \bracka{\frac{1+\beta}{2}}^MW_1\ge W_{m+1} = \sum^n_{j=1}W_{m+1, j} = \sum^n_{j=1}\beta^{M_j} \ge \beta^{M_i}
+    \end{equation*}
+    Note that $M$ is number of mistakes, while $m$ is number of running time. It is clear that $W_1 = n$, solving for $M$ gives us:
+    \begin{equation*}
+        M \le \frac{\ln 1/\beta}{\ln 2/(1+\beta)}M_i + \frac{1}{\ln2/(1+\beta)}\ln n
+    \end{equation*}
+    Setting $\beta=1/e$ yields the result, completing the proof.
+\end{proof}
+
+\begin{remark}{\textbf{(Notion of Regret)}}
+    We would like to obtain regret bound for arbitary loss function $L : \mathcal{Y}\times\hat{\mathcal{Y}}\rightarrow[0, \infty]$. Making our notation of regre more precise:
+    \begin{equation*}
+        L_A(S) - \min_{i\in[n]}L_i(S) \le o(m)
+    \end{equation*}
+    where $o(m)$ denotes some function that is sublinear in $m$ that depends on other parameter:
+    \begin{equation*}
+        \frac{L_A(S) - \min_{i\in[n]L_i(S)}}{m} \le \frac{o(m)}{m}
+    \end{equation*}
+    Note that as $m\rightarrow\infty$:
+    \begin{equation*}
+        \frac{L_A(S)}{m} \le - \frac{\min_{i\in[n]}L_i(S)}{m}
+    \end{equation*}
+    The limit of the mean asympototic loss is bounded by the mean of asympototic loss of the best expert. 
+    \begin{itemize}
+        \item The loss function $L : \brackc{0, 1}\times[0, 1]\rightarrow[0,\infty)$ the entropic loss given by:
+        \begin{equation*}
+            L(y, \hat{y}) = y\ln\frac{y}{\hat{y}} + (1-y)\ln\frac{1-y}{1-\hat{y}}
+        \end{equation*}
+        We can show that the regret with small constant with $\log(n)$
+        \item Arbitary loss function $L : \mathcal{Y}\times\hat{\mathcal{Y}}\rightarrow [0, B]$. The regret will be $\mathcal{O}(\sqrt{m\log n})$
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Simplex and Related Entropy)}}
+    We define the simplex  over probability distribution:
+    \begin{equation*}
+        \Delta_n = \brackc{\boldsymbol x : [0, 1]^n : \sum^n_{i=1}x_i = 1}
+    \end{equation*}
+    We define the relative entropy $d:\Delta_n \times \Delta_n\rightarrow[0, \infty)$ as we have:
+    \begin{equation*}
+        d(\boldsymbol u, \boldsymbol v) = \sum^n_{i=1}u_i\ln\frac{u_i}{v_i}
+    \end{equation*}
+    we define the entropy loss is given as $L_\text{en}(y, \hat{y}) = d((y, 1-y), (\hat{y}, 1-\hat{y}))$
+\end{definition}
+
+\begin{definition}{\textbf{(Weighted Average)}}
+    We will consider a projection in $[0, 1]$  rather than $\brackc{0, 1}$, and we will predict with weighted average. One weight per expert as we have $w_{t, i} = \beta^{L_{i, t}} = \exp(-\eta L_{t, i})$ where $L_{t, i}$ is the cumulative loss of $E_i$ before the trial $t$, while $\eta$ is the learning rate. The master algorithm predicts with the weighted average:
+    \begin{equation*}
+        v_{t, i} = \frac{w_{t, i}}{\sum^n_{i=1}w_{t,i}} \qquad \hat{y}_t = \sum^n_{i=1}v_{t, i} x_{t, i} = \boldsymbol v_t^T\boldsymbol x_t
+    \end{equation*}
+    where the $x_{t, i}$ is the prediction of $E_i$ at trial $t$. We start with the initialize weight $\boldsymbol v_1 = \boldsymbol w_1 = (1/n,\dots,1/n)$. This gives the pseudocode:
+    \begin{algorithm}[H]
+        \caption{Weighted Average}
+        \begin{algorithmic}[1]
+            \State \textbf{Input}: Input $\boldsymbol v_1 = \boldsymbol w_1 = (1/n,\dots,1/n)$ with $L_\text{WA}=0$ and $\boldsymbol L = \boldsymbol 0$
+            \For {$i=1,2,\cdots, m$}
+                \State Receives instance $\boldsymbol x_t \in [0, 1]^n$
+                \State Predict $\hat{y}_t = \boldsymbol v_t^T\boldsymbol x_t$
+                \State Receives label $y_t \in [0, 1]$
+                \State Incur Loss $L_\text{WA} = L_\text{WA}+ L(y_t, \hat{y}_t)$ and $L_i = L_i + L(y_t, x_{t, i})$ for $i \in [n]$
+                \State Update Weight, for $i \in [n]$:
+                \begin{equation*}
+                    v_{t+1, i} = \frac{v_{t,i}\exp(-\eta L(y_t, x_{t, i}))}{\sum^n_{j=1}v_{t, j}\exp(-\eta L(y_t, x_{t, j}))}
+                \end{equation*}
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+\end{definition}
+
+\begin{theorem}
+    For sequence of examples $S = (\boldsymbol x_1, y_1),\dots,(\boldsymbol x_m, y_m) \in [0, 1]^n \times [0, 1]$. The regret of the weighted average WA algorithm is:
+    \begin{equation*}
+        L_\text{\emph{WA}}(S) - \min_i L_i(S) \le 1/\eta \ln(n)
+    \end{equation*}
+    with square and entropic loss for $\eta=1/2$ and $\eta=1$ respectively. 
+\end{theorem}
+\begin{proof}
+    We will proof the progress vs regret first, for all $\boldsymbol u \in \Delta_n$. Let's start with the assumption that $y_t = 1$ and by the error $L_\text{en}(1, x) = -\ln x$, we have
+    \begin{equation*}
+    \begin{aligned}
+        d(\boldsymbol u, \boldsymbol v_t) - d(\boldsymbol u, \boldsymbol v_{t+1}) &= \sum^n_{i=1}u_i\ln\bracka{\frac{v_{t+1, i}}{v_{t, i}}} \\
+        &= \sum^n_{i=1} u_i\ln\cfrac{\cfrac{v_{t, i}\exp(-L_\text{en}(1, x_{t, i})) }{\sum^n_{j=1} v_{t, j}\exp(-L_\text{en}(1, x_{t, j})) }}{v_{t, i}} \\
+        &= \sum^n_{i=1} u_i\ln\cfrac{\cfrac{v_{t, i}x_{t, i}}{\sum^n_{j=1} v_{t, j}x_{t, j} }}{v_{t, i}} \\
+        &= \sum^n_{i=1} u_i\ln\cfrac{x_{t, i}}{\hat{y}_t} = \bracka{\sum^n_{i=1}u_i\ln x_{t, i}} - \ln(\hat{y}_t) \\
+        &= L_\text{en}(y_t, \hat{y}_t) - \sum^n_{i=1}u_iL_\text{en}(y_t, x_{t, i})
+    \end{aligned}
+    \end{equation*}
+    This also works by symmetry with the case $y=0$, and so the claim:
+    \begin{equation*}
+        d(\boldsymbol u, \boldsymbol v_t) - d(\boldsymbol u, \boldsymbol v_{t+1}) = L_\text{en}(y_t, \hat{y}_t) - \sum^n_{i=1}u_iL_\text{en}(y_t, x_{t, i})
+    \end{equation*}
+    is correct. Consider the telescoping sum, which we have:
+    \begin{equation*}
+        \sum^m_{t=1}L_\text{en}(y_t, \hat{y}_t) - \sum^m_{t=1}\sum^n_{i=1}u_iL_\text{en}(y_t, x_{t, i}) = d(\boldsymbol u, \boldsymbol v_1) - d(\boldsymbol u, \boldsymbol v_{m+1})
+    \end{equation*}
+    Note that for any $\boldsymbol u \in \Delta_n$, espescially the unit vector, which is shown to be an upper bound, and we can see that that $d(\boldsymbol u, \boldsymbol v_1) \le \ln n$ and $-d(\boldsymbol u, \boldsymbol v_{m+1}) \le 0$, and so we have proven the theorem, as:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^m_{t=1}L_\text{en}(y_t, \hat{y}_t) - \sum^m_{t=1}\sum^n_{i=1}u_iL_\text{en}(y_t, x_{t, i}) &= \sum^m_{t=1}L_\text{en}(y_t, \hat{y}_t) - \min_i L_i(S) \\
+        &\le d(\boldsymbol u, \boldsymbol v_1) - d(\boldsymbol u, \boldsymbol v_{m+1}) \le \ln(n) - 0
+    \end{aligned}
+    \end{equation*}
+    Note that we can have a unit vector $u_i$ that is the correct expert. 
+\end{proof}
+
+\begin{definition}{\textbf{(Allocation Setting)}}
+    On each trial, the learner plays an allocation $\boldsymbol v_t \in \Delta_t$ , the the nature returns the loss vector $\boldsymbol l_t$ for example of the loss of expert $i$ is $l_{t, i}$. There are $2$ models for the learner:
+    \begin{itemize}
+        \item We can consider the incure loss directly: $L_A(t) = \boldsymbol v_t^T\boldsymbol l_t$
+        \item The learner randomly select $\hat{y}_t \in [n]$ according to discrete distribution over $[n]$ with probability $v_{t, i}$ for each action, thus we have:
+        \begin{equation*}
+            \mathbb{E}[L_A(t)] = \mathbb{E}[L_{t, \hat{y}}] = \boldsymbol v_t^T\boldsymbol l_t
+        \end{equation*}
+        The mechanism generating the loss vector $\boldsymbol l_t$ must be obvious to the learner's selection $\hat{y}$ until $t + 1$
+    \end{itemize}
+    This setting can simulate the setting where we rescue side-information $\boldsymbol x_t$ and have a fixed loss function. 
+\end{definition}
+
+\begin{theorem}{\textbf{(Hedge Theorem)}}
+    For all sequence of loss vector $S = \boldsymbol l_1,\dots,\boldsymbol l_m \in [0, 1]^n$. The regret of the weighted average algorithm with $\eta = \sqrt{2m\ln n}$ is equal to:
+    \begin{equation*}
+        \mathbb{E}[L_{\text{\emph{WA}}}(S)] - \min_iL_i(S) \le \sqrt{2m\ln n}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Given any $\boldsymbol u \in \Delta_n$. Letting $Z_t = \sum^n_{i=1}v_{t, i} \exp(-\eta l_{t, i})$, we observe that:
+    \begin{equation*}
+    \begin{aligned}
+        d(\boldsymbol u, \boldsymbol v_t) - d(\boldsymbol u, \boldsymbol v_{t+1}) &= \sum^n_{i=1}u_i\ln \frac{v_{t+1, i}}{v_{t, i}} \\
+        &= -\eta\sum^n_{i=1} u_il_{t,i} - \sum^n_{i=1}u_{t, i}\ln Z_t \\
+        &= -\eta \boldsymbol u^T\boldsymbol l_t - \ln\sum^n_{i=1}v_{t, i}\exp(-\eta l_{t, i}) \\
+        &\ge -\eta \boldsymbol u^T\boldsymbol l_t - \ln\sum^n_{i=1}v_{t, i}\exp\bracka{-\eta l_{t, i} + \frac{1}{2}\eta^2l^2_{t, i}} \\
+        &= -\eta \boldsymbol u^T\boldsymbol l_t - \ln\bracka{1 - \eta\boldsymbol v_t^T\boldsymbol l_t + \frac{1}{2}\sum^n_{i=1}v_{t, i}l^2_{t, i}} \\
+        &\ge \eta(\boldsymbol v_t^T\boldsymbol l_t - \boldsymbol u^T\boldsymbol l_t) - \frac{1}{2}\eta^2\sum^n_{i=1}v_{t, i}l^2_{t, i}
+    \end{aligned}
+    \end{equation*}
+    The first inequality uses $\exp(-x) \ge 1-x+x^2/2$ and the second inequality uses $\ln(1+x) \le x$. Now, let's consider the telescoping sum:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^m_{t=1} (\boldsymbol v_t^T\boldsymbol l_t - \boldsymbol u^T\boldsymbol l_t) &\le \frac{1}{\eta}(d(\boldsymbol u, \boldsymbol v_1) - d(\boldsymbol u, \boldsymbol v_{m+1})) + \frac{\eta}{2}\sum^m_{t=1}\sum^n_{i=1}v_{t, i}l^2_{t, i} \\
+        &\le \frac{\ln n}{\eta} + \frac{\eta}{2}\sum^m_{t=1}\sum^n_{i=1}v_{t, i}l^2_{t, i} 
+    \end{aligned}
+    \end{equation*}
+    This holds for all $\boldsymbol u \in \Delta_n$, it holds for a unit vector and we have the upper bound by noting that we have. $d(\boldsymbol u, \boldsymbol v_1) \le \ln n$ and $-d(\boldsymbol u, \boldsymbol v_{m+1})\le0$ and we have:
+    \begin{equation*}
+        \sum^m_{t=1}\sum^n_{i=1}v_{t, i}l^2_{t, i}  \le m
+    \end{equation*}
+    We can set $\eta = \sqrt{2\ln n/m}$, as we have proven the thoerem, as we can set $\eta = \sqrt{2\ln n/m}$, which we have prove the thoerem.
+\end{proof}
+
+\subsection{Online Learning of Linear Classifier}
+
+\begin{definition}{\textbf{(Problem)}}
+    We have the sequence of data: $S = (\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m)$ and the total loss is given by $L)A(S)$. The regret is defined as:
+    \begin{equation*}
+        L_A(S ) - \inf_{\boldsymbol u \in \mathcal{U}}\text{Loss}_{\boldsymbol u}(S)
+    \end{equation*}
+    where $\mathcal{U}$ is a set of linear threshold function, as we will focus on the case where there exists $\boldsymbol u \in \mathcal{U}$ such that $\text{Loss}_{\boldsymbol u}(S) = 0$, which is a reliable case. 
+\end{definition}
+
+\begin{definition}{\textbf{(Linear Threshold)}}
+    The linear threshold $f_{\boldsymbol u, b} : \mathbb{R}^n \rightarrow \brackc{-1, 1}$  function is:
+    \begin{equation*}
+        f_{\boldsymbol u, b}(\boldsymbol x) = \operatorname{sgn}(\boldsymbol u^T\boldsymbol x + b)
+    \end{equation*}
+    The separating by hyperplane. The comparision class of all linear threshold function:
+    \begin{equation*}
+        \mathcal{U}_\text{it} = \brackc{f_{\boldsymbol u, b} : \boldsymbol u \in \mathbb{R}^n, b \in \mathbb{R}}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Assumption)}}
+    Data is linear separatable by some margin $\gamma$. Hence there exists a linear hyperplane with normal vector $\boldsymbol v$ such that: $\norm{\boldsymbol v} = 1$ and for all $(\boldsymbol x_t, y_t)$, which we have $y_t \in \brackc{-1, 1}$, and $\norm{\boldsymbol x_t} \le R$ and $y_t(\boldsymbol x_t^T\boldsymbol v)\ge\gamma$
+\end{remark}
+
+\begin{definition}{\textbf{(Perceptron Learning Algorithm)}}
+    We consider the following learning algorithm 
+    \begin{algorithm}[H]
+        \caption{Perceptron Learning Algorithm}
+        \begin{algorithmic}[1]
+            \State \textbf{Initialize}: $\boldsymbol w_1=\boldsymbol 0$ and $M_1=0$ 
+            \For {$i=1,2,\cdots, m$}
+                \State Receives Pattern $\boldsymbol x_t \in \mathbb{R}^n$
+                \State Predict $\hat{y}_t = \operatorname{sgn}(\boldsymbol w_t^T\boldsymbol x_t)$
+                \State Receives Label $y_t$
+                \If{Mistake $y_t\hat{y}_t\le 0$}
+                    \State Update $\boldsymbol w_{t+1} = \boldsymbol w_t + y_t\boldsymbol x_t$
+                    \State $M_{t+1} = M_t + 1$
+                \Else
+                    \State $\boldsymbol w_{t+1} = \boldsymbol w_t$ and $M_{t+1} = M_t$
+                \EndIf
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+\end{definition}
+
+\begin{lemma}
+    If $(\boldsymbol w^T_t\boldsymbol x_t)y_t < 0$ then $\norm{\boldsymbol w_{t+1}}^2 \le \norm{\boldsymbol w_t}^2 + \norm{\boldsymbol x_t}^2$
+\end{lemma}
+\begin{proof}
+    We have the following inequality:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{\boldsymbol w_{t+1}}^2 &= \norm{\boldsymbol w_t + y_t\boldsymbol x_t}^2 \\
+        &= \norm{\boldsymbol w_t}^2 + 2y_t(\boldsymbol w_t^T\boldsymbol x_t)+\norm{\boldsymbol x_t}^2 \\
+        &\le \norm{\boldsymbol w_t}^2 + \norm{\boldsymbol x_t}^2
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{lemma}
+    $\norm{\boldsymbol w_t}^2 \le M_tR^2$
+\end{lemma}
+\begin{proof}
+    Using induction, as we have:
+    \begin{itemize}
+        \item Base: $M_1 = 0$ and $\norm{\boldsymbol w_1}^2 = 0$
+        \item Induction step, when we have a mistake on the trial $t$ as we have:
+        \begin{equation*}
+            \norm{\boldsymbol w_{t+1}}^2 \le \norm{\boldsymbol w_t}^2 + \norm{\boldsymbol x_t}^2 \le \norm{\boldsymbol w_t}^2 + R^2 \le (M_{t}+1)R^2
+        \end{equation*}
+    \end{itemize}
+    If there is no mistake, then the outcome is trivial as we have $\boldsymbol w_{t+1} = \boldsymbol w_t$ and $M_{t+1} = M_t$
+\end{proof}
+
+\begin{lemma}
+    $\norm{\boldsymbol w_t}^2 \ge M_t\gamma$
+\end{lemma}
+\begin{proof}
+    Observe that $\norm{\boldsymbol w_t} \ge \boldsymbol w_t^T\boldsymbol v$ because $\norm{\boldsymbol v} = 1$ (via Cauchy-Schawarz). The prove of the lower bound $\boldsymbol w_t^T\boldsymbol v$ using the induction over $t$:
+    \begin{itemize}
+        \item Induction hypothesis $\boldsymbol w_t^T\boldsymbol v \ge M_t\gamma$
+        \item Base $t=1$, we have $\boldsymbol w_1^T\boldsymbol v = 0$
+        \item Induction step: Assume for $t$ and prove for $t+1$, if there is a mistake as we have:
+        \begin{equation*}
+        \begin{aligned}
+            \boldsymbol w_{t+1}^T\boldsymbol v &= (\boldsymbol w_t + \boldsymbol x_ty_t)^T\boldsymbol v \\
+            &= \boldsymbol w_t^T\boldsymbol v + y_t\boldsymbol x_t^T\boldsymbol v \\
+            &\ge M_t\gamma + \gamma = (M_t+1)\gamma
+        \end{aligned}
+        \end{equation*}
+        This works in the case of non-mistake.
+    \end{itemize}
+\end{proof}
+
+\begin{theorem}
+    For all sequence of examples $S = (\boldsymbol x_1,y_1),\dots,(\boldsymbol x_m, y_m) \in \mathbb{R}^n \times \brackc{-1, +1}$. This mistake of the \texttt{PERCEPTRON} algorithm is bounded by:
+    \begin{equation*}
+        M \le \bracka{\frac{R}{\gamma}}^2
+    \end{equation*}
+    with $R = \max_t\norm{\boldsymbol x_t}$. If there exists a vector $\boldsymbol v$ with $\norm{\boldsymbol v} = 1$ and constant $\gamma$ such that $(\boldsymbol v^T\boldsymbol x_t)y_t\ge\gamma$
+\end{theorem}
+\begin{proof}
+    We use the bound on the norm of the weight $\norm{\boldsymbol w_t}$ as we have:
+    \begin{equation*}
+        (M\gamma)^2 \le \norm{\boldsymbol w_{t+1}}^2 \le MR^2
+    \end{equation*}
+    and the inequality follows. 
+\end{proof}
+
+\begin{remark}
+    It is conveinece to express the bound in the form $M \le R^2\norm{\boldsymbol u}^2$ where $\boldsymbol u = \boldsymbol v/\gamma$ then we have for all $\boldsymbol u$ such that $(\boldsymbol u^T\boldsymbol x_t)y_t\ge1$.     
+\end{remark}
+
+\begin{remark}{\textbf{(Additional Problem)}}
+    Suppose that $\boldsymbol w_{m+1}$ doesn't necessary linearly separate $S$. How can we use the PERCEPTRON to define a vector $\boldsymbol w$ and how long that would take ? 
+\end{remark}
+
+\begin{remark}{\textbf{(Gradien Descent)}}
+    Recalling the regularization approach to supervised learning as we have:
+    \begin{equation*}
+        h^* = \argmin{h\in\mathcal{H}} \sum^m_{t=1}L(y_t, h(\boldsymbol x_t)) + \lambda \ \text{penalty}(h)
+    \end{equation*}
+    We consider the soft-margin SVM, which we have the following loss function:
+    \begin{equation*}
+        \argmin{\boldsymbol w\in \mathbb{R}^n, b\in \mathbb{R}}\sum^m_{i=1}h_\text{hi}(y_t, \boldsymbol w^T\boldsymbol x_t + b) + \lambda\norm{\boldsymbol w}^2
+    \end{equation*}
+    where $h_\text{hi}(y, \hat{y}) = \max(0, 1-y\hat{y})$, which we can consider the followimg optimization problem:
+    \begin{equation*}
+        \boldsymbol w_{t+1} = \argmin{\boldsymbol w\in \mathbb{R}^n}L_\text{hi}(y_i, \boldsymbol w^T\boldsymbol x_t) + \lambda\norm{\boldsymbol w - \boldsymbol w_t}^2
+    \end{equation*}
+    Solving this problem, gives us:
+    \begin{equation*}
+        \boldsymbol w_{t+1} = \begin{cases}
+            \boldsymbol w_t & y_t(\boldsymbol w^T\boldsymbol x_t) > 1 \\
+            \boldsymbol w_t + \cfrac{y_t\boldsymbol x_t}{2\lambda} & y_t(\boldsymbol w^T\boldsymbol x_t) < 1
+        \end{cases}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Online Gradient Descent)}}
+    We consider the online gradient descent with hinge loss and $\norm{\cdot}^2_2$ penalty, which we have the following pseudocode:
+    \begin{algorithm}[H]
+        \caption{Online Gradient Descent}
+        \begin{algorithmic}[1]
+            \State \textbf{Initialize}: $\boldsymbol w_1=\boldsymbol 0$ and $L_\text{OGD}=0$ 
+            \State Select $\eta\in(0, \infty)$
+            \For {$i=1,2,\cdots, m$}
+                \State Receives instance $\boldsymbol x_t \in \mathbb{R}^n$
+                \State Predict $\hat{y}_t = \boldsymbol w_t^T\boldsymbol x_t$
+                \State Receives Lable $y_t \in \brackc{+1, -1}$
+                \State Incur Loss $L_\text{OGD} = L_\text{OGD} + L_\text{hi}(y_t,\hat{y}_t)$
+                \State Update weight $\boldsymbol w_{t+1} = \boldsymbol w_t + \mathbb{I}[y_t\hat{y}_t<1]\eta y_t\boldsymbol x_t$
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+\end{definition}
+
+\begin{theorem}
+    Given $R = \max_t\norm{\boldsymbol x_t}$ and $\norm{\boldsymbol u} \le U$. For the algorithm OGD with $\eta = U/(R\sqrt{m})$ as:
+    \begin{equation*}
+        \sum^m_{t=1}L_\text{hi}(y_t, \hat{y}_t) - L_\text{hi}(y_t, \boldsymbol u^T\boldsymbol x_t) \le \sqrt{U^2R^2m}
+    \end{equation*}
+    for any vector $\boldsymbol u$.
+\end{theorem}
+\begin{proof}
+    Using the convexity of the hinge loss (with respected to 2nd argument), which we have:
+    \begin{equation*}
+        L_\text{hi}(y_t,\hat{y}_t) - L_\text{hi}(y_t, \boldsymbol u^T\boldsymbol x) \le (\boldsymbol w_t - \boldsymbol u)^T\boldsymbol z_t
+    \end{equation*}
+    where $\boldsymbol z_t = -y_t\boldsymbol x_t[y_t(\boldsymbol w_t^T\boldsymbol x_t) < 1] \in \partial_{\boldsymbol w}h_\text{hi}(y_t, \boldsymbol w_t^T\boldsymbol x)$. For the update, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \norm{\boldsymbol w_{t+1} - \boldsymbol u}^2 &= \norm{\boldsymbol w_t - \eta\boldsymbol z_t - \boldsymbol u}^2 \\
+        &= \norm{\boldsymbol w_t - \boldsymbol u}^2 - 2\eta(\boldsymbol w_t- \boldsymbol u)^T\boldsymbol z_t + \eta^2\norm{\boldsymbol z_t}^2
+    \end{aligned}
+    \end{equation*}
+    And so, we have the:
+    \begin{equation*}
+        (\boldsymbol w_t - \boldsymbol u_t)^T\boldsymbol z_t = \frac{1}{2\eta}\bracka{\norm{\boldsymbol w_t - \boldsymbol u}^2 - \norm{\boldsymbol w_{t+1} - \boldsymbol u}^2 + \eta^2\norm{\boldsymbol z_t}^2}
+    \end{equation*}
+    and so we have:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^m_{t=1} (\boldsymbol w_t - \boldsymbol u)^T\boldsymbol z_t &= \sum^m_{t=1}\frac{1}{2\eta}\bracka{\norm{\boldsymbol w_t - \boldsymbol u}^2 - \norm{\boldsymbol w_{t+1} - \boldsymbol u}^2 + \eta^2\norm{\boldsymbol z_t}^2} \\
+        &\le \frac{1}{2\eta}\bracka{\norm{\boldsymbol u^2} + \eta^2\sum^m_{t=1}\norm{\boldsymbol z_t}^2} \\
+        &=\frac{1}{2\eta}\norm{\boldsymbol u}^2 + \frac{\eta}{2}\sum^m_{t=1}\norm{\boldsymbol x_t}^2\mathbb{I}[y_t(\boldsymbol w_t^T\boldsymbol x_t) < 1] \\
+        &\le \frac{1}{2\eta}U^2 + \frac{\eta}{2}mR^2 = \sqrt{U^2R^2m}
+    \end{aligned}
+    \end{equation*}
+    as we have $\eta = U/(R\sqrt{m})$ and using the result from the convex setting yields the result. 
+\end{proof}
+
+\begin{remark}{\textbf{(Perceptron Bound)}}
+    The perceptron bound can be arrived by using the analysis of the OGD above as we have:
+    \begin{itemize}
+        \item If we consider the hinge, we have:
+        \begin{equation*}
+            \sum^m_{t=1} \mathbb{I}[y_t \ne \operatorname{sgn}(\hat{y}_t)] - L_\text{hi}(y_t, \boldsymbol u^T\boldsymbol x_t) \ge \sqrt{U^2R^2m}
+        \end{equation*}
+        \item Assuming that there is a linear classifier $\boldsymbol u$ such that $y_t(\boldsymbol u^T\boldsymbol x_t) \ge 1$ for all $t=1,\dots,m$ as we have:
+        \begin{equation*}
+            \sum^m_{t=1}\mathbb{I}[y_t \ne \operatorname{sgn}(\hat{y}_t)]\ge \sqrt{U^2R^2m}
+        \end{equation*}
+        \item Make OGD conservative that we only update when $y_t\hat{y}_t\le0$ instead of $y_t\hat{y}_t\le1$ as we have the trial when mistake is made.
+        \item With respect to the bound, we can ignore the trial, which the mistake is made, so we can take the value $m = M := \sum^m_{t=1}\mathbb{I}[y_t \ne \operatorname{sgn}(\hat{y}_t)]$, which implies that:
+        \begin{equation*}
+            M \le \sqrt{U^2R^2M} \implies M\le U^2R^2
+        \end{equation*}
+        \item We can set $\eta=1$ as its number doesn't matter at all. Recall the update rule for the perceptron, when mistake is made, with learning rate $\eta$: $\boldsymbol w_{t+1} = \boldsymbol w_t + \eta y_t\boldsymbol x_t$, as we have:
+        \begin{equation*}
+            \boldsymbol w = \sum_{m:\text{mistake}}\eta y_t\boldsymbol x_t
+        \end{equation*}
+        If $\eta > 0$, then we have $\eta\sum_{m:\text{mistake}}y_t\boldsymbol x_t$. Note that the prediction made by perceptron is based on the sign of the dot product, and so $\eta$ doesn't take on any effect.
+    \end{itemize}
+\end{remark}
+
+\subsection{Disjunction Learning}
+
+\begin{definition}{\textbf{(Boolean Function)}}
+    The boolean function $f$ may be represented as a map $f : \brackc{0, 1}^n\rightarrow \brackc{0, 1}$ where, we have the following:
+    \begin{itemize}
+        \item $x_1\wedge x_2 = x_1x_2$ 
+        \item $x_1\vee x_2 = \operatorname{sign}(x_1 + x_2)$ 
+        \item $\bar{x} = 1 - x$
+    \end{itemize}
+    Furthermore, we have the following addiitonal definiiton for the boolean function:
+    \begin{itemize}
+        \item Single variable is called a literal. 
+        \item Term or Conjuction is an iterated \correctquote{and} applied. 
+        \item Clause or Disjunction is an iterated \correctquote{or} applied. 
+        \item Monotone disjunction or conjuction implies no negated literal. 
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(Naive Weighted-Majority)}}
+    The goal is to predict as well as $k$-literal (monotone) disjunction (over $n$ variables). We can consider the use of weighted majority as each experts are disjunction of various variable and size. So, we have $\begin{pmatrix}
+        n \\ k
+    \end{pmatrix}$ total expert and weights. This gives us the following bound:
+    \begin{equation*}
+        \text{Mistake} \le 2.63 M + 2.63k\ln\frac{nl}{k}
+    \end{equation*}
+    where $M$ is the mistakes of best disjunction, while we use the inequality 
+    \begin{equation*}
+        \begin{pmatrix}n \\ k\end{pmatrix}\le \bracka{\frac{ne}{k}}^k 
+    \end{equation*}
+    It is clear that the time and space are exponent in $k$ (run time). We need better algorithm.
+\end{remark}
+
+\begin{corollary}
+    With the feature map $\phi(\boldsymbol x) = (\boldsymbol x, 1)$, we use the perceptron to learn monotone disjunction:
+    \begin{equation*}
+        M \le (4k+1)(n+1)
+    \end{equation*}
+    when $k$ is the number of literal out of the $n$ possible literal. And, so there exists a generic lower bound for rotation invariance algorithm (SVM and perceptron) where $M = \Omega(n)$
+\end{corollary}
+\begin{proof}
+    We use the following perceptron bound:
+    \begin{equation*}
+        M \le R^2\norm{\boldsymbol u}^2
+    \end{equation*}
+    for all $\boldsymbol u$ such that $(\boldsymbol u^T\boldsymbol x_t)y_t \ge 1$. With $\boldsymbol x \in \brackc{0, 1}^n$, the the feature map $\boldsymbol \phi(\boldsymbol x) = (\boldsymbol x, 1)$, claim the following that $\boldsymbol u^* \in \mathbb{R}^{n+1}$ separate with margin of $1$, where:
+    \begin{equation*}
+        u_i^* = \begin{cases}
+            2 & i \text{ is a literal} \\
+            0 & i \text{ isn't a literal} \\
+            -1 & i \text{ is biase weight} \\
+        \end{cases}
+    \end{equation*}
+    Such that, we have the following calculation:
+    \begin{itemize}
+        \item $(\boldsymbol u^*)^T\boldsymbol \phi(\boldsymbol x) \ge 1$ as we have positive example $y_t = 1$
+        \item $(\boldsymbol u^*)^T\boldsymbol \phi(\boldsymbol x) = -1$ as we have negative example $y_t = -1$
+    \end{itemize}
+    Note that for some $\boldsymbol x \in \brackc{0, 1}^n$, then $\norm{\boldsymbol \phi(\boldsymbol x)}^2 \le n + 1$ and we have $\norm{\boldsymbol u^*}^2 = 4k+1$, thus we have $M \le (4k+1)(n+1)$ as required.
+\end{proof}
+
+\begin{definition}{\textbf{(Winnow Algorithm)}}
+    We define the winnow algorithm to be 
+    \begin{algorithm}[H]
+        \caption{Winnow Algorithm}
+        \begin{algorithmic}[1]
+            \State \textbf{Input}: $(\boldsymbol x_1, y_1),\dots,(\boldsymbol x_m, y_m)\in\brackc{0, 1}^n \times \brackc{0, 1}$
+            \State \textbf{Initialize}: $\boldsymbol w_1 = \boldsymbol 1$
+            \State Select $\eta\in(0, \infty)$
+            \For {$i=1,2,\cdots, m$}
+                \State Receives instances $\boldsymbol x_t \in \brackc{0, 1}^n$
+                \State Predict the value:
+                \begin{equation*}
+                    \hat{y}_t = \begin{cases}
+                        0 & \boldsymbol w_t^T\boldsymbol x_t < n \\
+                        1 & \boldsymbol w_t^T\boldsymbol x_t \ge n \\
+                    \end{cases}
+                \end{equation*}
+                \State Receives the label $y_t\in\brackc{0, 1}$
+                \If{Mistake $\hat{y}_t \ne y_t$}
+                    \State Update the value:
+                    \begin{equation*}
+                        w_{t+1, i} = w_{t, i}2^{(y_t - \hat{y}_t)x_{t, i}} \qquad \text{ for } i \in [n]
+                    \end{equation*}
+                \EndIf
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+\end{definition}
+
+\begin{theorem}
+    The mistake of winnow is bounded by:
+    \begin{equation*}
+        M \le 3k(\log n + 1) + 2
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Let's consider $2$ scenarios as we consider the bound on mistake:
+    \begin{itemize}
+        \item On a mistake, at least one element weight is doubled and the relevent weight never decreases. 
+        \item Once it the weight $w_{t, i}\ge n$, it will no longer change (it will saturated to $n$) and so the mistake is:
+        \begin{equation*}
+            M_p \le k(\log n + 1)
+        \end{equation*}
+        where $M_p$ is the bound on the positive example $y_t= 1$
+    \end{itemize}
+    Let $W_t = \sum^n_{i=1}w_{t, i}$. We can see that $W_1 = n$, and so:
+    \begin{itemize}
+        \item On the positive mistake $(y_t = 1)$ we have $W_{t+1} \le W_t + n$ (as we can only double it)
+        \item On the negative mistake $(y_t = 0)$ we have $W_{t+1} \le W_t - n/2$ as we can only half the number of weights.
+    \end{itemize}
+    Consider the progression of weights, we can see that: 
+    \begin{equation*}
+        0 \le W_{m+1} \le W_1 + M_pn - M_fn/2 = n + M_pn - M_fn/2 
+    \end{equation*}
+    Thus, we have $M_f \le 2k(\log n + 1) + 2$, where $M_p$ is the bound on the positive example $y_t= 0$. Combining them and we have:
+    \begin{equation*}
+        M \le M_p + M_f \le 2 + 3k(\log n + 1)
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    There are several observation that we have to make:
+    \begin{itemize}
+        \item WINNOW is an improvement over PERCEPTRON in terms of dimension $m$ in the mistake bound. 
+        \item The bound for linear threshold learning for the WINNOW is incompatible as the algorithm prefer sparse hypothesis. 
+    \end{itemize}
+\end{remark}
+
+\begin{theorem}
+    Given $m$, let $t$ drawn uniformly at random from $\brackc{1,\dots,m}$. Let $S$ be set of $t$ examples sampled from $p$. Let $(\boldsymbol x', y')$ be addiitonal example sample from $P$, then:
+    \begin{equation*}
+         \mathbb{P}(A_S(\boldsymbol x') \ne y') \le \frac{B}{m}
+    \end{equation*}
+    with respected to be drawing of $t, S$ and $(\boldsymbol x', y)$, where the mistake bound for $A$ is $B$.
+\end{theorem} 
+\begin{proof}
+    There are no more than $B$ trials with mistake, therefore, since $t$ is drawn uniformly from $\brackc{1,\dots,m}$ there is no more than $B/m$ probability of hitting trial with a mistake. 
+\end{proof}
+
+\begin{definition}{\textbf{(Disjunctive Normal Form)}}
+    DNF is a disjunction of terms, for example: 
+    \begin{equation*}
+        x_1x_4x_7\vee x_1\bar{x}_2 \vee x_2x_5
+    \end{equation*}
+    All boolean function may be represented as DNF. 
+\end{definition}
+
+\begin{remark}
+    DNF corresponds to simple boolean network with a signle layer as such they may learn by a neural network with single hidden layer. 
+\end{remark}
+
+\begin{definition}{\textbf{(ANOVA Kernel)}}
+    We consider the feature map to be:
+    \begin{equation*}
+        \boldsymbol x = \begin{matrix}
+            x_1 \\ x_2 \\ \vdots \\ x_n
+        \end{matrix} \qquad \qquad \Phi(\boldsymbol x) = \begin{matrix}
+            1 \\ x_1 \\ x_2 \\ \vdots \\ x_n \\ x_1x_2 \\ \vdots \\ x_1x_2\dots x_n
+        \end{matrix}
+    \end{equation*}
+    THere are $2^n$ features. The $k$-terms DNF in input space is $k$-literal in feature space:
+    \begin{equation*}
+        \boldsymbol \Phi(\boldsymbol x) \boldsymbol \Phi(\boldsymbol y) = \prod^n_{i=1}(1+x_iy_i) = k_\text{anova}(\boldsymbol x, \boldsymbol y)
+    \end{equation*}
+    Please note that it also represent a disjunction normal form. 
+\end{definition}
+
+\begin{remark}{\textbf{(Perceptron for K-term DNF)}}
+    The weight of the perceptron, we have the weight to be:
+    \begin{equation*}
+        \boldsymbol w_t = \sum_{q\in\text{mistakes}}\alpha_q \boldsymbol \Phi(\boldsymbol x_q)
+    \end{equation*}
+    And performing a predicting gives us:
+    \begin{equation*}
+        \boldsymbol w_t^T\boldsymbol \Phi(\boldsymbol x_t) = \bracka{\sum_{q\in\text{mistakes}}\alpha_q \boldsymbol \Phi(\boldsymbol x_q)}\boldsymbol \Phi(\boldsymbol x_t) = \sum_{q\in\text{mistakes}}\alpha_q \boldsymbol k(\boldsymbol x_q, \boldsymbol x_t)
+    \end{equation*}
+    The prediction time complexity is $\mathcal{O}(n\cdot\#\text{mistakes}) \le \mathcal{O}(nm)$. The mistake bound is $\mathcal{O}(k2^n)$
+\end{remark}
+
+\begin{remark}
+    The winnow weight is given as:
+    \begin{equation*}
+        w_{t, i}=\exp\bracka{-\eta \sum_{q\in\text{mistake}}\alpha_q\boldsymbol [\Phi(\boldsymbol x_q)]_i}
+    \end{equation*}
+    The have the log of weights that is linear combination of the past examples. We have the mistake bound to be $\mathcal{O}(k\ln 2^n) = \mathcal{O}(kn)$ with the prediction time to be $\Omega(2^n\#\text{mistake})$, as there is no obvious fas way to compute $\boldsymbol w_t^T\boldsymbol \Phi(\boldsymbol x_t)$ for now. 
+\end{remark}

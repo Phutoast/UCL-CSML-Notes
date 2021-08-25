@@ -1,0 +1,297 @@
+\section{Latent Variable Model}
+
+\begin{definition}{\textbf{(Latent Variable Model)}}
+    The latent variable model can be seen as:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol z &\sim p(\boldsymbol \theta_z) \\
+        \boldsymbol x | \boldsymbol z &\sim p(\boldsymbol \theta_z) \\
+        p(\boldsymbol x, \boldsymbol z;\boldsymbol \theta_x, \boldsymbol \theta_z) &= p(\boldsymbol x|\boldsymbol z ; \boldsymbol \theta_x)p(\boldsymbol z ; \boldsymbol \theta_z) \\
+        p(\boldsymbol x ; \boldsymbol \theta_x, \boldsymbol \theta_z) &= \int p(\boldsymbol x |\boldsymbol z; \boldsymbol \theta_x) p(\boldsymbol z ; \boldsymbol \theta_z) \dby \boldsymbol z
+    \end{aligned}
+    \end{equation*}
+    Note that $p(\boldsymbol z), p(\boldsymbol x|\boldsymbol z)$ and $p(\boldsymbol x, \boldsymbol z)$ are exponential family but $p(\boldsymbol x)$ doesn't have to be an exponential family. 
+\end{definition}
+
+\subsection{PCA Formulation}
+
+\begin{remark}
+    We will consider the family of PCA formulation. We will start with PCA definition, which can be formulated in $2$ ways: Maximal Variance and Average Projection Cost. Then, we will consider the PPCA a probabilistic version of PCA. 
+\end{remark}
+
+\begin{definition}{\textbf{(Maximal Variance)}}
+    Consider the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$ where $\boldsymbol x_i \in \mathbb{R}^D$. We want to project the data onto space with dimension $M < D$. To do this, we want to find a subspace orthonormal basis $\boldsymbol u_i$ for $i=1,\cdots,M$, such that $\boldsymbol u_i^T\boldsymbol u_j = \delta_{ij}$. So that the empirical projected variance, given as:
+    \begin{equation*}
+        \frac{1}{N}\sum^N_{j=1}(\boldsymbol u_i^T\boldsymbol x_j - \boldsymbol u_i^T\bar{\boldsymbol x})^2
+    \end{equation*}
+    is maximized for $i=1,\dots,M$ where $\boldsymbol u_1$ gives the highest variance, where $\bar{\boldsymbol x} = 1/N\sum^N_{i=1}\boldsymbol x_i$
+\end{definition}
+
+\begin{proposition}
+    The maximum projected variance direction $\boldsymbol u_1,\dots,\boldsymbol u_M$ is the $M$ eigenvectors of the data-covariance matrix:
+    \begin{equation*}
+        \boldsymbol S = \frac{1}{N}\sum^N_{i=1}(\boldsymbol x_i - \bar{\boldsymbol x})(\boldsymbol x_i-\bar{\boldsymbol x_i})^T
+    \end{equation*}
+    associated with the following eigenvalues $\lambda_1\ge\lambda_2\ge\cdots\ge\lambda_M\ge\cdots\ge\lambda_D$. 
+\end{proposition}
+\begin{proof}
+    Let's start with the first direction $\boldsymbol u_1$ as we can show that the empirical projected variance:
+    \begin{equation*}
+        \frac{1}{N}\sum^N_{j=1}(\boldsymbol u_1^T\boldsymbol x_j - \boldsymbol u_1^T\bar{\boldsymbol x})^2 = \boldsymbol u_1^T\boldsymbol S\boldsymbol u_1
+    \end{equation*}
+    We will consider the following contraint optimization problem as we have the following Lagrange multiplier and set the derivative to be $0$:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial \boldsymbol u} \Big[\boldsymbol u_1^T\boldsymbol S\boldsymbol u_1 + \lambda_1(1 - \boldsymbol u_1^T\boldsymbol u_1)\Big] &= 2\boldsymbol S\boldsymbol u_1 - 2\lambda_1\boldsymbol u_1 = 0
+    \end{aligned}
+    \end{equation*}
+    Please note that the matrix $\boldsymbol S$ is symmetric. This leads us to the following, equation, which is:
+    \begin{equation*}
+        \boldsymbol S \boldsymbol u_1 = \lambda_1\boldsymbol u_1
+    \end{equation*}
+    Furthermore, if we multiply $\boldsymbol u_1^T$ on the LHS together with the contraint $\boldsymbol u_1^T\boldsymbol u_1=1$, then we have $\boldsymbol u_1^T\boldsymbol S\boldsymbol u_1 = \lambda_1$. This means that  first maximal variance projection direction is the eigenvector $\boldsymbol u_1$ that has the highest assocated eigenvalue.  Furthermore, the orthogonal comes from the properties of eigenvectors. 
+\end{proof}
+
+\begin{definition}{\textbf{(Minimum-Error Formulation)}}
+    We get the formulation PCA where we have orthonormal set $D$-dimensional basis vector $\brackc{\boldsymbol u_i}$ where $i=1,\dots,D$ and $\boldsymbol u_i^T\boldsymbol u_j = \delta_{ij}$. This means that the data point can be represented by the basis:
+    \begin{equation*}
+        \boldsymbol x_i = \sum^D_{j=1}\alpha_{ij}\boldsymbol u_j = \sum^D_{j=1}(\boldsymbol x_i^T\boldsymbol u_j) \boldsymbol u_j 
+    \end{equation*}
+    The value of $\alpha_{ij}$ can be found by the inner product $\alpha_{ij} = \boldsymbol x_i^T\boldsymbol u_j$ as above (by the orthogonal properties). Now, we will consider the approximation using the projection over linear subspace $M < D$:
+    \begin{equation*}
+        \tilde{\boldsymbol x}_i = \sum^M_{j=1}z_{ij}\boldsymbol u_j + \sum^D_{j=M+1}b_j\boldsymbol u_j
+    \end{equation*}
+    where the $\brackc{b_j}$  are component that is same for all data points. Now, we are free to find the $\brackc{b_j}, \brackc{z_{ij}}$ and $\brackc{\boldsymbol u_j}$ given the following objective:
+    \begin{equation*}
+        \frac{1}{N}\sum^N_{i=1}\norm{\boldsymbol x_i - \tilde{\boldsymbol x}_i}^2
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The solution to the minimum error formulation is the same as the maximal variance formulation. This gives us the difference interpretation of the PCA.
+\end{proposition}
+\begin{proof}
+    Let's start with finding the value $\brackc{z_{ij}}$, first. As we want to find derivative of $z_{ij}$ to be zero:
+    \allowdisplaybreaks
+    \begin{align*}
+        \frac{1}{N}\sum^N_{i=1}&\norm{\boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j - \sum^D_{j=M+1}b_j\boldsymbol u_j}^2 \\
+        &= \frac{1}{N}\sum^N_{i=1}\brackb{\bracka{\boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j - \sum^D_{j=M+1}b_j\boldsymbol u_j}^T\bracka{\boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j - \sum^D_{j=M+1}b_j\boldsymbol u_j}} \\
+        &= \begin{aligned}[t] 
+            \frac{1}{N}\sum^N_{i=1}\Bigg[
+            &\boldsymbol x_i^T\boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - \sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i -\sum^M_{j=1}z_{ij}\boldsymbol x_i^T\boldsymbol u_j \\
+            & + \bracka{\sum^M_{j=1}z_{ij}\boldsymbol u_j^T}\bracka{\sum^M_{j=1}z_{ij}\boldsymbol u_j} + \bracka{\sum^D_{j=M+1}b_j\boldsymbol u_j^T}\bracka{\sum^M_{j=1}z_{ij}\boldsymbol u_j} \\
+            &-\sum^D_{j=M+1}b_j\boldsymbol x_i^T\boldsymbol u_j + \bracka{\sum^M_{j=1}z_{ij}\boldsymbol u_j^T}\bracka{\sum^D_{j=M+1}b_j\boldsymbol u_j} + \bracka{\sum^D_{j=M+1}b_j\boldsymbol u_j^T}\bracka{\sum^D_{j=M+1}b_j\boldsymbol u_j}\Bigg]  \\
+        \end{aligned} \\
+        &= \begin{aligned}[t] 
+            \frac{1}{N}\sum^N_{i=1}\Bigg[
+            &\boldsymbol x_i^T\boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - \sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i -\sum^M_{j=1}z_{ij}\boldsymbol x_i^T\boldsymbol u_j-\sum^D_{j=M+1}b_j\boldsymbol x_i^T\boldsymbol u_j  \\
+            & + \bracka{\sum^M_{a=1}z_{ia}\boldsymbol u_a^T}\bracka{\sum^M_{b=1}z_{ib}\boldsymbol u_b} + \bracka{\sum^D_{a=M+1}b_a\boldsymbol u_a^T}\bracka{\sum^M_{b=1}z_{ib}\boldsymbol u_b} \\
+            &+ \bracka{\sum^M_{a=1}z_{ia}\boldsymbol u_a^T}\bracka{\sum^D_{b=M+1}b_b\boldsymbol u_b} + \bracka{\sum^D_{a=M+1}b_a\boldsymbol u_a^T}\bracka{\sum^D_{b=M+1}b_b\boldsymbol u_b}\Bigg]  \\
+        \end{aligned} \\
+        &= \begin{aligned}[t] 
+            \frac{1}{N}\sum^N_{i=1}\Bigg[
+            &\boldsymbol x_i^T\boldsymbol x_i - 2\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - 2\sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \sum^M_{a=1}\sum^M_{b=1}z_{ia} z_{ib}\boldsymbol u_a^T\boldsymbol u_b \\
+            & + 2\sum^D_{a=M+1}\sum^M_{b=1}b_az_{ib}\boldsymbol u_a^T\boldsymbol u_b +\sum^D_{a=M+1}\sum^D_{b=M+1}b_ab_b\boldsymbol u_a^T\boldsymbol u_b\Bigg]  \\
+        \end{aligned} \\
+        &= \begin{aligned}[t] 
+            \frac{1}{N}\sum^N_{i=1}\Bigg[
+            &\boldsymbol x_i^T\boldsymbol x_i - 2\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - 2\sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \sum^M_{j=1}z_{ij}^2  +\sum^D_{j=M+1}b_j^2 + \cancel{2\sum^D_{a=M+1}\sum^M_{b=1}b_az_{ib}\boldsymbol u_a^T\boldsymbol u_b}\Bigg]  \\
+        \end{aligned} \\
+        &= \begin{aligned}[t] 
+            \frac{1}{N}\sum^N_{i=1}\Bigg[\boldsymbol x_i^T\boldsymbol x_i - 2\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - 2\sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \sum^M_{j=1}z_{ij}^2  +\sum^D_{j=M+1}b_j^2\Bigg] 
+        \end{aligned} \\
+    \end{align*}
+    Now, let's consider the derivative with respected to $z_{ab}$ as we now have:
+    \begin{equation*}
+    \begin{aligned}
+       \frac{\partial}{\partial z_{ab}} \ &\frac{1}{N}\sum^N_{i=1} \Bigg[\boldsymbol x_i^T\boldsymbol x_i - 2\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - 2\sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \sum^M_{j=1}z_{ij}^2  +\sum^D_{j=M+1}b_j^2\Bigg] \\ 
+       &= -\frac{\partial}{\partial z_{ab}} \ \frac{2}{N}\sum^N_{i=1}\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i + \frac{\partial}{\partial z_{ab}} \ \frac{1}{N}\sum^N_{i=1}\sum^M_{j=1}z_{ij}^2 \\
+       &= -\frac{2}{N}\boldsymbol u_b^T\boldsymbol x_a + \frac{2}{N}z_{ab} = 0
+    \end{aligned}
+    \end{equation*}
+    And so, we have the $z_{ij} = \boldsymbol x_i^T\boldsymbol u_j$ for $j=1,\dots,M$. Now, we consider the derivative of the with respected to $b_a$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+       \frac{\partial}{\partial b_a} \ &\frac{1}{N}\sum^N_{i=1} \Bigg[\boldsymbol x_i^T\boldsymbol x_i - 2\sum^M_{j=1}z_{ij}\boldsymbol u_j^T\boldsymbol x_i - 2\sum^D_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \sum^M_{j=1}z_{ij}^2  +\sum^D_{j=M+1}b_j^2\Bigg] \\ 
+       &= -\frac{\partial}{\partial b_a} \ \frac{2}{N}\sum^N_{i=1}\sum^M_{j=M+1}b_j\boldsymbol u_j^T\boldsymbol x_i + \frac{\partial}{\partial b_a} \ \frac{1}{N}\sum^N_{i=1}\sum^M_{j=M+1}b_{j}^2 \\
+       &= -\frac{\partial}{\partial b_a} \ 2\sum^M_{j=M+1}b_j\boldsymbol u_j^T\bracka{\frac{1}{N}\sum^N_{i=1}\boldsymbol x_i} + \frac{\partial}{\partial b_a} \ \sum^M_{j=M+1}b_{j}^2 \\
+       &= -\frac{\partial}{\partial b_a} \ 2\sum^M_{j=M+1}b_j\boldsymbol u_j^T\bracka{\frac{1}{N}\sum^N_{i=1}\boldsymbol x_i} + \frac{\partial}{\partial b_a} \ \sum^M_{j=M+1}b_{j}^2 \\
+       &= -2\boldsymbol u^T_a\bar{\boldsymbol x} + 2b_a
+    \end{aligned}
+    \end{equation*}
+    And so, we have $b_j = \bar{\boldsymbol x}^T\boldsymbol u_j$ for $j=M+1,\dots, D$. To find the $\boldsymbol u_i$, we have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol x_i - \tilde{\boldsymbol x}_i &= \boldsymbol x_i - \sum^M_{j=1}z_{ij}\boldsymbol u_j - \sum^D_{j=M+1}b_j\boldsymbol u_j \\ 
+        &= \sum^M_{j=1}(\boldsymbol x_i^T\boldsymbol u_j)\boldsymbol u_j + \sum^D_{j=M+1}(\boldsymbol x_i^T\boldsymbol u_j)\boldsymbol u_j - \sum^M_{j=1}(\boldsymbol x_i^T\boldsymbol u_j)\boldsymbol u_j - \sum^D_{j=M+1}(\bar{\boldsymbol x}^T\boldsymbol u_j)\boldsymbol u_j \\ 
+        &= \sum^D_{j=M+1}(\boldsymbol x_i^T\boldsymbol u_j)\boldsymbol u_j - \sum^D_{j=M+1}(\bar{\boldsymbol x}^T\boldsymbol u_j)\boldsymbol u_j \\ 
+        &= \sum^D_{j=M+1}\brackc{(\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_j}\boldsymbol u_j \\
+    \end{aligned}
+    \end{equation*}
+    And, so we now have, the following objective:
+    \allowdisplaybreaks
+    \begin{align*}
+        \frac{1}{N}\sum^N_{i=1}&\brackb{\bracka{\sum^D_{j=M+1}\brackc{(\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_j}\boldsymbol u_j}^T\bracka{\sum^D_{j=M+1}\brackc{(\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_j}\boldsymbol u_j}} \\
+        &= \frac{1}{N}\sum^N_{i=1}\brackb{\bracka{\sum^D_{a=M+1}\boldsymbol u_a^T\brackc{\boldsymbol u_a^T(\boldsymbol x_i - \bar{\boldsymbol x}) } }\bracka{\sum^D_{b=M+1}\brackc{(\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_b}\boldsymbol u_b}}\\
+        &= \frac{1}{N}\sum^N_{i=1}\brackb{\bracka{\sum^D_{a=M+1}\sum^D_{b=M+1}\brackc{\boldsymbol u_a^T(\boldsymbol x_i - \bar{\boldsymbol x}) (\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_b} \ \boldsymbol u_a^T \boldsymbol u_b}}\\
+        &= \frac{1}{N}\sum^N_{i=1}\sum^D_{a=M+1}\boldsymbol u_a^T(\boldsymbol x_i - \bar{\boldsymbol x}) (\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol u_a = \sum^D_{a=M+1}\boldsymbol u_a^T \boldsymbol S \boldsymbol u_a
+    \end{align*}
+    Now, we have the same objective to the maximal variance formulation. And the proposition is proven. 
+\end{proof}
+
+\subsection{Probabilistic PCA}
+
+\begin{definition}{\textbf{(PPCA)}}
+    We consider the following system of probabilities:
+    \begin{equation*}
+        p(\boldsymbol z) = \mathcal{N}(\boldsymbol z | \boldsymbol 0,\boldsymbol  I) \qquad p(\boldsymbol x|\boldsymbol z) = \mathcal{N}(\boldsymbol x | \boldsymbol W\boldsymbol z + \boldsymbol \mu, \Psi)
+    \end{equation*}
+    which we can consider $p(\boldsymbol z)$ to be the PCA projection, while $p(\boldsymbol x|\boldsymbol z)$ is the reconstruction of the PCA. This means that we can perform PPCA of it. 
+\end{definition}
+
+\begin{proposition}
+    We consider the marginalization of Gaussian to be:
+    \begin{equation*}
+        p(\boldsymbol x) = \mathcal{N}(\boldsymbol x | \boldsymbol \mu, \boldsymbol C) \qquad \text{ where } \qquad \boldsymbol C = \boldsymbol \Psi + \boldsymbol W\boldsymbol W^T
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the linear Gaussian model in this case, where we use the marginalization (see above) to get the value of $p(\boldsymbol x)$
+\end{proof}
+
+\begin{proposition}
+    We consider the inference of the latent and we have:
+    \begin{equation*}
+        p(\boldsymbol z | \boldsymbol x) = \mathcal{N}\Big(\boldsymbol \Sigma^{-1}\boldsymbol W^T\boldsymbol \Psi^{-1}(\boldsymbol x - \boldsymbol \mu), \boldsymbol \Sigma^{-1} \Big)
+    \end{equation*}     
+    where we have $\boldsymbol \Sigma = I + \boldsymbol W^T\Psi^{-1}\boldsymbol W$. 
+\end{proposition}
+
+\begin{remark}
+    We have the projection to be:
+    \begin{equation*}
+        \hat{\boldsymbol x}_i = \boldsymbol W\boldsymbol \Sigma^{-1}\boldsymbol W^T\boldsymbol \Psi^{-1}(\boldsymbol x_i - \boldsymbol \mu)
+    \end{equation*}
+    As we have the PCA projection that also take noise into consideration. Furthermore, if $\boldsymbol \Psi = \psi^2 \boldsymbol I$ and $\psi \rightarrow0$, then it leads to the PCA estimation (given the correct $\boldsymbol W$, which we will explore later). 
+\end{remark}
+
+\begin{remark}{\textbf{(Likelihood of PPCA)}}
+    Now, we are left to find the actual value of $\boldsymbol W$ and we will assume that we are aware of $\boldsymbol \mu$ (which is usually $\boldsymbol 0$), while the covariance matrix is assumed to be $\boldsymbol \Psi = \psi^2 \boldsymbol I$. The log-likelihood of this PPCA is (using the marginalized):
+    \begin{equation*}
+    \begin{aligned}
+        l = \log p(\brackc{\boldsymbol x_i}^N_{i=1} | \boldsymbol \mu, \boldsymbol C) &= \log \prod^N_{i=1} \frac{1}{\sqrt{|2\pi\boldsymbol C|}}\exp\brackc{-\frac{1}{2}(\boldsymbol x_i - \boldsymbol \mu)^T\boldsymbol C^{-1}(\boldsymbol x_i - \boldsymbol \mu)} \\
+        &= -\frac{N}{2}\log\abs{\boldsymbol C} -\frac{1}{2}\sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)^T\boldsymbol C^{-1}(\boldsymbol x_i - \boldsymbol \mu) + \const \\
+        &= -\frac{N}{2}\log\abs{\boldsymbol C} -\frac{N}{2}\operatorname{Tr}\bracka{\frac{1}{N}\sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)^T\boldsymbol C^{-1}(\boldsymbol x_i - \boldsymbol \mu)} + \const \\
+        &= -\frac{N}{2}\log\abs{\boldsymbol C} -\frac{N}{2}\operatorname{Tr}\bracka{\boldsymbol C^{-1}\frac{1}{N}\sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)(\boldsymbol x_i - \boldsymbol \mu)^T} + \const \\
+        &= -\frac{N}{2}\log\abs{\boldsymbol C} -\frac{N}{2}\operatorname{Tr}\bracka{\boldsymbol C^{-1}\boldsymbol S} + \const \\
+    \end{aligned}
+    \end{equation*}
+    Now $\boldsymbol C = \boldsymbol W\boldsymbol W^T + \psi^2\boldsymbol I$ is given above. 
+\end{remark}
+
+\begin{proposition}
+    Non-Trivial Solution of Maximum Likelihood estimate of $\boldsymbol W$ is equal to:
+    \begin{equation*}
+        \boldsymbol W_\text{ML} = \boldsymbol U (\boldsymbol \Lambda - \psi^2\boldsymbol I)^{1/2}\boldsymbol V^T
+    \end{equation*}
+    where $\boldsymbol U \in \mathbb{R}^{D\times M}$ is the first $M$ eigenvector of $\boldsymbol S$ the empirical variance matrix and $\boldsymbol \Lambda \in \mathbb{R}^{M\times M}$ be the matrix, which is the eigenvalues of $\boldsymbol S$. Finally, $\boldsymbol V \in \mathbb{R}^{M\times M}$ is an arbitrary orthogonal matrix.
+\end{proposition}
+\begin{proof}
+    Let's consider the derivative of the log-likelihood with respect to $\boldsymbol W$ as we now have:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial l}{\partial \boldsymbol W} &= \frac{\partial}{\partial \boldsymbol W}\brackb{-\frac{N}{2}\log\abs{\boldsymbol C} -\frac{N}{2}\operatorname{Tr}\bracka{\boldsymbol C^{-1}\boldsymbol S} } \\
+        &= -N\brackb{-\boldsymbol C^{-1}\boldsymbol W + \boldsymbol C^{-1}\boldsymbol S \boldsymbol C^{-1}\boldsymbol W } 
+    \end{aligned}
+    \end{equation*}
+    Setting this to $\boldsymbol 0$, and we can see that, we have the following equation: $\boldsymbol S\boldsymbol C^{-1}\boldsymbol W=\boldsymbol W$, there are $2$ outcome to the solution: $\boldsymbol W = 0$, which can be shown to be minimum. Or,  Consider $\boldsymbol W$ in the SVD form i.e $\boldsymbol W = \boldsymbol U\boldsymbol L\boldsymbol V^T$ for orthogonal matrix $\boldsymbol U$ and $\boldsymbol V$, while $\boldsymbol L$ is diagonal matrix. This would entail:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol S\Big( \boldsymbol U \boldsymbol L\boldsymbol V^T \boldsymbol V \boldsymbol L^T\boldsymbol U^T + \psi^2\boldsymbol I \Big)^{-1}\boldsymbol U \boldsymbol L\boldsymbol V^T  = \boldsymbol U \boldsymbol L\boldsymbol V^T  \\
+        \implies & \boldsymbol S\Big( \boldsymbol U \boldsymbol L^2\boldsymbol U^T + \psi^2\boldsymbol I \Big)^{-1}\boldsymbol U  = \boldsymbol U \\
+        \implies & \boldsymbol S\boldsymbol U \Big( \boldsymbol L^2 + \psi^2\boldsymbol I \Big)^{-1}=\boldsymbol U \\
+        \implies & \boldsymbol S\boldsymbol U =\boldsymbol U \Big( \boldsymbol L^2 + \psi^2\boldsymbol I \Big)
+    \end{aligned}
+    \end{equation*}
+    For the second implication, we have:
+    \begin{equation*}
+        \boldsymbol U\Big(\boldsymbol L^2 + \psi^2\boldsymbol I\Big) = \Big(\boldsymbol U\boldsymbol L^2\boldsymbol U^T+ \psi^2\boldsymbol I\Big)\boldsymbol U \implies \Big( \boldsymbol U\boldsymbol L^2\boldsymbol U^T + \psi^2\boldsymbol I \Big)^{-1}\boldsymbol U = \boldsymbol U\Big(\boldsymbol L^2 + \psi^2\boldsymbol I\Big)^{-1}
+    \end{equation*}
+    We can see that the $\boldsymbol U$ is the eigenvector of $\boldsymbol S$, where the corresponding eigenvalues are $\lambda_i = l_i^2 + \psi^2$, and so we can rewrite the weight to be:
+    \begin{equation*}
+        \boldsymbol W = \boldsymbol U (\boldsymbol \Lambda - \psi^2\boldsymbol I)^{1/2}\boldsymbol V^T
+    \end{equation*}
+    where $\boldsymbol \Lambda$ be the matrix, which is the eigenvalues of $\boldsymbol S$.
+\end{proof}
+
+\subsection{Other Related Models}
+
+\begin{definition}{\textbf{(Factor Analysis)}}
+    The factor analysis is PPCA:
+    \begin{equation*}
+        p(\boldsymbol z) = \mathcal{N}(\boldsymbol z | \boldsymbol 0,\boldsymbol  I) \qquad p(\boldsymbol x|\boldsymbol z) = \mathcal{N}(\boldsymbol x | \boldsymbol W\boldsymbol z + \boldsymbol \mu, \Psi)
+    \end{equation*}
+    but we consider the matrix $\boldsymbol \Psi$ to be $D\times D$ diagonal matrix. This means that the inferences still holds. However, the training is much harder now as we may not find the $\boldsymbol W$ from the data in closed form. 
+\end{definition}
+
+\begin{definition}{\textbf{(Canonical Correlation Analysis)}}
+    The data vector $\mathcal{D}=\brackc{(\boldsymbol u_1, \boldsymbol v_1), (\boldsymbol u_2,\boldsymbol v_2),\dots}$ where $\boldsymbol u_i \in \mathcal{U}$ and $\boldsymbol v_i \in \mathcal{V}$. We want to find the correlation:
+    \begin{itemize}
+        \item We find te unti vector $\boldsymbol a\in\mathcal{U}$ and $\boldsymbol b\in\mathcal{V}$ such that the correlation $\boldsymbol u_i^T\boldsymbol a$ and $\boldsymbol v_i^T\boldsymbol b$ is the maximum the covariance between them.
+        \item This also requires some in the orthogonal subspace. 
+    \end{itemize}
+    Now, the probabilistic CCA is the generative model with latent $\boldsymbol z_i \in \mathbb{R}^K$ such that:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol z \sim \mathcal{N}(\boldsymbol 0, \boldsymbol I) \qquad \boldsymbol u \sim \mathcal{N}(\boldsymbol \Upsilon\boldsymbol z, \boldsymbol \Psi_u) \qquad \boldsymbol v \sim \mathcal{N}(\boldsymbol \Phi\boldsymbol z, \boldsymbol \Psi_u)
+    \end{aligned}
+    \end{equation*}
+    where we have $\boldsymbol\Psi_{\boldsymbol u}\succeq0$ and $\boldsymbol\Psi_{\boldsymbol v}\succeq0$. This is block diagonal noise. There are certain restriction of Gaussian FA and PCA as it is modelled the distribution that is too restrictive. 
+\end{definition}
+
+\begin{definition}{\textbf{(Mixture Distribution)}}
+    The mixture distribution has simple discrete latent variable:
+    \begin{equation*}
+        s_i \sim \text{Discrete}[\boldsymbol \pi] \qquad \boldsymbol x_i | \boldsymbol s_i \sim P_{s_i}[\theta_{s_i}]
+    \end{equation*}
+    The mixture can be seen as a mixture of multiple sources of data. The probability density of the single data point is given as:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol x_i) &= \sum^k_{i=1} p(\boldsymbol x_i | s_i=m)p(s_i=m) = \sum^k_{i=1} \pi_m p(s_i=m) \\
+    \end{aligned}
+    \end{equation*}
+    The most notable mixture distribution is the mixture of Gaussian distribution. 
+\end{definition}
+
+\begin{remark}
+    Please note that once can perform a Baysian inference to infer the probability that particular point $\boldsymbol x$ belongs to the cluster $m$ of the mixture distribution:
+    \begin{equation*}
+        p(s_i = m | \boldsymbol x) = \frac{p_m(\boldsymbol x)\pi_m}{\sum^k_{i=1}p_i(\boldsymbol x)\pi_i}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Mixture of Gaussian)}}
+    Let's consider the mixture of Gaussian, where we have the following mixture distribution:
+    \begin{equation*}
+        p(\brackc{\boldsymbol x_i}^N_{i=1} | \brackc{\boldsymbol \mu_i}^k_{i=1}, \brackc{\boldsymbol \Sigma_i}^k_{i=1}, \boldsymbol \pi) = \prod^n_{i=1}\sum^k_{m=1} \pi_m \frac{1}{\sqrt{\abs{2\pi\boldsymbol \Sigma_m}}}\exp\brackc{-\frac{1}{2}(\boldsymbol x_i-\boldsymbol \mu)\boldsymbol \Sigma_m^{-1}(\boldsymbol x_i-\boldsymbol \mu)}
+    \end{equation*}
+    Again it is hard to find the solution to the problem, and so we will consider the method to solve such the problem, which is called Expectation-Maximization (EM). 
+\end{remark}
+
+\begin{remark}{\textbf{(Mixture of Factor Analyzers)}}
+    Now, we consider the clustering and dimensionality reduction:
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta) = \sum^k_{m=1}\pi_m\mathcal{N}(\boldsymbol \mu_k | \boldsymbol W_k\boldsymbol W_k^T + \boldsymbol \Psi)
+    \end{equation*}
+    where $\pi_k$ is the mixing proportion, while the parameter are $\boldsymbol \theta = \brackc{\brackc{\pi_m, \boldsymbol \mu_m, \boldsymbol W_m}^k_{m=1}, \boldsymbol \Psi}$. Please note that this model has 2 kinds of latent variables, which are:
+    \begin{itemize}
+        \item Cluster indicator variable $\pi_m$ for $m \in \brackc{1,\cdots,k}$
+        \item Continuous factor $\boldsymbol z_{im} \in \mathbb{R}^M$
+    \end{itemize}
+    Together giving us the following data generating distribution:
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta) = \sum^k_{m=1} p(\pi_m)\int p(\boldsymbol z)p(\boldsymbol x_m | \boldsymbol z, \boldsymbol \theta) \dby \boldsymbol z
+    \end{equation*}
+    We can use EM to perform an optimization over it. 
+\end{remark}
+

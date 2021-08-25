@@ -1,0 +1,209 @@
+
+\section{RKHS in Machine Learning}
+\subsection{Expansion of Centered Matrix for PCA}
+\label{appendix:pca-center-matrix}
+
+% We have the following matrix $XHX^T$, and we have:
+% \begin{equation*}
+% \begin{aligned}
+%     &\begin{bmatrix}
+%         x_{11} & x_{12} & \cdots & x_{1n} \\
+%         x_{21} & x_{22} & \cdots & x_{2n} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         x_{d1} & x_{d2} & \cdots & x_{dn} \\
+%     \end{bmatrix}\begin{bmatrix}
+%         1-1/n & -1/n & \cdots & -1/n \\
+%         -1/n & 1-1/n & \cdots & -1/n \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         -1/n & -1/n & \cdots & 1-1/n \\
+%     \end{bmatrix}
+%     \begin{bmatrix}
+%         x_{11} & x_{21} & \cdots & x_{d1} \\
+%         x_{12} & x_{22} & \cdots & x_{d2} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         x_{1n} & x_{2n} & \cdots & x_{dn} \\
+%     \end{bmatrix} \\
+%     &=\begin{bmatrix}
+%         x_{11}-\frac{1}{n}\sum^n_{i=1}x_{1i} &  x_{12}-\frac{1}{n}\sum^n_{i=1}x_{1i} & \cdots & x_{1n}-\frac{1}{n}\sum^n_{i=1}x_{1i} \\
+%         x_{21}-\frac{1}{n}\sum^n_{i=1}x_{2i} &  x_{22}-\frac{1}{n}\sum^n_{i=1}x_{2i} & \cdots & x_{2n}-\frac{1}{n}\sum^n_{i=1}x_{2i} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         x_{d1}-\frac{1}{n}\sum^n_{i=1}x_{di} &  x_{d2}-\frac{1}{n}\sum^n_{i=1}x_{di} & \cdots & x_{dn}-\frac{1}{n}\sum^n_{i=1}x_{di} \\
+%     \end{bmatrix}\begin{bmatrix}
+%         x_{11} & x_{21} & \cdots & x_{d1} \\
+%         x_{12} & x_{22} & \cdots & x_{d2} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         x_{1n} & x_{2n} & \cdots & x_{dn} \\
+%     \end{bmatrix} \\
+%     &=\begin{bmatrix}
+%         \sum^n_{j=1} x_{1j} \bracka{x_{1j} -\frac{1}{n}\sum^n_{i=1}x_{1i}} & \sum^n_{j=1} x_{2j} \bracka{x_{1j} -\frac{1}{n}\sum^n_{i=1}x_{1i}} & \cdots & \sum^n_{j=1} x_{dj} \bracka{x_{1j} -\frac{1}{n}\sum^n_{i=1}x_{1i}} \\
+%         \sum^n_{j=1} x_{1j} \bracka{x_{2j} -\frac{1}{n}\sum^n_{i=1}x_{2i}} & \sum^n_{j=1} x_{2j} \bracka{x_{2j} -\frac{1}{n}\sum^n_{i=1}x_{2i}} & \cdots & \sum^n_{j=1} x_{dj} \bracka{x_{2j} -\frac{1}{n}\sum^n_{i=1}x_{2i}} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         \sum^n_{j=1} x_{1j} \bracka{x_{dj} -\frac{1}{n}\sum^n_{i=1}x_{di}} & \sum^n_{j=1} x_{2j} \bracka{x_{dj} -\frac{1}{n}\sum^n_{i=1}x_{di}} & \cdots & \sum^n_{j=1} x_{dj} \bracka{x_{dj} -\frac{1}{n}\sum^n_{i=1}x_{di}} 
+%     \end{bmatrix}
+% \end{aligned}
+% \end{equation*}
+% Now, consider
+% \begin{equation*}
+%     \sum^n_{i=1}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}^T 
+% \end{equation*}
+% which, we have:
+% \begin{equation*}
+%     \sum^n_{i=1}\begin{bmatrix}
+%         x_{1i}-1/n\sum^n_{j=1}x_{1j} \\ x_{2i}-1/n\sum^n_{j=1}x_{2j} \\ \vdots \\ x_{di}-1/n\sum^n_{j=1}x_{dj}
+%     \end{bmatrix}\begin{bmatrix}
+%         x_{1i}- \frac{1}{n}\sum^n_{j=1}x_{1j} & x_{2i}-\frac{1}{n}\sum^n_{j=1}x_{2j} & \cdots & x_{di}-\frac{1}{n}\sum^n_{j=1}x_{dj}
+%     \end{bmatrix}
+% \end{equation*}
+% Then, we have the following matrix at $(a, b)$:
+% \begin{equation*}
+% \begin{aligned}
+%     \sum^n_{i=1} x_{ai}x_{bi} &- \frac{x_{ai}}{n}\sum^n_{j=1}x_{bj} - \frac{x_{bi}}{n}\sum^n_{j=1}x_{aj} + \frac{1}{n^2}\bracka{\sum^n_{j=1}x_{aj}}\bracka{\sum^n_{j=1}x_{bj}} \\
+%     &= \brackb{\frac{1}{n}\bracka{\sum^n_{j=1}x_{aj}}\bracka{\sum^n_{j=1}x_{bj}} - \frac{1}{n}\sum^n_{i=1}x_{ai}\sum^n_{j=1}x_{bj}}  + \brackb{\sum^n_{i=1}x_{ai}x_{bi} - \frac{1}{n}x_{bi}\sum_{j=1}^n x_{aj}} \\
+%     &= \sum^n_{i=1} x_{bi} \bracka{x_{ai} - \frac{1}{n}\sum^n_{j=1}x_{aj}}
+% \end{aligned}
+% \end{equation*}
+Smarter way to do it is:
+\begin{equation*}
+    X\bracka{I - \frac{1}{n}\boldsymbol 1_{n\times n}}X^T = XX^T - \frac{1}{n}X\boldsymbol{1}_{n\times n}X^T
+\end{equation*}
+Now, we consider the second one:
+\begin{equation*}
+\begin{aligned}
+    \sum^n_{i=1}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}\bracka{x_i-\frac{1}{n}\sum^n_{j=1}x_j}^T &= \sum^n_{i=1} x_ix_i^T - \frac{1}{n}X\boldsymbol{1}x_i - \frac{1}{n} x_i\boldsymbol{1}^TX^T + \frac{1}{n^2}X\boldsymbol{1}\boldsymbol{1}^TX^T \\
+    &= \brackb{\frac{1}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T + \sum^n_{i=1}x_ix_i^T} - \brackb{\frac{1}{n}\sum^n_{i=1}X\boldsymbol{1}x_i^T + x_i\boldsymbol{1}^TX^T} \\
+    &= \brackb{\frac{1}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T + XX^T} - \brackb{\frac{2}{n}\sum^n_{i=1}X\boldsymbol{1}x_i^T} \\
+    &= \brackb{\frac{1}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T + XX^T} - \brackb{\frac{2}{n}X\boldsymbol{1}\sum^n_{i=1}x_i^T} \\
+    &= \brackb{\frac{1}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T + XX^T} - \brackb{\frac{2}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T} \\
+    &= XX^T - \frac{1}{n}X\boldsymbol{1}\boldsymbol{1}^TX^T\\
+\end{aligned}
+\end{equation*}
+Note that for vector $\boldsymbol{a}$ and $\boldsymbol{b}$, we have $\boldsymbol{a}\boldsymbol{b}^T = \boldsymbol{b}\boldsymbol{a}^T$
+
+\subsection{Centering Kernel Matrix}
+\label{appendix:kernel-pca-centering}
+Please note that 
+\begin{equation*}
+    \tilde{k}(x_i, x_j) = \brackd{\tilde{\phi}(x_i), \tilde{\phi}(x_j)} = \brackd{\phi(x_i) - \frac{1}{n}\sum^n_{k=1}\phi(x_k), \phi(x_j) - \frac{1}{n}\sum^n_{k=1}\phi(x_k)}
+\end{equation*}
+Let's see that:
+\begin{equation*}
+\begin{aligned}
+    \tilde{k}(x_i, x_j) &= \brackd{\phi(x_i) - \frac{1}{n}\sum^n_{k=1}\phi(x_k), \phi(x_j) - \frac{1}{n}\sum^n_{k=1}\phi(x_k)} \\ 
+    &= \brackd{\phi(x_i), \phi(x_j)} - \brackd{\phi(x_i), \frac{1}{n}\sum^n_{k=1}\phi(x_k) } - \brackd{\phi(x_j), \frac{1}{n}\sum^n_{k=1}\phi(x_k)} + \brackd{\frac{1}{n}\sum^n_{k=1}\phi(x_k), \frac{1}{n}\sum^n_{k=1}\phi(x_k)}\\
+    &= \underbrace{\brackd{\phi(x_i), \phi(x_j)}}_{\circled{1}} - \underbrace{\frac{1}{n}\sum^n_{k=1}\brackd{\phi(x_i),\phi(x_k)} - \frac{1}{n}\sum^n_{k=1}\brackd{\phi(x_j), \phi(x_k)}}_{\circled{2}} + \underbrace{\frac{1}{n^2} \sum^n_{k=1}\sum^n_{l=1}\brackd{\phi(x_k), \phi(x_l)}}_{\circled{3}}
+\end{aligned}
+\end{equation*}
+Now, let's consider $\tilde{K} = HKH$, which we have:
+\begin{equation*}
+\begin{aligned}
+    \tilde{K} &= \bracka{I - \frac{1}{n}\boldsymbol 1_{n\times n}}K\bracka{I - \frac{1}{n}\boldsymbol 1_{n\times n}} = \bracka{K- \frac{1}{n}\boldsymbol{1}_{n\times n}K }\bracka{I - \frac{1}{n}\boldsymbol{1}_{n\times n}} \\
+    &= K-\frac{1}{n}K\boldsymbol{1}_{n\times n} - \frac{1}{n}\boldsymbol{1}_{n\times n}K + \frac{1}{n^2}\boldsymbol{1}_{n\times n}K\boldsymbol{1}_{n\times n}
+\end{aligned}
+\end{equation*}
+It is clear that $K$ corresponds to $\circled{1}$, and we can see that:
+\begin{equation*}
+\begin{aligned}
+    \frac{1}{n}K\boldsymbol{1}_{n\times n} = \frac{1}{n}\begin{bmatrix}
+        \cdots & \sum^n_{i=1}\brackd{x_1, x_i} & \cdots \\
+        \cdots & \sum^n_{i=1}\brackd{x_2, x_i} & \cdots \\
+        & \vdots & \\
+        \cdots & \sum^n_{i=1}\brackd{x_n, x_i} & \cdots \\
+    \end{bmatrix} \qquad \frac{1}{n}\boldsymbol{1}_{n\times n}K = \frac{1}{n}\begin{bmatrix}
+        \vdots & \vdots & & \vdots \\
+        \sum^n_{i=1}\brackd{x_1, x_i} & \sum^n_{i=1}\brackd{x_2, x_i} & \cdots & \sum^n_{i=1}\brackd{x_n, x_i} \\
+        \vdots & \vdots & & \vdots \\
+    \end{bmatrix}
+\end{aligned} 
+\end{equation*}
+And, so the addition of them would lead to the $\circled{2}$. Finally, $\circled{3}$ can be shown easily as we use the result above and multiply by $\boldsymbol 1_{n\times n}$.
+
+\subsection{Ridge Regression Expansion}
+\label{appendix:ridge-regression}
+We will show that 
+\begin{equation*}
+    - 2y^TX^TCb + b^Tb = \norm{CXy-b}^2 - \norm{y^TX^TC}^2
+\end{equation*}
+where $C=(XX^T+\lambda I)^{-1/2}$, please note that $C = C^T$. Let's consider the right handside:
+\begin{equation*}
+\begin{aligned}
+    \norm{CXy-b}^2 - \norm{y^TX^TC^T}^2 &= (CXy-b)^T(CXy-b) - (y^TX^TC^T)^T(y^TX^TC^T) \\
+    &= (y^TX^TC^T - b^T)(CXy-b) - (y^TX^TC^T)^T(y^TX^TC^T) \\
+    &= y^TX^TC^TCXy - y^TX^TC^Tb - b^TCXy + b^Tb - CXyy^TX^TC^T \\
+    &= (y^TX^TC^TCXy - CXyy^TX^TC^T) - 2y^TX^TC^Tb + b^Tb \\
+    &= - 2y^TX^TC^Tb + b^Tb \\
+\end{aligned}
+\end{equation*}
+
+\subsection{Representor Theorem for Ridge Regression}
+\label{appendix:representor-ridge}
+We will assume that
+\begin{equation*}
+\begin{aligned}
+    X(X^TX + \lambda I_n)^{-1}y &= X\begin{bmatrix}
+        \beta_{11} & \beta_{12} & \cdots & \beta_{1n} \\
+        \beta_{21} & \beta_{22} & \cdots & \beta_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \beta_{n1} & \beta_{n2} & \cdots & \beta_{nn} \\
+    \end{bmatrix}y \\
+    &= \begin{bmatrix}
+        \sum^n_{i=1}x_{1i}\beta_{i1} & \sum^n_{i=1}x_{1i}\beta_{i2} & \cdots & \sum^n_{i=1}x_{1i}\beta_{in} \\
+        \sum^n_{i=1}x_{2i}\beta_{i1} & \sum^n_{i=1}x_{2i}\beta_{i2} & \cdots & \sum^n_{i=1}x_{2i}\beta_{in} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \sum^n_{i=1}x_{di}\beta_{i1} & \sum^n_{i=1}x_{di}\beta_{i2} & \cdots & \sum^n_{i=1}x_{di}\beta_{in} \\
+    \end{bmatrix}y \\
+    &= \begin{bmatrix}
+        \sum^n_{i=1}x_{1i}\beta_{i1} & \sum^n_{i=1}x_{1i}\beta_{i2} & \cdots & \sum^n_{i=1}x_{1i}\beta_{in} \\
+        \sum^n_{i=1}x_{2i}\beta_{i1} & \sum^n_{i=1}x_{2i}\beta_{i2} & \cdots & \sum^n_{i=1}x_{2i}\beta_{in} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \sum^n_{i=1}x_{di}\beta_{i1} & \sum^n_{i=1}x_{di}\beta_{i2} & \cdots & \sum^n_{i=1}x_{di}\beta_{in} \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        y_1 \\ y_2 \\ \vdots \\ y_n
+    \end{bmatrix} \\
+    &= \begin{bmatrix}
+        \sum^n_{j=1}y_j\sum^n_{i=1}x_{1i}\beta_{ij} \\
+        \sum^n_{j=1}y_j\sum^n_{i=1}x_{2i}\beta_{ij} \\
+        \vdots \\
+        \sum^n_{j=1}y_j\sum^n_{i=1}x_{ni}\beta_{ij} \\
+    \end{bmatrix} = \begin{bmatrix}
+        \sum^n_{j=1}\sum^n_{i=1}y_jx_{1i}\beta_{ij} \\
+        \sum^n_{j=1}\sum^n_{i=1}y_jx_{2i}\beta_{ij} \\
+        \vdots \\
+        \sum^n_{j=1}\sum^n_{i=1}y_jx_{ni}\beta_{ij} \\
+    \end{bmatrix} \\
+    &= \begin{bmatrix}
+        \sum^n_{i=1}\sum^n_{j=1} y_jx_{1i}\beta_{ij} \\
+        \sum^n_{i=1}\sum^n_{j=1} y_jx_{2i}\beta_{ij} \\
+        \vdots \\
+        \sum^n_{i=1}\sum^n_{j=1} y_jx_{ni}\beta_{ij} \\
+    \end{bmatrix} 
+\end{aligned}
+\end{equation*}
+The rest will be in main proof. 
+
+\subsection{MMD Integration}
+\label{appendix:MMD-integration}
+We have
+\begin{equation*}
+\begin{aligned}
+    \iint &\brackb{k(s-t)\dby(P-Q)(s)}\dby(P-Q)(t) \\
+    &= \int \Big[ \mathbb{E}_{s\sim P}\brackb{k(s-t)} - \mathbb{E}_{s\sim Q}\brackb{k(s-t)} \Big] \dby (P-Q)(t) \\
+    &= \int \mathbb{E}_{s\sim P}\brackb{k(s-t)} \dby (P-Q)(t) - \int\mathbb{E}_{s\sim Q}\brackb{k(s-t)} \dby (P-Q)(t) \\
+    &= \Big[\mathbb{E}_{t\sim P}\mathbb{E}_{s\sim P}[k(s-t)] - \mathbb{E}_{t\sim Q}\mathbb{E}_{s\sim P}[k(s-t)] \Big] - \Big[ \mathbb{E}_{t\sim P}\mathbb{E}_{s\sim Q} [k(s-t)] - \mathbb{E}_{t\sim Q}\mathbb{E}_{s\sim Q} [k(s-t)] \Big]\\
+    &= \mathbb{E}_P[k(s-t)] + \mathbb{E}_Q[k(s-t)] - 2\mathbb{E}_{P, Q}[k(s-t)] 
+\end{aligned}
+\end{equation*}
+
+\subsection{Biased Estimate of HSIC Part 2}
+\label{appendix:HSIC-bias-2}
+We have 
+\begin{equation*}
+    \boldsymbol1^TK = \begin{bmatrix}
+        \sum^n_{a=1}k_{a1} & \sum^n_{a=1}k_{a2} & \cdots & \sum^n_{a=1}k_{an}  
+    \end{bmatrix} \qquad L\boldsymbol1=\begin{bmatrix}
+        \sum^n_{b=1}l_{1b} \\
+        \sum^n_{b=1}l_{2b} \\
+        \vdots \\
+        \sum^n_{b=1}l_{nb} \\
+    \end{bmatrix}
+\end{equation*}

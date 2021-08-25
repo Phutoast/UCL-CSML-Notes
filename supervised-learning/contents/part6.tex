@@ -1,0 +1,180 @@
+\section{Online Learning 2: Bandits}
+
+\begin{definition}{\textbf{(Partial Feedback Protocal)}}
+    We cosnider the following setting:
+    \begin{algorithm}[H]
+        \caption{Partial Feedback Control}
+        \begin{algorithmic}[1]
+            \For {$i=1,2,\cdots, T$}
+                \State Predict $\hat{y}_t \in [n]$
+                \State Observe loss of prediction $l_{t, \hat{y}_t}\in[0, 1]$
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+    We have the following goal:
+    \begin{equation*}
+        \sum^m_{t=1}l_{t, \hat{y_t}} - \min_{i\in[n]}\sum^m_{t=1}l_{t, i} \le o(m)
+    \end{equation*}
+    This is the same as the regret. Please note that we didn't get to see all loss function that is induced by the prediction.
+\end{definition}
+
+\begin{definition}{\textbf{(Unbiased Estimation)}}
+    An estimator $\hat{\theta}$  estimate a parameter $\theta$ of a distribution from a sample is unbiased if we can show that $\mathbb{E}[\hat{\theta}] = \theta$.
+\end{definition}
+
+\begin{example}
+    Suppose $X_1,\dots,X_n$ are iid random variable for a distribution with mean $\mu$, then:
+    \begin{equation*}
+        \hat{\theta} = \frac{1}{n}(X_1+\dots+X_n)
+    \end{equation*}
+    is an unbiased estimate of $\mu$
+\end{example}
+
+\begin{example}
+    Suppose $X$ is a random variable with the discrete unifrom distribution over $\brackc{1,\dots,n}$. Suppose $n$ is unknown and we wish to estimate it. 
+    \begin{itemize}
+        \item The estimate $\hat{\theta}_1 = X$ is the maximum likelihood estimator, since $\mathcal{L}(\theta, X = x) = 1/\theta$ is maximized when $\theta = x$. Then we have:
+        \begin{equation*}
+            \mathbb{E}[\hat{\theta}_1 ; \theta = n] = \sum^n_{x=1}\frac{x}{n} = \frac{n+1}{2}
+        \end{equation*}
+        \item And so, $\hat{\theta}_2 = 2x - 1$ is unbiased estimator, which is:
+        \begin{equation*}
+            \mathbb{E}[\hat{\theta}_2 ; \theta = n] = \sum^n_{x=1}\frac{1}{n}(2x - 1) = 2\sum^n_{x=1} \frac{1}{n} (2x - 1) = 2\sum^n_{x=1}\frac{1}{n}x -\sum^n_{x=1}\frac{1}{n} = n
+        \end{equation*}
+    \end{itemize}
+\end{example}
+
+\begin{remark}{\textbf{(Assumption and Estimation)}}
+    Suppose, we have a distribution $D_i$ over $[0, 1]$ for each $i\in[n]$ arms. For each arm $i$, we use iid sample $l_{t, i}$ for $D_i$. Suppose, we play $i$ on trials $S_{t, i}\subseteq[t]$, then:
+    \begin{equation*}
+        \hat{\mu}_{t, i} = \sum_{t\in S_i} \frac{l_{t, i}}{|S_i|}
+    \end{equation*}
+    This is unbiased estimator of $\mu_i$. Now, we can consider the usage as we have:
+    \begin{itemize}
+        \item We can use a concentration inequality that allows us to quantitatively estimate the likelihood to estimate differently for the parameter. 
+        \item Using the observation, the algorithm UCB balances exploration and exploitation to obtain good regret bounds for this method. 
+        \item Suppose tha tthe underlying $D_i$ is changing over time (being $D_{t, i}$):
+        \begin{equation*}
+            \mu_{t, i} = \frac{\sum^t_{j=1} \mathbb{E}[l_{j,t}]}{t}
+        \end{equation*}
+        where $S_i = [t]$. However, if we only have $S_{t, i} = [t]$, then we have no information about the other arms. 
+        \item We need to have simultaneous unbiased estimate for all arms $S$
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Importance Weighting)}}
+    We have the following series of observation:
+    \begin{itemize}
+        \item Suppose $X$ is a random variable over $\mathbb{R}$ with a mean $\mu$. By definition, $\mathbb{E}[X] = \mu$ and $\hat{\theta}_1 = X$ is an unbiased estimator of the mean. 
+        \item Consider the biased coin $Z_p$ with outcome $1$ with probability $p$. Suppse, we have the estimator $\hat{\theta}_0$ setting to equal to $X/p$ if $Z_p = 1$. 
+        \item Its expectation is equal to:
+        \begin{equation*}
+            \mathbb{E}[\hat{\theta}_0] = \mathbb{P}(Z_p = 1)(X/p) + 0 \mathbb{P}(Z_p = 0) = (p)(X/p) + (1-p)(0) = X
+        \end{equation*}
+        This is unbiased. 
+    \end{itemize} 
+\end{definition}
+
+\begin{definition}{\textbf{(Hallucinated Loss Vector)}}
+    We generalize this to obtain an unbiased estimator of $l_t$ in the bandit setting. Given $\boldsymbol v_t \in \Delta_n$  by the relation tha t$\hat{y}_t \sim \boldsymbol v_t$. The unbiased estimator $l^n_t$ or $\boldsymbol k_t$ with respected to $\boldsymbol v_t$ is given as:
+    \begin{equation*}
+        \bracka{l^h_{t, i} = \frac{l_{t, i}}{v_{t, i}} \mathbb{I}[i = \hat{y}_t] }_{i \in [n]}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Expectation of Hallucinated Loss Vector)}}
+    Observed that $l^h_t$ is unbiased for all $i\in[n]$ since we have:
+    \begin{equation*}
+        \mathbb{E}_{\hat{y}_t, \boldsymbol v_t}[l^h_{t, i}] = \sum^n_{j=1}v_{t, j}\frac{l_{t, i}}{v_{t, i}} \mathbb{I}[i = j] = l_{t, i}
+    \end{equation*}
+    We have unbiased estimator for all arms by only observing the single arm. We can apply the hedge to $l^h_t$ requires bounded loss vector. We can use more careful analysis of the hedge. 
+    % \begin{itemize}
+    %     \item We will be given an expected regret bound and there will be some subtleties in the source of randomness. 
+    %     \item This will be clarify the adversariable model that generates the loss $\boldsymbol l_1,\dots,\boldsymbol l_m$
+    % \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(EXP3)}}    
+    Exponential-Weight algorithm for Exploration and Exploitation is given by:
+    \begin{algorithm}[H]
+        \caption{EXP3}
+        \begin{algorithmic}[1]
+            \State \textbf{Initialize}: $\eta \in (0, \infty)$
+            \State Set $\boldsymbol v_1 = (1/n, \dots, 1/n)$
+            \For {$i=1,2,\cdots, T$}
+                \State Sample $\hat{y}_t \sim \boldsymbol v_t$
+                \State Observe Loss $l_{t, \hat{y}} \in [0, 1]$
+                \State Construct Hallucinated Loss vector:
+                \begin{equation*}
+                    l^h_t = \bracka{l^h_{t, i} = \frac{l_{t, i}}{v_{t, i}} \mathbb{I}[i = \hat{y}_t] }_{i \in [n]}
+                \end{equation*}
+                \State Perform the update, for $i\in[n]$ and $Z_t = \sum^n_{i=1}v_{t,i}\exp(-\eta l^h_{t, i})$:
+                \begin{equation*}
+                    v_{t+1, i} = v_i\exp(-\eta l^h_{t, i})/Z_t
+                \end{equation*}
+            \EndFor
+        \end{algorithmic} 
+    \end{algorithm}
+\end{definition}
+
+\begin{lemma}  
+    For any sequence of loss vector $\boldsymbol l_1,\dots,\boldsymbol l_m \in [0, 1]^n$, we have the following loss bound:
+    \begin{equation*}
+        \sum^m_{t=1}\boldsymbol v_t^T\boldsymbol l^h_t - \sum^m_{t=1}\boldsymbol u^T\boldsymbol l^h_t \le \frac{\ln n}{\eta} + \frac{\eta}{2}\sum^m_{t=1}\sum^n_{i=1}v_{t, i}(l^h_{t, i})^2
+    \end{equation*}
+    For all $\boldsymbol u \in \Delta_n$
+\end{lemma}
+\begin{proof}
+    The lemma follows from the fact that EXP3 is just Hedge with $\boldsymbol l_t$ weighted to be $\boldsymbol l^h_t$ and the Hedge inequality is proven before. 
+\end{proof}
+
+\begin{remark}
+    We can show the property of EXP3, where we consider that: we need to perform and so we may replace hallucination losses $\boldsymbol l^h_t$ with time loss $\boldsymbol l$:
+    \begin{itemize}
+        \item We can model some of the randomness as we use the adversarial loss $\boldsymbol l_1,\dots,\boldsymbol l_m$. 
+        \item We have to bound the term $\sum^m_{t=1}\sum^n_{i=1}v_{t,i}(l^h_{t,i})^2$ and tune $\eta$
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Deterministic Adversarial Model)}}
+    We will to set $\boldsymbol l_1,\dots,\boldsymbol l_m$ before running the algorithm. The adversary is assumed to be complete given the prior knowledge, and:
+    \begin{itemize}
+        \item The limitation of near omniscient adversary is that it is non-adaptive. 
+        \item It many simulate the stochastic model by repeatedly sample the $\mathcal{D}_1,\dots,\mathcal{D}_m$ in advance.
+    \end{itemize} 
+\end{definition}
+
+\begin{theorem}
+    For any sequence of loss vector $S = l_1,\dots,l_m \in [0, 1]^n$, the regret for EXP3 with $\eta = \sqrt{2\ln n/mn}$ is:
+    \begin{equation*}
+        \mathbb{E}[L_A(S)] - \min_i L_i \le \sqrt{2mn\ln n}
+    \end{equation*}
+    where $L_A(S) = \sum^m_{t=1}l_{t, \hat{y}_y}$ and $L_i = \sum^m_{t=1}l_{t, i}$
+\end{theorem}
+\begin{proof}
+    Observe that the only source of randomness are the sample $\hat{y}_t \sim \boldsymbol v_t$. As previously argue, note that $\mathbb{E}[l^h_{t, i}] = l_{t, i}$, and we have:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol v_t^T\boldsymbol l^h_t] = \sum^n_{i=1}\mathbb{E}[v_{t, i}l^h_{t, i}] = \sum^n_{i=1}v_{t, i}\mathbb{E}[l^h_{t, i}] = \sum^n_{i=1}v_{t, i}l_{t, i} = \mathbb{E}[l_{t, \hat{y}_t}]
+    \end{equation*}
+    Similarly, we have:
+    \begin{equation*}
+        \mathbb{E}[(l^h_{t, i})^2] = \sum^n_{j=1}v_{t, j}\bracka{\frac{l_{t, i}}{v_{t, i}}}^2 \mathbb{I}[i = j]^2 = v_{t,i}\bracka{\frac{l_{t,i}}{v_{t, i}}}^2 = \frac{l^2_{t, i}}{v_{t, i}}
+    \end{equation*}
+    This implies that:
+    \begin{equation*}
+        \mathbb{E}\brackb{\sum^n_{i=1} v_{t, i}(l^h_{t, i})^2 } = \sum^n_{i=1}v_{t, i}\frac{l^2_{t, i}}{v_{t, i}} = \sum^n_{i=1}l^2_{t, i} \le n
+    \end{equation*}
+    Taking the expectation over the Hedge terms, and we have for $\boldsymbol u \in \Delta_n$:
+    \begin{equation*}
+        \mathbb{E}\brackb{\sum^m_{t=1}\boldsymbol v_t^T\boldsymbol l^h_t - \sum^m_{t=1}\boldsymbol u^T\boldsymbol l^h_t} \le \mathbb{E}\brackb{\frac{\ln n}{\eta} + \frac{\eta}{2}\sum^m_{t=1}\sum^n_{i=1}v_{t, i}(l^h_{t, i})^2}
+    \end{equation*}
+    And, so we have using the fact that: $\mathbb{E}[l^h_{t, i}] = l_{t, i}$, and the previous result with $\boldsymbol u$ being a coordinate vector, we have:
+    \begin{equation*}
+        \mathbb{E}\brackb{\sum^m_{t=1}\boldsymbol v_t^T\boldsymbol l^h_t} - \min_i\mathbb{E}\brackb{\sum^m_{t=1}\boldsymbol l^h_{t, i}} \le \frac{\ln n}{\eta} + \frac{\eta}{2}\mathbb{E}\brackb{\sum^m_{t=1}\sum^n_{i=1}v_{t, i}(l^h_{t, i})^2}
+    \end{equation*}
+    And, so we have:
+    \begin{equation*}
+        \mathbb{E}[L_A(S)] - \min_i L_i(S) \le \ln\frac{n}{\eta} + \frac{\eta}{2}mn
+    \end{equation*}
+    Substuite the $\eta = \sqrt{2\ln n/mn}$ to prove this theorem.
+\end{proof}

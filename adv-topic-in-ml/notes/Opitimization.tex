@@ -1,0 +1,2105 @@
+\section{Introduction}
+
+\begin{definition}{\textbf{(Optimization Problem)}}
+    We have the following optimization problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } f_i(x) \le b_i \quad i=1,\dots,m 
+    \end{aligned}
+    \end{equation*}
+    where we have
+    \begin{itemize}
+        \item $x = (x_1, \dots, x_n)$: Optimization Variable
+        \item $f_0:\mathbb{R}^n\rightarrow \mathbb{R}$: Objective Function
+        \item $f_i:\mathbb{R}^n\rightarrow \mathbb{R}$ for $i=1,\dots,m$: Constant Function
+    \end{itemize} 
+    The optimal solution $x^*$ has smallest value of $f_0$ among all vectors that satisfies the constraint.
+\end{definition}
+
+\begin{definition}{\textbf{(Least Square)}}
+    We have the following problem:
+    \begin{equation*}
+        \min \norm{Ax - b}^2_2
+    \end{equation*}
+    where we have the following analytic solution $x^* = (A^TA)^{-1}A^Tb$. There are reliable and efficient algorithm to solve, with the complexity of $\mathcal{O}(n^2k)$ where $A\in \mathbb{R}^{k\times m}$. The problem is easy to recognize and a few standard technique to increase flexibility. 
+\end{definition}
+
+\begin{definition}{\textbf{(Linear Programming)}}
+    We have the following problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\ 
+        &\text{ subject to } a_i^Tx \le b_i \quad i=1,\dots,m
+    \end{aligned}
+    \end{equation*}
+    There is no analytical solution but there are reliable and efficient algorithm to solve with complexity of $\mathcal{O}(n^2m)$ if $m\ge n$. The problem isn't east to recognize but there are standard tricks to convert problem into a linear program. 
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Optimization Problem)}}
+    We have the following problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x)\\
+        &\text{ subject to } f_i(x) \le b_i \quad i=1,\dots,m
+    \end{aligned}
+    \end{equation*}
+    The objective and constraint functions are convex. This includes a least square and linear program as special case. Trying to solve the convex optimization problem has no analytic solution but we have reliable and efficient algorithm. The time complexity is $\max\{ n^3, n^2m, F \}$ where $F$ is the cost of evaluating $f_i$ and their first and second derivative. The problem is hard to recognize, where there are many tricks to covert problem to convex form.
+\end{definition}
+
+\begin{remark}
+    The traditional technique to solve non-convex optimization involves compomise, where:
+    \begin{itemize}
+        \item Local Optimization Method
+        \begin{itemize}
+            \item Find a point that minimize $f_0$ among feasible point near it.
+            \item Fast and can handle large problem
+            \item Require initial guess 
+            \item No information about distance to global optimum.
+        \end{itemize}
+        \item Global Optimization Method:
+        \begin{itemize}
+            \item Find the global solution
+            \item Worst case complexity can be exponential with problem size.
+        \end{itemize}
+    \end{itemize}
+    These algorithms are based on solving convex subproblem. 
+\end{remark}
+
+\section{Convex Sets}
+
+\subsection{Examples}
+
+\begin{definition}{\textbf{(Line)}}
+    A line through $x_1, x_2$ points:
+    \begin{equation*}
+        x = \theta x_1 + (1-\theta)x_2
+    \end{equation*}
+    where $\theta\in \mathbb{R}$
+\end{definition}
+
+\begin{definition}{\textbf{(Affine Set)}}
+    A set that contains a line through any $2$ distict points in the set.
+\end{definition}
+
+\begin{definition}{\textbf{(Line Segment)}}
+    Between $x_1$ and $x_2$ where:
+    \begin{equation*}
+        x = \theta x_1 + (1-\theta)x_2
+    \end{equation*}
+    with $0\le\theta\le1$
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Set)}}
+    A set that contains a line segment between any $2$ points $x_1, x_2 \in C$ in the set:
+    \begin{equation*}
+        \theta x_1 + (1-\theta) x_2 \in C
+    \end{equation*}
+    where $0\le\theta\le1$
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Combination)}}
+    Given points $x_1,x_2,\dots,x_k$, then the convex combination:
+    \begin{equation*}
+        x = \theta_1x_1 + \theta_2x_2 + \dots + \theta_kx_k
+    \end{equation*}
+    with $\theta_1+\theta_2+\dots+\theta_k = 1$ where $\theta_i\ge0$
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Hull)}}
+    Set of all convex combination of points in $S$ is called convex hull. 
+\end{definition}
+
+\begin{definition}{\textbf{(Cone (Non-Negative) Combination)}}
+    Cone Combination of $x_1$ and $x_2$ is any points with the form:
+    \begin{equation*}
+        x = \theta_1x_1 + \theta_2x_2
+    \end{equation*}
+    with $\theta_1\ge0$ and $\theta_2\ge0$
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Cone)}}
+    Convex Cone is the set that contains all conic combination of points in the set. 
+\end{definition}
+
+\begin{definition}{\textbf{(Hyperplane)}}
+    Hyperplane is the set of the form $\{ x | a^Tx = b \}$ where $a\ne0$
+\end{definition}
+
+\begin{definition}{\textbf{(Halfspace)}}
+    Halfspace is the set of the form $\{x | a^Tx \le b\}$ where $a\ne0$
+\end{definition}
+
+\begin{definition}{\textbf{(Euclidian Ball)}}
+    The euclidian with a center $x_c$ and radius $r$ is:
+    \begin{equation*}
+        B(x_c, r) = \Big\{ x \Big| \norm{x-x_C} \le r \Big\} = \Big\{ x_c + ru \Big| \norm{u}_2\le1 \Big\}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Ellipsoid)}}
+    The set of the form 
+    \begin{equation*}
+        \Big\{ x \Big| (x-x_c)^TP^{-1}(x-x_c)\le1 \Big\}
+    \end{equation*}
+    with $P$ is symmetric positive semi-definite matrices, or we can set 
+    \begin{equation*} 
+        \Big\{ x_c + Au \Big| \norm{u_1}\le1 \Big\}
+    \end{equation*}
+    where $A$ being square and non-singular. 
+\end{definition}
+
+\begin{definition}
+    A function that satisfies:
+    \begin{itemize}
+        \item $\norm{x}\ge0$ and $\norm{x} = 0$ iff $x = 0$
+        \item $\norm{tx} = |t|\norm{x}$ for $t\in \mathbb{R}$
+        \item $\norm{x+y}\le\norm{x} + \norm{y}$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Norm Ball)}}
+    The norm ball is the center $x_C$ and radius $r$ is:
+    \begin{equation*}
+        \Big\{ x \Big| \norm{x-x_C}\le1 \Big\}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Norm Cone)}}
+    We have
+    \begin{equation*}
+        \Big\{ (x, y) \Big| \norm{x}\le t \Big\}
+    \end{equation*}
+    The euclidian norm cone is called second order cone. 
+\end{definition}
+
+\begin{lemma}
+    The norm balls and cones are convex.
+\end{lemma}
+
+\begin{definition}{\textbf{(Polyhedra)}}
+    The solution set of finitely many linear inequalities and equalities:
+    \begin{equation*}
+        Ax\preceq b \qquad Cx = d
+    \end{equation*}
+    The $\preceq$ is component-wise inequality, where $A\in \mathbb{R}^{m\times n}$ and $C\in \mathbb{R}^{p\times n}$. Please note that the polyhedron is intersection of finite number of halfspace and hyperplane.
+\end{definition}
+
+\begin{definition}
+    $\mathbb{S}^n$ is set of symmetric $n\times n$ matrices. 
+\end{definition}
+
+\begin{definition}{\textbf{(Positive Semi-Definite)}}
+    \begin{equation*}
+        \mathbb{S}^n_+ = \Big\{ X \in \mathbb{S}^n \Big| X\succeq0 \Big\}
+    \end{equation*}
+    where $X \in \mathbb{S}^n_+ \iff z^TXz\ge0$ for all $z$. Note that $\mathbb{S}^n_+$ is convex cone. If we have strictly greater than $0$, we have positive definite matrices:
+    \begin{equation*}
+        \mathbb{S}^n_{++} = \Big\{ X \in \mathbb{S}^n \Big| X\succ0 \Big\}
+    \end{equation*}
+\end{definition}
+
+\subsection{Operators that Preserve Convexity}
+
+\begin{proposition}
+    Intersection of any number of convex sets is convex.     
+\end{proposition}
+
+\begin{proposition}
+    Suppose $f:\mathbb{R}^n\rightarrow \mathbb{R}^{m}$ is affine ($f(x) = Ax+b$ with $A\in \mathbb{R}^{m\times n}$ and $b\in \mathbb{R}^m$):
+    \begin{itemize}
+        \item The image of convex set under $f$ is convex 
+        \begin{equation*}
+            S\subseteq \mathbb{R}^n \text{ is convex } \implies f(S) = \brackc{f(x) \Big| x\in S}
+        \end{equation*}
+        \item The inverse image of $f^{-1}(C)$ of a convex set under $f$ is convex:
+        \begin{equation*}
+            C\subseteq \mathbb{R}^m \text{ is convex } \implies f^{-1}(C) = \brackc{x\in \mathbb{R}^n \Big| f(x) \in C}
+        \end{equation*}
+    \end{itemize}
+\end{proposition}
+
+\begin{proposition}
+    The perspective function $P:\mathbb{R}^{n+1}\rightarrow \mathbb{R}^n$ where
+    \begin{equation*}
+        P(x, t) = x/t
+    \end{equation*}
+    where $\text{dom } f = \brackc{(x, t) | t > 0}$. The image and inverse image of convex set under perspective are convex. 
+\end{proposition}
+
+\begin{proposition}
+    A linear fractional function $f:\mathbb{R}^n\rightarrow \mathbb{R}^m$ 
+    \begin{equation*}
+        f(x) = \frac{Ax + b}{c^Tx+d}
+    \end{equation*}
+    where $\text{dom } f = \{ x | c^Tx + d > 0 \}$
+\end{proposition}
+
+\begin{definition}{\textbf{(Proper Cone)}}
+    $\mathcal{K}\subseteq \mathbb{R}^n$ is proper cone if 
+    \begin{itemize}
+        \item $ \mathcal{K} $ is closed (Contains Its Boundary)
+        \item $\mathcal{K}$ is solid (Non Empty)
+        \item $\mathcal{K}$ is pointed (Contains No Line)
+    \end{itemize}
+\end{definition}
+
+
+\begin{definition}{\textbf{(Generalized Ineqality)}}
+    It is defined by proper cone $\mathcal{K}$, where 
+    \begin{equation*}
+    \begin{aligned}
+        &X \preceq_\mathcal{K} Y \iff y-x\in\mathcal{K} \qquad X \prec_\mathcal{K} Y \iff y-x\in\operatorname{int}\mathcal{K}
+    \end{aligned}
+    \end{equation*}
+    The property of generalized inequality is similar to $\le$ in $\mathbb{R}$. Please note that it isn't a general linear ordering. We can have $X\not\preceq_\mathcal{K} Y$ and $Y \not\preceq_\mathcal{K}X$
+\end{definition}
+
+\begin{definition}{\textbf{(Minimum)}}
+    The point $x\in S$ is minimum element of $S$ with respected to $\succeq_\mathcal{K}$ if 
+    \begin{equation*}
+        y\in S \implies x\preceq_K y
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Minimal)}}
+    The point $x\in S$ is the minimal element of $S$ with respected to 
+    \begin{equation*}
+        y \in S, y \preceq_\mathcal{K} X \implies y=x
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}
+    If $C$ and $D$ are non-empty disjoint convex set, there exists $a\ne0$ and $b$ such that $a^Tx \le b$ for $x\in C$ and $a^Tx>b$ for $x\in D$. This means that the hyperplane $\brackc{x | a^Tx = b}$ separates $C$ and $D$.
+\end{theorem}
+
+\begin{definition}{\textbf{(Supporting Hyperplane)}}
+    to a set $C$ at boundary point $x_0$ such that 
+    \begin{equation*}
+        \Big\{ x \Big| a^Tx = a^Tx_0 \Big\}
+    \end{equation*}
+    where $a\ne0$ and $a^Tx \le a^Tx_0$ for all $x\in C$
+\end{definition}
+
+\begin{theorem}
+    If $C$ is convex, then there exists, a supporting hyperplane at every boundary point of $C$
+\end{theorem}
+
+\begin{definition}{\textbf{(Dual Cone)}}
+    The dual cone of a cone $ \mathcal{K}$ is:
+    \begin{equation*}
+        \mathcal{K}^* = \Big\{ y | y^Tx \ge 0 \text{ for all } x \in \mathcal{K} \Big\}
+    \end{equation*}
+    If the cone is a dual of itself is called self-dual. Furtheremore, if dual cone of proper cone is propert, hence defined generalized inequality:
+    \begin{equation*}
+        y \succeq_{\mathcal{K}^*} 0 \iff y^Tx \ge 0 \text{ for all } x \succeq_{\mathcal{K}} 0
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    The minimum element with respected to $\preceq_\mathcal{K}$: $x$ is minimum of $S$ iff for all $\lambda\succeq_{\mathcal{K}^*}0$ is unique minimizer of $\lambda^Tz$ over $S$.
+\end{proposition}
+
+\begin{proposition}
+    The minimal element with respected to $\preceq_\mathcal{K}$:
+    \begin{itemize}
+        \item If $x$ minimizes $\lambda^Tz$ over $S$ for some $\lambda\succeq_{\mathcal{K}^*}0$ then $x$ is minimal
+        \item If $x$ is a minimal element of convex set $S$ then there exists a non-zero $\lambda\succeq_{\mathcal{K}^*}0$ such that $x$ minimizer $\lambda^Tz$ over $S$
+    \end{itemize}
+\end{proposition}
+
+\section{Convex Functions}
+
+\subsection{Properties of Convex Functions}
+
+\begin{definition}{\textbf{(Convex Function)}}
+    $f:\mathbb{R}^n\rightarrow \mathbb{R}$ is convex if $\operatorname{dom}(f)$ is convex:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y) \le \theta f(x) + (1-\theta)f(y)
+    \end{equation*}
+    for all $x, y\in\operatorname{dom}(f)$ and $0\le\theta\le1$
+\end{definition}
+
+\begin{definition}{\textbf{(Concave + Strictly Convex)}}
+    $f$ is convex if $-f$ is convex. $f$ is strictly convex if $\operatorname{dom} f$ is convex and:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y) < \theta f(x) + (1-\theta)f(y)
+    \end{equation*}
+    for $x, y\in\operatorname{dom}(f)$ where $x\ne y$ and $0\le\theta\le1$.
+\end{definition}
+
+\begin{remark}
+    Examples of convex functions in $\mathbb{R}$:
+    \begin{itemize}
+        \item Affine: $ax+b$ on $\mathbb{R}$ and for any $a, b\in \mathbb{R}$
+        \item Exponential: $\exp(ax)$ for any $a\in \mathbb{R}$
+        \item Power: $x^\alpha$ on $\mathbb{R}_{++}$ for $\alpha\ge1$ or $\alpha\le0$
+        \item Power of Absolute Value: $|x|^p$ on $\mathbb{R}$ with $p\ge1$
+        \item Negative entropy: $x\log x$ on $\mathbb{R}_{++}$
+    \end{itemize}
+    Examples of concave functions in $\mathbb{R}$:
+    \begin{itemize}
+        \item Affine: $ax+b$ on $\mathbb{R}$ and for any $a, b\in \mathbb{R}$
+        \item Power: $x^\alpha$ on $\mathbb{R}_{++}$ for $0\le\alpha\le1$
+        \item Logarithm: $\log x$ on $\mathbb{R}_{++}$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    Examples of convex function in $\mathbb{R}^n$:
+    \begin{itemize}
+        \item Affine Function: $f(x) = a^Tx + b$
+        \item Norms: $\norm{x}_p$ where 
+        \begin{equation*}
+            \bracka{\sum^n_{i=1} \abs{x_i}^p}^{1/p}
+        \end{equation*}
+        for $p\ge1$ and $\norm{x}_\infty = \max_k|x_k|$
+    \end{itemize}
+    Examples of convex function in $\mathbb{R}^{m\times n}$:
+    \begin{itemize}
+        \item Affine Function: $f(X) = \text{tr}(A^TX) + b = \sum^m_{i=1}\sum^n_{j=1}A_{ij}X_{ij} + b$
+        \item Special Singular Value:
+        \begin{equation*}
+            f(X) = \norm{X}_2 = \sigma_\text{max}(X) = \bracka{\lambda_\text{max}(X^TX)}^{1/2}
+        \end{equation*}
+    \end{itemize}
+\end{remark}
+
+\begin{proposition}
+    The function $f:\mathbb{R}^n\rightarrow \mathbb{R}$ is convex iff the function $g:\mathbb{R}\rightarrow \mathbb{R}$ where $g(t) = f(x+tv)$, where $\operatorname{dom}(g) = \brackc{t | x+tv \in \operatorname{dom} f}$. Now we can check the convexity of $f$ by checking convexiy of functions of one variable.
+\end{proposition}
+
+\begin{remark}
+    Let's consider the log-determinant function:
+    \begin{equation*}
+    \begin{aligned}
+        g(t) &= \log\det(X + tV) = \log\det X + \log\det(I + X^{-1/2}VX^{-1/2}) \\ 
+        &= \log \det X + \sum^n_{i=1}\log(1+t\lambda_i)
+    \end{aligned}
+    \end{equation*}
+    where $\lambda_i$ are eigenvalues of $X^{-1/2}VX^{-1/2}$ and therfore $g$ is concave in $t$ for any choice $X\succ0$ and $V$ hence $f$ is concave.  
+\end{remark}
+
+\begin{definition}{\textbf{(Extended Value Extension)}}
+    The extended value extension $\tilde{f}$ of $f$ is:
+    \begin{itemize}
+        \item $\tilde{f}(x)=f(x)$ if $x\in\operatorname{dom}(f)$
+        \item $\tilde{f}(x)=\infty$ if $x\not\in\operatorname{dom}(f)$
+    \end{itemize}
+    This would simplify the notation. The condition:
+    \begin{equation*}
+        0\le\theta\le1 \implies \tilde{f}(\theta x + (1-\theta)y) \le\theta\tilde{f}(x) + (1-\theta)\tilde{f}(y)
+    \end{equation*}
+    as the inequality in $\mathbb{R}\cup\{\infty\}$ means the same. The domain $f$ is convex.
+\end{definition}
+
+\begin{proposition}{\textbf{(Differentiable)}}
+    $f$ is differentiable if $\operatorname{dom}(f)$ is open and the gradient:
+    \begin{equation*}
+        \nabla f(x) = \bracka{\frac{\partial f(x)}{\partial x_1}, \cdots, \frac{\partial f(x)}{\partial x_n}}
+    \end{equation*}
+    exists at each $x\in\operatorname{dom}(f)$
+\end{proposition}
+
+\begin{lemma}
+    First order condition, a differentiable $f$ with convex domain $S$ is convex iff:
+    \begin{equation*}
+        f(y) \ge f(x) + \nabla f(x)^T(y-x) 
+    \end{equation*}
+    For all $x, y \in \operatorname{dom}(f)$. This means a first order approximation of $f$ is global underestimator.
+\end{lemma}
+
+\begin{definition}{\textbf{(Twice Differentiable)}}
+    If $f$ is twice differentiable, if $\operatorname{dom}(f)$ is open then Hessian:
+    \begin{equation*}
+        \nabla^2f(x)_{ij} = \frac{\partial^2 f(x)}{\partial x\partial y}
+    \end{equation*}
+    for $i, j = 1,\dots,n$ exists at each $x\in\operatorname{dom}(f)$.  
+\end{definition}
+
+\begin{lemma}
+    For twice differentiable $f$ with convex domain, $f$ is convex iff 
+    \begin{equation*}
+        \nabla^2f(x)\succeq0
+    \end{equation*}
+    for all $x\in\operatorname{dom}(f)$. If $\nabla^2f(x)\succ0$ for all $x \in \operatorname{dom}(f)$, then $f$ is strictly convex. Note that we can use it to calculate the convexity of the function. 
+\end{lemma}
+
+\begin{definition}{\textbf{($\boldsymbol{\alpha}$-sublevel Set)}}
+    $\alpha$-sublevel set of $f:\mathbb{R}^n\rightarrow \mathbb{R}$, which we have:
+    \begin{equation*}
+        C_\alpha = \Big\{ x\in\operatorname{dom}(f) \Big| f(x)\le\alpha \Big\}
+    \end{equation*}
+    A sublevel set of convex functions are convex but not the converse. 
+\end{definition}
+
+\begin{definition}{\textbf{(Epigraph)}}
+    The epigraph of $f:\mathbb{R}^n\rightarrow \mathbb{R}$:
+    \begin{equation*}
+        \operatorname{epi}(f) = \Big\{ (x, t)\in \mathbb{R}^{n+1} \Big| x\in\operatorname{dom}(f), f(x)\le t \Big\}
+    \end{equation*}
+    is $f$ is convex iff $\operatorname{epi}(f)$ is a convex set. 
+\end{definition}
+
+\begin{definition}{\textbf{(Jensen's Ineqality)}}
+    If $f$ is convex then for $0\le\theta\le1$, we have:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y) \le \theta f(x) + (1-\theta)f(y)
+    \end{equation*}
+    The extension if $f$ is convex then $f(\mathbb{E}[z]) \le \mathbb{E}[f(z)]$
+\end{definition}
+
+
+\subsection{Building Convex Functions}
+
+
+\begin{proposition}
+    We have the following opeartors on function that we can use for creating a new convex functions:
+    \begin{itemize}
+        \item Non-negative multiple $\alpha f$ is convex if $f$ is convex and $\alpha > 0$
+        \item Sum $f_1 + f_2$ is convex if $f_1$ and $f_2$ is convex. This can be extended to infinite sum or integral.
+        \item Composition with affine function $f(Ax + b)$ is convex if $f$ is convex.
+    \end{itemize}
+\end{proposition}
+
+\begin{proposition}
+    If $f_1,\dots,f_m$ are convex then:
+    \begin{equation*}
+        f(x) = \max\Big\{ f_1(x), \dots, f_m(x) \Big\}
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    If $f(x, y)$ is convex in $x$ for each $y\in\mathcal{A}$, then:
+    \begin{equation*}
+        g(x) = \sup_{y\in\mathcal{A}}f(x, y)
+    \end{equation*}
+    is convex.
+\end{proposition}
+
+\begin{proposition}
+    Composition of $g:\mathbb{R}^n\rightarrow \mathbb{R}$ and $h:\mathbb{R}\rightarrow \mathbb{R}$ where $f(x) = h(g(x))$. Then $f$ is convex if:
+    \begin{itemize}
+        \item $g$ is convex, $h$ is convex and $\tilde{h}$ is non-decreasing.
+        \item $g$ is concave, $h$ is convex and $\tilde{h}$ is non-increasing.
+    \end{itemize}
+\end{proposition}
+\begin{proof}
+    Let's consider when the case where $n=1$ and differentiable $g$ and $h$:
+    \begin{equation*}
+        f''(x) = h''(g(x))g'(x)^2 + h'(g(x))g''(x)
+    \end{equation*}
+    Monotonicity must hold extned value extensions $\tilde{h}$
+\end{proof}
+
+\begin{proposition}
+    Composition of $g:\mathbb{R}^n\rightarrow \mathbb{R}^k$ and $n : \mathbb{R}^k\rightarrow \mathbb{R}$:
+    \begin{equation*}
+        f(x) = h(g(x)) = h(g_1(x), \dots, g_k(x))
+    \end{equation*}
+    where we have, $f$ is convex: if 
+    \begin{itemize}
+        \item $g_i$ convex, $h$ convex, $\tilde{h}$ is non-decreasing.
+        \item $g_i$ concave, $h$ convex, $\tilde{h}$ is non-increasing.
+    \end{itemize}
+\end{proposition}
+\begin{proof}
+    For $n = 1$ and differentiable $g, h$:
+    \begin{equation*}
+        f''(x) = g'(x)^T\nabla^2 h(g(x))g'(x) + \nabla h(g(x))^Tg''(x)
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}
+    If $f(x, y)$ is convex in $(x, y)$ and $C$ is convex set then:
+    \begin{equation*}
+        g(x) = \inf_{y\in C} f(x, y)
+    \end{equation*}
+    is convex.
+\end{proposition}
+
+\begin{proposition}
+    The perspective of a function $f:\mathbb{R}^n\rightarrow \mathbb{R}$ is the functtion $g : \mathbb{R}^n\times \mathbb{R}\rightarrow \mathbb{R}$:
+    \begin{equation*}
+        g(x, y) = f(x/t)\cdot t
+    \end{equation*}
+    where $\operatorname{dom}=\brackc{(x, y) | x/t \in \operatorname{dom}(f), t>0}$. The $g$ is convex if $f$ is convex.
+\end{proposition}
+
+\subsection{Other Kinds of Convex Related Functions}
+
+\begin{definition}{\textbf{(Conjugate)}}
+    Conjugate of a function $f$ is $f^*(y) = \sup_{x\in\operatorname{dom}(f)}(y^Tx - f(x))$, then $f^*$ is convex even $f$ isn't.
+\end{definition}
+
+\begin{definition}{\textbf{(Quasi-Convex)}}
+    The function $f:\mathbb{R}^n\Rightarrow \mathbb{R}$ is quasi-convex if the domain of $f$ is convex and:
+    \begin{equation*}
+        S_\alpha = \Big\{ x \in \operatorname{dom}(f) \Big| f(x)\le\alpha \Big\}
+    \end{equation*}
+    are convex for all $\alpha$. $f$ is quasi-concave if $-f$ is quasi-convex. and $f$ is quasi-linear if $f$ is quasi-convex and quasi-concave.
+\end{definition}
+
+\begin{proposition}
+    Modified Jensen's inequalities: For quasi-convex $f$, and for $0\le\theta\le1$:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y) \le \max\brackc{f(x), f(y)}
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    For differentiable $f$ with convex domain is quasi-convex iff
+    \begin{equation*}
+        f(y)\le f(x) \implies \nabla f(x)^T(y-x)\le0
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}
+    Sum of Quasi-convex functions are not necessary quasi-convex.
+\end{remark}
+
+\begin{definition}{\textbf{(Log-Concave and Log-Convex Function)}}
+    A positive function $f$ is log concave if $\log f$ is concave:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y)\ge f(x)^\theta f(y)^{1-\theta}
+    \end{equation*}
+    for $0\le\theta\le1$, and $f$ is log convex if $\log f$ is convex. 
+\end{definition}
+
+\begin{proposition}
+    We have the following results for log-concave:
+    \begin{itemize}
+        \item Twice differentiable $f$ with convex function is $\log$ concave iff 
+        \begin{equation*}
+            f(x)\nabla^2 f(x) \preceq \nabla f(x)\nabla f(x)^T
+        \end{equation*}
+        for all $x\in\operatorname{dom}(f)$
+        \item Product of Log-Concave function is log-concave. 
+        \item Sum of log-concave function isn't always log-concave.
+        \item If $f:\mathbb{R}^n\times \mathbb{R}^m\rightarrow \mathbb{R}$ is log concave then:
+        \begin{equation*}
+            g(x) = \int f(x, y)\dby y
+        \end{equation*}
+        is log concave, if the integration exists.
+    \end{itemize}
+\end{proposition}
+
+\begin{proposition}
+    Convolution $f*g$ of log-concave function if $f, g$ is log-concave 
+    \begin{equation*}
+        (f*g)(x) = \int f(x-y)g(y)\dby y
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    If $C\subseteq \mathbb{R}^n$ is convex and $y$ is random variable with log-concave probability density function, then:
+    \begin{equation*}
+        f(x) = \operatorname{Prob}(x+y\in C)
+    \end{equation*}
+    is log-concave.
+\end{proposition}
+\begin{proof}
+    We write $f(x)$ as integral of product of log-concave function, where:
+    \begin{equation*}
+        f(x) = \int g(x + y) p(y)\dby y \qquad g(u) = \begin{cases}
+            1 & u\in C \\
+            0 & u\in C
+        \end{cases}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(K-Convex)}}
+    The function $f:\mathbb{R}^n\rightarrow \mathbb{R}^m$ is $K$-convex if $\operatorname{dom}(f)$ is convex and:
+    \begin{equation*}
+        f(\theta x + (1-\theta)y)\preceq_\mathcal{K}\theta f(x) + (1-\theta)f(y)
+    \end{equation*}
+    for $x, y\in\operatorname{dom}(f)$ and $0\le\theta\le1$. 
+\end{definition}
+
+\section{Convex Optimization Problems}
+
+\subsection{Introductions}
+
+\begin{definition}{\textbf{(Constraint Optimization Problem)}}
+    The constraint optimization is a problem of the form:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $x\in \mathbb{R}^n$ is optimization variable. $f_0:\mathbb{R}^n\rightarrow \mathbb{R}$ is the objective. $f_i : \mathbb{R}^n\rightarrow \mathbb{R}$ where $i=1,\dots,m$ be the inequality constraint function. Finally, $h_i:\mathbb{R}^n\rightarrow \mathbb{R}$ are equality constraint function. The optimal value is:
+    \begin{equation*}
+        p^* = \inf \Big\{ f_0(x) \Big| f_i(x)\le0, i=1,\dots,m, h_i(x)=0, i=1,\dots,p \Big\}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Feasibility)}}
+    We have the following definitions:
+    \begin{itemize}
+        \item $x$ is feasible if $x\in\operatorname{dom}(f_0)$ and it satisfies the constraints. 
+        \item A feasible $x$ is optimal if $f_0(x) = p^*$. 
+        \item $X_{\operatorname{opt}}$ is the set of optimal points.
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Local Optimal)}}
+    $x$ is locally local if there is $R>0$ such that $x$ is optimal for:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(z) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(z)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p \\
+            &\norm{z-x}_2\le R
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+\end{definition}
+
+\begin{definition}{\textbf{(Implicit Constraints)}}
+    The standard form of optimization problem has an implicit constrain:
+    \begin{equation*}
+        x \in \mathcal{D} = \bigcap^m_{i=0}\operatorname{dom}(f_i) \cap \bigcap^p_{i=1} \operatorname{dom} (h_i)
+    \end{equation*}
+    The constraints $f_i(x)\le0$ and $h_i(x) =0$ are called explicit constriants. The problem is unconstrained if there is no explicit constraints.
+\end{definition}
+
+\begin{definition}{\textbf{(Feasibility Problem)}}
+    We can consider a special case of general problem with $f_0(x) = 0$:
+    \begin{equation*}
+    \begin{aligned}
+        &\min 0 \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where if $p^* = 0$ then the constrains are feasible, and any feasible $x$ is optimal. However, if $p^*=\infty$ if constraints are infeasible.
+\end{definition}
+
+\begin{definition}{\textbf{(Standard Form of Convex Optimization Problem)}}
+    We have 
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &a^T_ix_i = b_i \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $f_0, f_1, \dots, f_n$ are convex, equality constraints are affine. 
+\end{definition}
+
+\begin{definition}{\textbf{(Quasi-Convex Problem)}}
+    A Quasi-Convex Problem is when $f_0$ is quasi-convex (and $f_1,\dots,f_n$ are convex.), and it is written as 
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &Ax=b \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    Any locally optimal point of a convex problem is (globally) optimal.
+\end{proposition}
+\begin{proof}
+    Suppose $x$ is locally optimal but there exists a feasible point $y$ with $f_0(y) < f_0(x)$. We see that $x$ is locally optimal means that there is an $R>0$ such that $z$ is feasible and
+    \begin{equation*}
+        \norm{z-x}_2\le R \implies f_0(z) \ge f_0(x)
+    \end{equation*}
+    We then consider $z = \theta y + (1-\theta) x$ with $\theta = R/(2\norm{y-x}_2)$. Since 
+    \begin{itemize}
+        \item $\norm{y-x}_2 > R$ so we need $0\le\theta\le1/2$.
+        \item $z$ is convex combination of feasible points $x$ and $y$, then $z$ is feasible. 
+        \item $\norm{z-x}_2 = R/2$ and 
+        \begin{equation*}
+            f_0(z) \le \theta f_0(y) + (1-\theta)f_0(x) < f_0(x)
+        \end{equation*}
+    \end{itemize}
+\end{proof}
+
+\begin{proposition}
+    $x$ is optimal iff it is feasible and
+    \begin{equation*}
+        \nabla f_0(x)^T(y-x) \ge 0
+    \end{equation*}
+    for all feasible $y$. If we have non-zero $\nabla f_0(x)$ we define a supporting hyperplane to feasible set $X$ at $x$.
+\end{proposition}
+
+\begin{definition}{\textbf{(Unconstrained Problem)}}
+    $x$ is optimal iff $x\in\operatorname{dom}(f_0)$ and $\nabla f_0(x) = 0$
+\end{definition}
+
+\begin{definition}{\textbf{(Equally Constraint Problem)}}
+    We have the following form:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            Ax = b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    $x$ is optimal iff there exists $\nu$ such that $x\in\operatorname{dom}(f)$. $Ax=b$ and $\nabla f_0(x) + A^T\nu = 0$
+\end{definition}
+
+\begin{definition}{\textbf{(Minimization Over Non-Negative Orthant)}}
+    We have the following form
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            x \succeq 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    $x$ is optimal iff $x\in\operatorname{dom}(f_0)$ and $x\succeq0$
+    \begin{equation*}
+        \begin{cases}
+            \nabla f_0(x)_i\ge0 & x_i=0 \\
+            \nabla f_0(x)_i=0 & x_i>0 \\
+        \end{cases}
+    \end{equation*}
+\end{definition}
+
+\subsection{Equivalent Convex Problems}
+
+\begin{proposition}{\textbf{(Eliminating Equality Constraints)}}
+    These 2 problems are equivalent as one of the the solution can be obtained from the solution of the other:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &Ax=b\\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This is equivalent to:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(Fz+x_0) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &f_i(Fz+x_0)\le0 \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $F$ and $x_0$ are such that:
+    \begin{equation*}
+        Ax = b \iff x = Fz + x_0 
+    \end{equation*}
+    for some $z$
+\end{proposition}
+
+\begin{proposition}{\textbf{(Introducing Equality Constraints)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(A_0x+b) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &f_i(A_ix+b_i)\le0 \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(y_0) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &f_i(y_i)\le0 \quad i=1,\dots,m \\
+            &y_i = A_ix+b_i \quad i=0,1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}{\textbf{(Introducing Slack Varaible for Linear Inequalities)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &a_i^Tx\le b_i \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to 
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &a_i^Tx +s_i = b_i \quad i=1,\dots,m \\
+            &s_i\ge0 \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    we minimize over $x$ and $s$
+\end{proposition}
+
+\begin{proposition}{\textbf{(Epigraph Form)}}
+    Standard Convex Problem is equivalent to 
+    \begin{equation*}
+    \begin{aligned}
+        &\min t \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &f_0(x)-t\le0 \\
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where we minimize over $x$ and $t$.
+\end{proposition}
+
+\begin{proposition}{\textbf{(Minimizer Over Some Variables)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x_1, x_2) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            f_i(x_1)\le0\quad i=1,\dots,m 
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to 
+    \begin{equation*}
+    \begin{aligned}
+        &\min \tilde{f}_0(x_1) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            f_i(x_1)\le0\quad i=1,\dots,m 
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $\tilde{f}_0(x_1) = \inf_{x_2}f_0(x_1,x_2)$
+\end{proposition}
+
+\begin{proposition}
+    If $f_0$ is quasi-convex then there exists a famility of functions $\phi_t$ such that: 
+    \begin{itemize}
+        \item $\phi_t(x)$ is convex in $x$ for fixed $t$ 
+        \item $t$-sublevel set of $f_0$ is $0$-sublevel set of $\phi_t$:
+        \begin{equation*}
+            f_0(x)\le t \iff \phi_t(x) \le 0
+        \end{equation*}
+    \end{itemize}
+\end{proposition}
+
+\begin{remark}
+    The example of this is:
+    \begin{equation*}
+        f_0 = \frac{p(x)}{q(x)}
+    \end{equation*}
+    where if $p$ is convex and $q$ is concave, and $p(x)\ge0$ and $q(x)>0$ on $\operatorname{dom}(f_0)$, we can take $\phi_t(x) = p(x) - tq(x)$
+    \begin{itemize}
+        \item For $t\ge0$, $\phi_t$ is convex in $x$
+        \item $p(x)/q(x)\le t$ iff $\phi_t(x)\le0$
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Bisection Method For Quasi-Convex Optimization)}}
+    We can consider the feasibility problem, where we have:
+    \begin{equation*}
+        \phi_t(x)\le0 \qquad f_i(x)\le0 \qquad Ax=b
+    \end{equation*}
+    Then we can see that, for a fixed $t$, a convex feasibility problem implies: 
+    \begin{itemize}
+        \item If feasible then $t\ge p^*$
+        \item Otherwise $t\le p^*$
+    \end{itemize}
+    which leads to binary search-like problem, where:
+    \begin{algorithm}[H]
+        \caption{Bisection Method For Quasi-Convex Optimization}
+        \begin{algorithmic}[1]
+            \State \textbf{Input: } $l\le p^*$ and $u\ge p^*$ and Tolerance $\varepsilon>0$
+            \While{Until Convergence}
+                \State $t = (t+u)/2$
+                \State Solve the convex feasibility problem
+                \If{It is Feasible}
+                    \State u = t
+                \Else
+                    \State l = t
+                \EndIf
+            \EndWhile
+    	\end{algorithmic} 
+    \end{algorithm}
+    This requires exactly $\lceil \log_2((u-l)/\varepsilon)\rceil$ iterations, when $u$ and $l$ are intial values. 
+\end{definition}
+
+\subsection{Types of Convex Problems}
+
+\begin{definition}{\textbf{(Linear Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx+d \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Gx\preceq h\\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    It is an convex problem with affine objective and constraint functions. Feasible set is polyhedron.
+\end{definition}
+
+\begin{remark}
+    The notable problem of LP is Chebshev center of polyhedron, where the Chebshev center of $\mathcal{P} = \brackc{x | a^T_i x\le b_i, i=1,\dots,m}$ is the center of largest inscribed ball $B = \brackc{x_c + u | \norm{u}_2\le r}$. Note that $a_i^Tx\le b$ for all $x\in B$ iff 
+    \begin{equation*}
+        \sup \Big\{ a^T_i(x_c+u) \Big| \norm{u}_2\le r \Big\} = a^T_ix_c + r\norm{a_i}_2\le b_i
+    \end{equation*}
+    Hence, the $x_c$ and $r$ can be determined by:
+    \begin{equation*}
+    \begin{aligned}
+        &\max r \\
+        &\text{ subject to } \begin{aligned}[t]
+            &a_i^Tx_c + r\norm{a_i}_2\le b_i \text{ for } i=1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Linear Fractional Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min \frac{c^Tx+d}{e^Tx+f} \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Gx\preceq h\\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $\operatorname{dom}(f_0) = \brackc{x | e^Tx + f > 0}$. This is a quasi-convex optimization, which can be solved by Bisection method. Note that it is equivalent to LP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Ty + dz \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Gy\preceq hz\\
+            &Ay=bz\\
+            &e^Ty+fz=1 \\
+            &z\ge0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Generalized Fractional Program)}}
+    where we have
+    \begin{equation*}
+        f_0(x) = \max_{i=1,\dots,r}\frac{c_i^Tx+d_i}{e^T_ix+f_i}
+    \end{equation*}
+    where $\operatorname{dom}(f_0) = \brackc{x | e_i^Tx + f_i > 0 ; i=1,\dots,r}$. This is also quasi-convex problem, which can be solved by Bisection
+\end{definition}
+
+
+\begin{definition}{\textbf{(Quadratic Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min (1/2)x^TPx + q^Tx + r \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Gx\preceq h\\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $P \in \mathbb{S}^n_+$, therefore,the objective is convex. The examples of quadratic program is least square problem. 
+\end{definition}
+
+\begin{definition}{\textbf{(Linear Program with Random Cost)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min \bar{c}^Tx + \gamma x^T\Sigma x = \mathbb{E}[c^Tx] + \gamma \operatorname{var}(c^Tx) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Gx\preceq h\\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    We have $c$ as as random variable with a mean of $\bar{c}$ and covariance of $\Sigma$, given this we have $c^Tx$ being a random variable with a mean of $c^Tx$ and covarance $x^T\Sigma x$. Fianlly, $\gamma>0$ is risk aversion paramter, which controls the trade-off between expected cost and risk.
+\end{definition}
+
+\begin{definition}{\textbf{(Quadratic Constrained Quadratic Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min \frac{1}{2}x^TP_0x + q_0^Tx + r_0 \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\frac{1}{2}x^TP_ix + q_i^Tx + r_i \le 0 \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $P_i\in\mathbb{S}^n_+$ where objective and constraints are convex quadratic. If $P_1,\dots,P_m\in\mathcal{S}^n_{++}$ feasible region is intersection of $m$ ellipsoid and an affine set. 
+\end{definition}
+
+\begin{definition}{\textbf{(Second Order Cone Programming)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\norm{A_ix+b_i}_2 \le c_i^Tx+d_i \quad i=1,\dots,m \\
+            &Fx=g
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $A_i\in \mathbb{R}^{n_i\times n}$ and $F\in \mathbb{R}^{p\times n}$. The inequalities are called second order cone constraints: $(A_ix+b_i, c_i^Tx+d_i)$ is in second order cone in $\mathbb{R}^{n_i+1}$. For $n_i=0$, reduces to an LP if $c_i=0$ reduces to QCQP. 
+\end{definition}
+
+\begin{remark}
+    The parameter in the optimization problem are often constraint, for example, in LP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &a_i^Tx\le b_i \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    as there exists an uncertainty in $c, a_i, b_i$. 
+\end{remark}
+
+\begin{definition}{\textbf{(Deterministic Robust Linear Programming)}}
+    We can constrain the paramter that must holds for all $a_i\in\mathcal{E}_i$ where:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &a_i^Tx\le b_i \quad \forall a_i\in\mathcal{E}_i \quad i=1,\dots,m \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Stochastic Robust Linear Programming)}}
+    We have $a_i$ as random variables. The constrains must hold with probability $\eta$:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\text{Prob}(a^T_ix\le b_i)\ge\eta \quad i=1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    We choose an Ellipsoid $\mathcal{E}_i$: 
+    \begin{equation*}
+        \mathcal{E}_i = \brackc{\bar{a}_i + P_iu \big| \norm{u}_2\le1}
+    \end{equation*}
+    The center is $\bar{a}_i$ with the semi-axis is determined by singular value of $P_i$. Then the deterministic robust LP (with constraint $\mathcal{E}_i$) is equivalent to:  
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &\bar{a}^T_ix + \norm{P_i^T x}_2 \le b_i \quad i=2,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This follows from 
+    \begin{equation*}
+        \sup_{\norm{u}_2\le1} \bracka{\bar{a}_i + P_iu}^Tx = \bar{a}^T_ix+\norm{P^T_ix}_2
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    Assume $a_i$ is Guassian with mean $\bar{a}_i$ and covarance $\bar{\Sigma}_i$. We can see that $a_i^Tx$ is Gaussian with mean of $\bar{a}^T_ix$ variance $x^T\Sigma_ix$ hence, we have:
+    \begin{equation*}
+        \operatorname{Prob}\bracka{a_i^Tx \le b_i} = \Phi\bracka{\frac{b_i - a_i^{-T}x_i}{\norm{\Sigma^{1/2}_ix}_2}}
+    \end{equation*}
+    where $\Phi$ is CDF with $\norm{N}(0, 1)$. Given the stochastic robust LP with $\eta\ge1/2$ is equivalent to SOCP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &\bar{a}^T_ix + \Phi^{-1}(\eta)\norm{\Sigma^{1/2}_ix}_2\le b_i \quad i =1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{definition}{\textbf{(Monomial Function)}}
+    Monomial function is fuction of the form:
+    \begin{equation*}
+        f(x) = cx^{a_1}_1cx^{a_2}_2\cdots x^{a_n}_n
+    \end{equation*}
+    where $\operatorname{dom} f \in \mathbb{R}^n_{++}$ with $c>0$, the exponent $a_i$ can be any real number. Note that this can be transformed to:
+    \begin{equation*}
+        \log f(e^{y_1},\dots,e^{y_n}) = a^Ty+b
+    \end{equation*}
+    where $b = \log c$
+\end{definition}
+
+\begin{definition}{\textbf{(Posynomial Function)}}
+    Posynomial function is sum of monomials:
+    \begin{equation*}
+        f(x) = \sum^K_{k=1}c_kx^{a_{1k}}_1 x^{a_{2k}}_2\cdots x^{a_{nk}}_n
+    \end{equation*}
+    where $\operatorname{dom} f \in \mathbb{R}^n_{++}$. This can be transformed to:
+    \begin{equation*}
+        \log f(e^{y_1},\dots,e^{y_n}) =\log\bracka{\sum^K_{k=1}\exp(a_k^Ty+b_k)}
+    \end{equation*}
+    where $b_k = \log c_k$.
+\end{definition}
+
+\begin{definition}{\textbf{(Geometric Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le1 \quad i=1,\dots,m \\
+            &h_i(x)=1 \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    with $f_i$ is posynomial and $h_i$ is monomial. This can be transformed t oconvex problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min \log\bracka{\sum^K_{k=1}\exp\bracka{a_{0k}^Ty+b_{0k}}} \\
+        &\text{such that } \begin{aligned}[t]
+            &\log \bracka{\sum^K_{k=1}\exp\bracka{a_{ik}^Ty+b_{ik}}} \le 0 \\
+            &Gy+d = 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Perron-Frobenius Eigenvalue)}}
+    This exists in (element-wise) positive $A\in \mathbb{R}^{n\times n}$. It is defined as real, positive eigenvalue of $A$ to spectral radius $\max_i\abs{\lambda_i(A)}$. Note that this determines asymptotic growth/decay rate of $A^k$ as $A^k\sim\lambda^k_\text{pf}$ as $k\rightarrow\infty$. The alternate characterization:
+    \begin{equation*}
+        \lambda_{\operatorname{pf}}(A) = \inf\brackc{\lambda | Av\preceq\lambda v \text{ for some } v\succ0}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    We want to minimize $\lambda_{\operatorname{pf}}(A(x))$ where $A(x)_{ij}$ are posynomial of $x$. This is equivalent to geometric program:
+    \begin{equation*}
+    \begin{aligned}
+        &\min \lambda \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\sum^n_{j=1}A(x)_{ij}v_j/(\lambda v_i)\le1 \quad i=1,\dots,n
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where the variables are $\lambda, v, x$.
+\end{remark}
+
+\begin{definition}{\textbf{(Generalize Inequality Constraints)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\preceq_{K_i}0 \quad i = 1,\dots,m \\
+            &Ax = b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    where $f_0:\mathbb{R}^n\rightarrow \mathbb{R}$ convex and $f_i:\mathbb{R}^n\rightarrow \mathbb{R}^{k_i}$ is $K_i$-convex with respected to proper cone $K_i$. This has the same properties as standard convex optimization problem (convex feasible set, local optimum is global etc.)
+\end{definition}
+
+\begin{definition}{\textbf{(Conic Form Problem)}}
+    Special case with affine objective and constraints:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Fx+g\preceq_K0 \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This extends linear programming (when $K=\mathbb{R}^m_+$) to non-polyhedron cones.
+\end{definition}
+
+\begin{definition}{\textbf{(Semi-Definite Program)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &x_1F_1+x_2F_2+\dots+x_nF_n+G\prec0\\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    with $F_i, G\in\mathbb{S}^k$. This ineqality constraints is called linear matrix ineqality (LMI). By having problems with multiple LMI contraints, for example:
+    \begin{equation*}
+    \begin{aligned}
+        &x_1\hat{F}_1 + \cdots + x_n\hat{F}_n + \hat{G}\preceq0 \\
+        &x_1\tilde{F}_1 + \cdots + x_n\hat{F}_n + \tilde{G}\preceq0 \\
+    \end{aligned}
+    \end{equation*}
+    is equivalent to single one:
+    \begin{equation*}
+        x_1\begin{bmatrix}
+            \hat{F}_1 & 0 \\
+            0 & \tilde{F}_1 \\
+        \end{bmatrix}
+        +x_2\begin{bmatrix}
+            \hat{F}_2 & 0 \\
+            0 & \tilde{F}_2 \\
+        \end{bmatrix} + \cdots + 
+        x_n\begin{bmatrix}
+            \hat{F}_n & 0 \\
+            0 & \tilde{F}_n \\
+        \end{bmatrix} + 
+        \begin{bmatrix}
+            \hat{G}& 0 \\
+            0 & \tilde{G} \\
+        \end{bmatrix}
+        \preceq 0
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    Given the LP program: 
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &Ax\preceq b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to SDP program:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &\operatorname{diag}(Ax-b)\preceq0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    Given SOCP
+    \begin{equation*}
+    \begin{aligned}
+        &\min f^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &\norm{A_ix+b_i}_2\le c_i^Tx+d_i \quad i=1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to the following SDP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f^Tx \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            \begin{bmatrix}
+                (c_i^Tx+d_i)I & A_ix+b_i \\
+                A_ix+b_i & c_i^Tx+d_i
+            \end{bmatrix} \succeq 0 \quad i=1,\dots,m
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{proposition}
+    Given the eigenvalue minimization problem: 
+    \begin{equation*}
+        \min \lambda_{\operatorname{max}}(A(x))
+    \end{equation*}
+    where $A(x) = A_0 + x_1A_1+\dots+x_nA_n$ with given $A_i\in \mathbb{S}^k$. This is equivalent SDP, where:
+    \begin{equation*}
+    \begin{aligned}
+        &\min t \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &A(x)\preceq tI
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    with the variable $x\in \mathbb{R}^n$ and $t\in \mathbb{R}$. This follows from $\lambda_{\operatorname{max}}(A)\le t$ iff $A \preceq tI$
+\end{proposition}
+
+\begin{proposition}
+    Given the matrix norm minimization problem: 
+    \begin{equation*}
+        \min\norm{A(x)}_2 = \bracka{\lambda_{\max}(A(x)^TA(x))}^{1/2}
+    \end{equation*}
+    where $A(x) = A_0 + x_1A_1+\dots+x_nA_n$ is equivalent to:
+    \begin{equation*}
+    \begin{aligned}
+        &\min t \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            \begin{bmatrix}
+                tI & A(x) \\
+                A(x) & tI
+            \end{bmatrix} \succeq 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Given the variabble $x\in \mathbb{R}^n$ and $t\in \mathbb{R}$. We have the constraint follows from:
+    \begin{equation*}
+    \begin{aligned} 
+        \norm{A}_2 \le t &\iff A^TA \preceq t^2I \quad t\ge0 \\
+        &\iff \begin{bmatrix}
+            tI & A \\
+            A^T & tI
+        \end{bmatrix} \succeq 0
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\subsection{Vector Optimization Problem}
+
+\begin{definition}{\textbf{(General Vector Optimization Problem)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{such that } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The minimization with respected to $K$. We have vector objective $f_0:\mathbb{R}^n\rightarrow \mathbb{R}^q$ minimized with respected to propert cone $K\in \mathbb{R}^q$.
+\end{definition}
+
+\begin{definition}{\textbf{(Convex Vector Optimization Problem)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{such that } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    with $f_0$ is $K$-convex and $f_1,\dots,f_m$ are convex. 
+\end{definition}
+
+\begin{definition}{\textbf{(Optimality)}}
+    Set of achievable objective vectors $\mathcal{O} = \brackc{f_0(x) | x \text{ feasible} }$:
+    \begin{itemize}
+        \item The feasible $x$ is optimal if $f_0(x)$ is minimum value of $\mathcal{O}$
+        \item The feasible $x$ is pareto optimal if $f_0(x)$ is minimal value of $\mathcal{O}$
+    \end{itemize}
+\end{definition}
+
+\begin{remark}
+    The vector optimization problem with $K = \mathbb{R}^d_+$, where 
+    \begin{equation*}
+        f_0(x) = (F_1(x),\dots,F_q(x))
+    \end{equation*}
+    we have $q$ different objectives $F_i$, roughly, we want all $f_i$ to be small. Then the notion of optimality becomes:
+    \begin{itemize}
+        \item The feasible $x^*$ is optimal if, $y$ is feasible:
+        \begin{equation*}
+            f_0(x^*) \preceq f_0(y)
+        \end{equation*}
+        If there exists an optimal point, then the object are non-competing.
+        \item The feasible $x^\text{po}$ is pareto optimal, if $y$ is feasible:
+        \begin{equation*}
+            f_0(y)\preceq f_0(x^\text{po}) \implies f_0(x^\text{po}) = f_0(y)
+        \end{equation*}
+        If there are multiple pareto optimal value, there is a trade-off between objective.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Scalarization)}}
+    To find a pareto optimal point, we can choose $\lambda\succeq_{K^*}0$ and have the following scalar problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min \lambda^Tf_0(x) \\
+        &\text{such that } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    If $x$ is optimal for scalar problem, then it is pareto optimal for vector optimization problems, we have:
+    \begin{equation*}
+        \lambda^Tf_0(x) = \lambda_1F_1(x) + \dots + \lambda_qF_q(x)
+    \end{equation*}
+    For convex vector optimization problem, we can find (almost) all Pareto optimal point by varying $\lambda\succ_{K^*}0$. 
+\end{definition}
+
+\section{Duality}
+
+\subsection{Lagragian}
+
+\begin{definition}{\textbf{(Lagragian)}}
+    Given a standard form of problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{such that } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &h_i(x)=0 \quad i=1,\dots,p
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Given the variable $x\in \mathbb{R}^n$, domain $D$, and optimal value $p^*$. We have Lagragian to be $L:\mathbb{R}^n\times \mathbb{R}^m\times \mathbb{R}^p \rightarrow \mathbb{R}$ with domain $L = D \times \mathbb{R}^m \times \mathbb{R}^p$:
+    \begin{equation*}
+        \mathcal{L}(x,\lambda, v) = f_0(x) + \sum^m_{i=1}\lambda_if_i(x) + \sum^p_{i=1}v_ih_i(x)
+    \end{equation*}
+    where we have:
+    \begin{itemize}
+        \item Weight sum of objective and constant functions.
+        \item $\lambda_i$ is lagragian multiple associated wth $f_i(x)\le0$
+        \item $v_i$ is lagragian multiple associated with $h_i(x)=0$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Dual Function)}}
+    The function $g:\mathbb{R}^m\times \mathbb{R}^D\rightarrow \mathbb{R}$:
+    \begin{equation*}
+    \begin{aligned}
+        g(\lambda, v) &= \inf_{x\in D}L(x,\lambda,v) \\
+        &= \inf_{x\in D}\bracka{ f_0(x) + \sum^m_{i=1}\lambda_i f_i(x) + \sum^p_{i=1}v_ih_i(x) }
+    \end{aligned}
+    \end{equation*}
+    Note that $g$ is concave and it can be $-\infty$ for some $\lambda, v$.
+\end{definition}
+
+\begin{proposition}
+    If $\lambda\succeq0$ then $g(\lambda, v)\le p^*$
+\end{proposition}
+\begin{proof}
+    If $\tilde{x}$ is feasible and $\lambda\succeq0$ then:
+    \begin{equation*}
+        f_0(\tilde{x}) \ge L(\tilde{x}, \lambda, v) \ge \inf_{x\in D} L(x,\lambda, v) = g(\lambda, v)
+    \end{equation*}
+    The minimizing over all feasible $\tilde{x}$ gives $p^*\ge g(\lambda, v)$
+\end{proof}
+
+\begin{remark}
+    The least norn solution for linear equation, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\min x^Tx \\
+        &\text{such that } \begin{aligned}[t]
+            &Ax = b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The lagragian is given by $L(x, v) = x^Tx + v^T(Ax-b)$. Let's try to minimize the Lagragian by finding the gradient with respected to $x$:
+    \begin{equation*}
+        \nabla_x L(x, v) = 2x + A^Tv = 0 \implies x = -(1/2)A^Tv
+    \end{equation*}
+    Plugging back to $L$ gives us:
+    \begin{equation*}
+        g(v) = L( -(1/2)A^Tv, v) = -\frac{1}{4}v^TAA^Tv - b^Tv
+    \end{equation*}
+    and it is concave function of $v$. Furtheremore, the lower bound is $p^*\ge -\frac{1}{4}v^TAA^Tv - b^Tv$ for all $v$. 
+\end{remark}
+
+\begin{remark}
+    If we consider the standard form of LP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{such that } \begin{aligned}[t]
+            &Ax = b \\
+            &x\succeq 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The Lagragian is:
+    \begin{equation*}
+    \begin{aligned}
+        L(x, \lambda, v) &= c^Tx + v^T(Ax-b) + x^Tx \\ 
+        &= -b^Tv + (c+A^Tv-\lambda)^T x
+    \end{aligned}
+    \end{equation*}
+    Note that if $L$ is affine in $x$, then we have:
+    \begin{equation*}
+        g(\lambda, v) = \inf_x L(x, \lambda, v) = \begin{cases}
+            -b^Tv &\text{ if } A^Tv - \lambda + c = 0 \\
+            -\infty &\text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Note that $g$ is linear on affine domain $\{ (\lambda, v) | A^Tv - \lambda + c = 0 \}$, hence concave. Now, the lower bound property: $p^*\ge-b^Tv$ if $A^Tv + c\succeq0$
+\end{remark}
+
+\begin{remark}
+    Given the equality constrained norm minimization:
+    \begin{equation*}
+    \begin{aligned}
+        &\min \norm{x} \\
+        &\text{such that } \begin{aligned}[t]
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The dual function is 
+    \begin{equation*}
+        g(v) = \inf_x\norm{x} - v^TAx+b^Tv = \begin{cases}
+            b^Tv & \text{ if } \norm{A^Tv}_* \le 1 \\
+            -\infty & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    where $\norm{v}_* = \sup_{\norm{u}\le1}u^Tv$ is dual norm of $\norm{\cdot}$. With the lower bound property: $p^*\ge b^Tv$ if $\norm{A^Tv}_*\le1$
+\end{remark}
+
+\begin{proposition}
+    We have $\inf_x\norm{x} - y^Tx = 0$ if $\norm{y}_*\le1$ and $-\infty$ otherwise.
+\end{proposition}
+\begin{proof}
+    Then, we have:
+    \begin{itemize}
+        \item If $\norm{y}_*\le1$ then $\norm{x}-y^Tx\ge0$ for all $x$ with equality if $x\ge0$
+        \item If $\norm{y}_*>1$ choose $x=tu$ where $\norm{u}\le1$ and $u^Ty = \norm{y}_*>1$:
+        \begin{equation*}
+            \norm{x}-y^Tx = t(\norm{u} - \norm{y}_*) \rightarrow -\infty
+        \end{equation*} 
+        as $t\rightarrow\infty$. 
+    \end{itemize}
+\end{proof}
+
+\begin{definition}{\textbf{(Two-Way Partitioning)}} 
+    Given the two way partitioning:
+    \begin{equation*}
+    \begin{aligned}
+        &\min x^TWx \\
+        &\text{such that } \begin{aligned}[t]
+            &x^2_i=1 \quad i=1,\dots,n
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    This is non-convex problem with a feasible set contains $2^n$ discrete points. The interpretation is partition $\{ 1,\dots,n \}$ in $2$ sets. Given the weight $W_{ij}$ is the cost assigning $ij$ into same set and $-W_{ij}$ is the const of defining a different set.
+\end{definition}
+
+\begin{remark}
+    The dual function of two-way partitioning is:
+    \begin{equation*}
+    \begin{aligned}
+        g(v) &= \inf_x \bracka{x^TWx + \sum_i v_i(x^2_i-1)} = \inf_x x^T(W + \operatorname{diag}(v))x - 1^Tv \\
+        &=\begin{cases}
+            -1^Tv & \text{ if } w + \operatorname{diag}(v)\succeq0\\
+            -\infty & \text{ otherwise }
+        \end{cases}
+    \end{aligned}
+    \end{equation*}
+    Now we have lower bound property $p^*\ge-1^Tv$ if $W+\operatorname{diag}(v)\succeq0$
+\end{remark}
+
+\begin{proposition}
+    We have linear programming problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{\emph{ such that }} \begin{aligned}[t]
+            &Ax\preceq b \\
+            &Cx=d
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    Now, consider the dual function:
+    \begin{equation*}
+    \begin{aligned}
+        g(\lambda, v) &= \inf_{x\in\operatorname{dom}f_0} \Big( f_0(x) + (A^T\lambda + C^Tv)^Tx - b^T\lambda - d^Tv \Big) \\
+        &= -f^*_0(-A^T\lambda - C^Tv) - b^T\lambda - d^Tv
+    \end{aligned}
+    \end{equation*}
+    recall the definition of conjugate function $f^*(\cdot)$. The dual if conjugate of $f_0$ is known. 
+\end{proposition}
+
+\begin{remark}
+    The example of entropy maximization, we have:
+    \begin{equation*}
+        f_0(x) = \sum^n_{i=1}x_i\log x_i \qquad f^*(x) = \sum^n_{i=1}\exp(y_i-1)
+    \end{equation*} 
+\end{remark}
+
+\subsection{Dual Problems}
+
+\begin{definition}{\textbf{(Lagragian Dual Problem)}}
+    We have the following problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min g(\lambda, v) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\lambda\succeq0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    We find the lower bound on $p^*$ to obtained from Lagragian dual function. Optimal value denote $d^*$. $\lambda, v$ are dual feasible if $\lambda\succeq0$ where $(\lambda, v)\in\operatorname{dom}(g)$. We often simplify by making the implicit constrain $(\lambda, v)\in\operatorname{dom}(g)$ explicit.
+\end{definition}
+
+\begin{definition}{\textbf{(Weak/Strong-Duality)}}
+    We consider $2$ cases:
+    \begin{itemize}
+        \item If we have $d^*\le p^*$, this always hold. It can be used to find non-trivial lower bound for difficult problem. 
+        \item Otherwise $d^*=p^*$, this doesn't hold in general. We usually hold for convex problem. The conditions that gurantee that gurantee strong duality in convex problem is called constriant qualificaition.
+    \end{itemize}
+\end{definition}
+
+\begin{remark}
+    For example, solving the SDP:
+    \begin{equation*}
+    \begin{aligned}
+        &\min -1^Tv \\
+        &\text{ subject to } \begin{aligned}[t]
+            &w+\operatorname{diag}(v)\succeq0 \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    gives a lower bound for $2$ ways partitioning problem 
+\end{remark}
+
+\begin{definition}{\textbf{(Slater's Constraint Qualification)}}
+    The strong duality holds for convex problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &Ax=b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    if it is strictly feasible: there exists $x\in\operatorname{int}(D)$
+    \begin{equation*}
+        f_i(x)< 0 \quad i =1,\dots,m \quad Ax = b
+    \end{equation*}
+    Guarantee that the dual optimum is attained (if $p^*>\infty$). Note that this can be sharpen: $\operatorname{int}(D)$ can be replaced with $\operatorname{relint}(D)$. There exists other types of constraint qualificaition.
+\end{definition}
+
+\begin{remark}{\textbf{(Linear Programming)}}
+    Now, we have inequality for Linear Programming: The primal problem is:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax\preceq b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    Together with the dual function: 
+    \begin{equation*}
+        g(\lambda) = \inf_x((c+ A^T\lambda)^Tx-b^T\lambda) = \begin{cases}
+            -b^T\lambda &\text{ if } A^T\lambda + c = 0 \\
+            -\infty &\text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    Now, the dual problem is:
+    \begin{equation*}
+    \begin{aligned}
+        &\min -b^T\lambda \\
+        &\text{ subject to } \begin{aligned}[t]
+            &A^T\lambda + c = 0 \\
+            &\lambda\succeq0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    From Slanter's Constraint, $p^*=d^*$ if $A\tilde{x}\prec b$ for some $\tilde{x}$. In fact $p^*=d^*$ except when primal and dual are infeasible. 
+\end{remark}
+
+\begin{remark}{\textbf{(Quadratic Program)}}
+    For quadratic program, where we have primal problem (assuming $P\in\mathbb{S}^n_{++}$):
+    \begin{equation*}
+    \begin{aligned}
+        &\min x^TPx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax\preceq b
+        \end{aligned}
+    \end{aligned}
+    \end{equation*} 
+    The dual function:
+    \begin{equation*}
+        g(\lambda) = \inf_x (x^TPx + \lambda^T(Ax-b)) = -\frac{1}{4}\lambda^TAP^{-1}A^T\lambda - b^T\lambda
+    \end{equation*}
+    This we have the dual problem to be:
+    \begin{equation*}
+    \begin{aligned}
+        &\min -\frac{1}{4}\lambda^TAP^{-1}A^T\lambda - b^T\lambda \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\lambda\succeq0
+        \end{aligned}
+    \end{aligned}        
+    \end{equation*}
+    From Slater condition $p^*=d^*$ if $A\tilde{x}\prec b$ for some $\tilde{x}$ in fact $p^*=d^*$ always.
+\end{remark}
+
+\begin{remark}{\textbf{(Non-Convex Problem with Strong Duality)}}
+    We have the following non-convex problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min x^TAx + 2b^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &x^Tx\le1
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    when $A\not\succeq0$ is non-convex. Given a dual function:
+    \begin{equation*}
+        g(\lambda) = \inf_x (x^T(A+\lambda I)x + 2b^Tx - \lambda)
+    \end{equation*}
+    The undbounded below if $A+I\lambda\not\succeq0$ or $A+I\lambda\succeq0$ and $b\not\in\mathcal{R}(A+I\lambda)$, where it is linear combination of columns. This is minimized by $x=-(A+\lambda I)^\dagger b$ and $g(\lambda)= -b^T(A+I\lambda)^\dagger b-\lambda$. Now the dual problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min -b^T(A+I\lambda)^\dagger b - \lambda \\
+        &\text{ subject to } \begin{aligned}[t]
+            &A+\lambda I \succeq 0 \\
+            &b\in\mathcal{R}(A+I\lambda)
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    is equivalent to:
+    \begin{equation*}
+    \begin{aligned}
+        &\min -t - \lambda \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\begin{bmatrix}
+                A+I\lambda & b \\
+                b^T & t
+            \end{bmatrix}\succeq 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    We can have strong duality although the primal problem isn't convex. 
+\end{remark}
+
+\begin{definition}{\textbf{(Complementary Slackness)}}
+    Assume strong duality holds, $x^*$ is primal optimal $(\lambda^*, v^*)$ is dual optimal:
+    \begin{equation*}
+    \begin{aligned}
+        f_0(x^*) = g(\lambda^*, v^*) &= \inf_x\bracka{ f_0(x) + \sum^m_{i=1} \lambda^*_if_i(x) + \sum^p_{i=1}v_i^*h_i(x) } \\
+        &\le f_0(x^*) + \sum^m_{i=1}\lambda^*_i f_i(x^*) + \sum^n_{i=1}v^*h_i(x^*) \\
+        &\le f_0(x^*)
+    \end{aligned}
+    \end{equation*}
+    Hence the $2$ inequalities hold with equality, if:
+    \begin{itemize}
+        \item $x^*$ minimizes $L(x,\lambda^*, v^*)$ 
+        \item $\lambda^*_if_i(x^*) = 0$ for $i=1,\dots,m$ (known as complementatry slackness):
+        \begin{equation*}
+        \begin{aligned}
+            &\lambda^*_i>0 \implies f_i(x^*)=0 \\
+            &f_i(x^*)<0 \implies \lambda_i^*=0 \\
+        \end{aligned}
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(KKT Condtion)}}
+    The following $4$ conditions are called KKT condition (for a problem with differentiable $f_i$ and $h_i$):
+    \begin{itemize}
+        \item Primal constraints: 
+        \begin{equation*}
+        \begin{aligned}
+            &f_i(x)\le0 \text{ for } i=1,\dots,m \\ 
+            &h_i(x)=0 \text{ for } i = 1,\dots,p 
+        \end{aligned} 
+        \end{equation*}
+        \item Dual Constraints $\lambda\succeq0$
+        \item Complementary Slackness: $\lambda_if_i(x) = 0$ for $i=1,\dots,m$
+        \item Gradient of Lagragian with respected to $x$ vanishes:
+        \begin{equation*}
+            \nabla f_0(x) + \sum^m_{i=1}\lambda_i\nabla f_i(x) + \sum^n_{i=1}v_i\nabla h_i(x) = 0
+        \end{equation*}
+    \end{itemize}
+    The strong duality holds and $x,\lambda,v$ are optimal, then it must satisfy KKT condition. 
+\end{definition}
+
+\begin{proposition}
+    If $\tilde{x}, \tilde{\lambda}, \tilde{v}$ satisfy KKT for convex problem, when they are optimal: 
+    \begin{itemize}
+        \item From complementatry slackness: $f_0(\tilde{x}) = L(\tilde{x}, \tilde{\lambda}, \tilde{v})$
+        \item From the forth condition and convexity: $g(\tilde{\lambda}, \tilde{v}) = L(\tilde{x}, \tilde{\lambda}, \tilde{v})$
+    \end{itemize}
+    hence $f_0(\tilde{x}) = g(\tilde{\lambda}, \tilde{v})$
+\end{proposition}
+
+\begin{proposition}
+    If slanter's condition is satisfied: $x$ is optimal iff $\lambda, v$ that satisfies KKT condition:
+    \begin{itemize}
+        \item Recall that slanter implies strong duality and dual optimal is allowed. 
+        \item The generalies optimality condition $\nabla f(x) = 0$ for unconstrained problems.
+    \end{itemize}
+\end{proposition}
+
+\begin{remark}
+    Perturbation and Sensitivity analysis. Consider unperturbed optimization problem and its dual:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le0 \quad i=1,\dots,m \\
+            &q_i(x)=0 \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Its dual is:
+    \begin{equation*}
+    \begin{aligned}
+        &\max g(\lambda,\nu) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\lambda \succ0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Now, the perturbed problem and its dual is:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x)\le u_i \quad i=1,\dots,m \\
+            &g_i(x)= v_i \quad i=1,\dots,p \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    and its dual is:
+    \begin{equation*}
+    \begin{aligned}
+        &\max g(\lambda, \nu) - u^T\lambda - v^T\nu \\
+        &\text{ subject to } \begin{aligned}[t]
+            &\lambda\succeq0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    We have:
+    \begin{itemize}
+        \item $x$ as primal variable and $u, \nu$ are parameters. 
+        \item $p^*(u, v)$ is optimal value as a function of $u,v$
+        \item We are interested about $p^*(u, v)$ that we can obtain from the solution of unperturbed problems and its dual.
+    \end{itemize}
+    Assume strong duality holds for unperturbed problems and that $\lambda^*$ and $\nu$ are dual optimal for unperturbed problem.
+    \begin{equation*}
+    \begin{aligned}
+        p^*(u, v) &\ge g(\lambda, \nu^*) - u^T\lambda^* - v^T\nu^* \\ 
+        &=p^*(0,0) - u^T\lambda^* - v^T\nu^*
+    \end{aligned}
+    \end{equation*}
+    Given a statistical interpretation:
+    \begin{itemize}
+        \item If $\lambda_i^*$ is large, $p^*$ increases greatly if we tighten constraint $i$ ($u_i<0$)
+        \item If $\lambda_i^*$ is small, $p^*$ doesn't decrease much if we loosen constraint $i$ ($u_i\ge0$)
+        \item If $\nu^*$ is large and positive: $p^*$ increases greatly if we have $v_i<0$
+        \item If $\nu^*$ is large and negative: $p^*$ increases greatly if we have $v_i>0$
+        \item If $\nu^*$ is small and positive: $p^*$ doesn't decrease much if we take $v_i>0$ 
+        \item If $\nu^*_i$ is small and negative: $p^*$ doesn't decrease much if we take $v_i<0$
+    \end{itemize}
+\end{remark}
+
+\begin{lemma}
+    If $p^*(u, v)$ is differentiable at $(0,0)$ then:
+    \begin{equation*}
+        \lambda^*_i = \frac{\partial p^*(0,0)}{\partial u_i} \qquad \nu^*_i = -\frac{\partial p^*(0,0)}{\partial v_i}
+    \end{equation*}
+\end{lemma}
+\begin{proof}
+    For $\lambda^*_i$ from global sensitivity result:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial p^*(0,0)}{\partial u_i} = \lim_{t\searrow0}\frac{p^*(te_i, 0) - p^*(0,0)}{t} \ge -\lambda^*_i \qquad
+        \frac{\partial p^*(0,0)}{\partial u_i} = \lim_{t\nearrow0}\frac{p^*(te_i, 0) - p^*(0,0)}{t} \le -\lambda^*_i
+    \end{aligned}
+    \end{equation*}
+    Hence equality.
+\end{proof}
+
+\subsection{Techniques of Solving Dual Problems}
+
+\begin{remark}
+    We have an equivalent formulations of a problem can lead to very different duals. Reformulating the primal problem can be useful when the duals is difficult to derive. The common reformulations are:
+    \begin{itemize}
+        \item Introduces new variables and equality constrains 
+        \item Make explicit constraint implicit or vice versa
+        \item Transform object or constant functions: Replace $f_0(x)$ by $\phi(f_0(x))$ with $\phi$ convex and increasing.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(New Variable and Equality Contraint)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\max f_0(Ax+b) \\
+    \end{aligned}
+    \end{equation*}
+    This is dual function is constant $g=\inf_x L(x) = \inf_x f_)(Ax+b) = p^*$ but this is useless:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(y) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax+b-y=0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Now, its dual is 
+    \begin{equation*}
+    \begin{aligned}
+        &\max b^T\nu - f_0^*(\nu) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &A^T\nu = 0
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    As the dual function forms:
+    \begin{equation*}
+    \begin{aligned}
+        g(\nu) &= \inf_{x, y} (f_0(y) -\nu^Ty + \nu^TAx + b^T\nu) \\ 
+        &= \begin{cases}
+            -f_0^*(\nu) + b^T\nu & \text{ if } A^T\nu=0 \\
+            -\infty &\text{ otherwise }
+        \end{cases}
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Norm Approximation Problem)}}
+    We would like to minimize $\norm{Ax-b}$. This is the same as:
+    \begin{equation*}
+    \begin{aligned}
+        &\min \norm{y} \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax-b=y
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    We have the following dual function: 
+    \begin{equation*}
+    \begin{aligned}
+        g(\nu) &= \inf_{x, y}\Big( \norm{y} + \nu^Ty - \nu^TAx + b^T\nu \Big)\\
+        &= \begin{cases}
+            b^T\nu + \inf_x\Big( \norm{y} + \nu^Ty \Big) &\text{ if } A^T\nu\le1 \\
+            -\infty &\text{ otherwise } 
+        \end{cases} \\
+        &= \begin{cases}
+            b^T\nu &\text{ if } A^T\nu=0, \norm{\nu}_*\le1 \\
+            -\infty &\text{ otherwise }
+        \end{cases}
+    \end{aligned}
+    \end{equation*}
+    And, so we have dual of the norm approximation problem is:
+    \begin{equation*}
+    \begin{aligned}
+        &\max b^T\nu \\
+        &\text{ subject to } \begin{aligned}[t]
+            &A^T\nu=0 \\
+            &\norm{\nu}_*\le1
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Implicit Constraint)}}
+    Let's consider the linear programming with box constriants, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax = b \\
+            &-1\preceq x \preceq 1
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    And its dual is 
+    \begin{equation*}
+    \begin{aligned}
+        &\min -b^T\nu - 1^T\lambda_1 - 1^T\lambda_2 \\
+        &\text{ subject to } \begin{aligned}[t]
+            &c+A^T\nu + \lambda_1 - \lambda_2 \\
+            &\lambda_1\succeq0 \\
+            &\lambda_2\succeq0 \\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    However, we can simplify by reformulate the box constraint and make the constriant explicit: 
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) = \begin{cases}
+            c^Tx &\text{ if } -1\succeq x\succeq 1\\
+            \infty &\text{ otherwise }
+        \end{cases} \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Ax=b\\
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Now, the dual function becomes:
+    \begin{equation*}
+    \begin{aligned}
+        g(\nu) &= \inf_{-1\preceq x\preceq 1} c^Tx + \nu^T(Ax-b)\\ 
+        &=-b^T\nu - \norm{A^T\nu + c}_1
+    \end{aligned}
+    \end{equation*}
+    Now, the dual problem is equal to $\max -b^T\nu - \norm{A^T\mu +c}_1 $
+\end{definition}
+
+\begin{definition}{\textbf{(Problems with Generalized Inequalities)}}
+    We consider the following problem:
+    \begin{equation*}
+    \begin{aligned}
+        &\min f_0(x) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &f_i(x) \preceq_{K_i} 0 \quad i=1,\dots,m\\
+            &h_i(x) = 0 \quad i=1,\dots,p\\
+        \end{aligned}
+    \end{aligned}        
+    \end{equation*}
+    Where $\preceq_{K_i}$ of generalized inequality on $\mathbb{R}^{k_i}$. There are parallels to the scalar case:
+    \begin{itemize}
+        \item Lagragian multiplier for $f_i(x)\preceq_{K_i}0$ is a vector $\lambda_i\in \mathbb{R}^{K_i}$
+        \item Lagragian $L:\mathbb{R}^n\times \mathbb{R}^{k_1}\times\cdots\times \mathbb{R}^{k_m}\times \mathbb{R}^d \rightarrow \mathbb{R}$
+        \begin{equation*}
+            L(x, \lambda_1,\dots,\lambda_m,\nu) = f_0(x) + \sum^m_{i=1}\lambda_i^Tf_i(x) + \sum^D_{i=1}\nu_ih_i(x) 
+        \end{equation*}
+        \item Dual Function is $g:\mathbb{R}^{k_1}\times\cdots\times \mathbb{R}^{k_m}\times \mathbb{R}^D\rightarrow \mathbb{R}$ is defined as:
+        \begin{equation*}
+            g(\lambda_1,\dots,\lambda_m,\nu) = \inf_{x\in\mathcal{D}}L(x, \lambda_1, \cdots, \lambda_m, \nu)
+        \end{equation*}
+        \item Lower bound property: If $\lambda_i\succeq_{K^*_i}0$ then $g(\lambda_1,\dots,\lambda_m)\le p^*$
+        \item Dual Problem:
+        \begin{equation*}
+        \begin{aligned}
+            &\max f_0(\lambda_1,\dots,\lambda_m,\nu) \\
+            &\text{ subject to } \begin{aligned}[t]
+                &\lambda_i\succeq_{K^*_i}0 \quad i=1,\dots,m
+            \end{aligned}
+        \end{aligned}        
+        \end{equation*}
+        The weak duality $p^*\ge d^*$. The strong duality is $p^*=d^*$ for some convex problem with constraint optimization (Slater). 
+    \end{itemize}
+\end{definition}
+
+\begin{remark}
+    To show that the lower bound property is true, we have:
+    \begin{equation*}
+    \begin{aligned}
+        f_0(\tilde{x}) &\ge f_0(\tilde{x}) + \sum^m_{i=1}\lambda_i^Tf_i(\tilde{x}) + \sum^p_{i=1} \nu_ih_i(\tilde{x}) \\
+        &\ge \inf_{x\in\mathcal{D}} L(x, \lambda_1,\dots,\lambda_m, \nu) \\
+        &=g(\lambda_1,\dots,\lambda_m,\nu)
+    \end{aligned}
+    \end{equation*}
+    Mininize over all feasible $\tilde{x}$ will give us $p^*\ge g(\lambda_1,\dots,\lambda_m,\nu)$
+\end{remark}
+
+
+\begin{definition}{\textbf{(Semi-Definite Program)}}
+    The primal SDP is given by $(F_i, G\in\mathbb{S}^k)$
+    \begin{equation*}
+    \begin{aligned}
+        &\min c^Tx \\
+        &\text{ subject to } \begin{aligned}[t]
+            &x_1F_1 + \dots + x_nF_n \preceq G
+        \end{aligned}
+    \end{aligned}        
+    \end{equation*}
+    The lagrange multiplier is $Z\in \mathbb{R}^{K}$ where 
+    \begin{equation*}
+        L(x, Z) = c^Tx + \operatorname{tr}(Z(x_1F_1 + \dots + x_nF_n - G))
+    \end{equation*}
+    Dual function is:
+    \begin{equation*}
+        g(Z) = \inf_x L(x, Z) = \begin{cases}
+            -\operatorname{tr}(GZ) &\text{ if } \operatorname{tr}(F_iZ) + c_i= 0 \quad i=1,\dots,n \\
+            -\infty &\text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    The dual SDP is defined as:
+    \begin{equation*}
+    \begin{aligned}
+        &\max -\operatorname{tr}(GZ) \\
+        &\text{ subject to } \begin{aligned}[t]
+            &Z\succeq 0 \quad \operatorname{tr}(F_iZ)+c_i=0, i=1,\dots,n 
+        \end{aligned}
+    \end{aligned}            
+    \end{equation*}
+    $p^* = d^*$ if primal SDP is strictly feasible (there exists $x$ with $x_1F_1 + \dots + x_nF_n\prec G$)
+\end{definition}
+

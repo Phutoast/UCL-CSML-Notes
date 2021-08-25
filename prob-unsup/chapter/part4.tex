@@ -1,0 +1,490 @@
+\section{Latent Variable Models for Time Series}
+
+\subsection{Problems}
+
+\begin{definition}{\textbf{(Time Series with Latent Variable)}}
+    The latent variable model for time series (with first order markov model) is given by:
+    \begin{equation*}
+        p(\boldsymbol z_{1:T}, \boldsymbol x_{1:T}) = p(\boldsymbol z_1)p(\boldsymbol x_1 | \boldsymbol z_1) \prod^T_{i=2}p(\boldsymbol z_t|\boldsymbol z_{t-1})p(\boldsymbol x_t|\boldsymbol z_t)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Discrete Model)}}
+    The discrete model is described using the following set of parameters as there are $K$ number of latent discrete values:
+    \begin{itemize}
+        \item Initial State Probability $p(\boldsymbol z_1)$: is given as $\pi_z = p(\boldsymbol z_1 = j)$
+        \item Transition Matrix $p(\boldsymbol z_{t+1} | \boldsymbol z_t)$ : is given as $\boldsymbol \Phi_{ij} = p(\boldsymbol z_{t+1} = j | \boldsymbol z_t = i)$
+        \item Emission Distribution $p(\boldsymbol x_t | \boldsymbol z_t)$: 
+        \begin{itemize}
+            \item Continuous variable: $\boldsymbol A_j(\boldsymbol x) = p(\boldsymbol x_t = \boldsymbol x | \boldsymbol z_t = j)$
+            \item Discrete variable: $\boldsymbol A_{jk}(\boldsymbol x) = p(\boldsymbol x_t = k | \boldsymbol z_t = j)$
+        \end{itemize}
+    \end{itemize}
+    And we have the following process for a discrete model:
+    \begin{equation*}
+        \boldsymbol z_1 \sim \boldsymbol \pi \qquad \boldsymbol z_{t+1} | \boldsymbol z_t \sim \boldsymbol \Phi_{\boldsymbol z_t} \qquad \boldsymbol x_t | \boldsymbol z_t \sim \boldsymbol A_{\boldsymbol z_t}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Continuous Variable)}}
+    We consider the continuous variable model, which we model the time series with Gaussian and Linear transformation, which we have the following process:
+    \begin{equation*}
+        \boldsymbol z_1 \sim \mathcal{N}(\boldsymbol \mu_0, \boldsymbol Q_0) \qquad \boldsymbol z_t | \boldsymbol z_{t-1} \sim \mathcal{N}(\boldsymbol A\boldsymbol z_{t-1}, \boldsymbol Q) \qquad \boldsymbol x_t | \boldsymbol z_t \sim \mathcal{N}(\boldsymbol C\boldsymbol z_t, \boldsymbol R)
+    \end{equation*}
+    We still use the same joint distribution as above. This has the other name called Linear Gaussian State Space Model (LGSSM). 
+\end{definition}
+
+\begin{definition}{\textbf{(Inference Problems)}}
+    We are interesting to find the following joint distributions:
+    \begin{equation*}
+        p(\boldsymbol z_t | \boldsymbol x_{1:t})  \qquad p(\boldsymbol z_t | \boldsymbol x_{1:T})
+    \end{equation*}
+    The first one is called filtering distribution, while the second one is called smoothing distribution. 
+\end{definition}
+
+\begin{remark}{\textbf{(Problem for the Problem)}}
+    It is clear that we can integrate out the posterior to get the answer for filtering (and smoothing), but it is very hard:
+    \begin{equation*}
+        p(\boldsymbol z | \boldsymbol x_1,\dots,\boldsymbol x_t) = \int \cdots \int p(\boldsymbol z_1,\dots,\boldsymbol z_t|\boldsymbol x_1,\dots,\boldsymbol x_t) \dby \boldsymbol z_1\cdots\dby \boldsymbol z_t
+    \end{equation*}
+    For the discrete variable, we can have sum instead of integration.
+\end{remark}
+
+\subsection{Solving Inference Problem}
+
+\begin{lemma}{\textbf{(Baysian Filtering)}}
+    One can compute the filtering recursively as:
+    \begin{equation*}
+        p(\boldsymbol z_t | \boldsymbol x_{1:t}) \propto \int p(\boldsymbol x_t|\boldsymbol z_t)p(\boldsymbol z_t|\boldsymbol z_{t-1})p(\boldsymbol z_{t-1} | \boldsymbol x_{1:t-1})\dby\boldsymbol z_{t-1}
+    \end{equation*}
+    We have the same treatment for discrete variable. 
+\end{lemma}
+\begin{proof}
+    We have the following:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol z_t | \boldsymbol x_{1:t}) 
+        &= \int p(\boldsymbol z_t, \boldsymbol z_{t-1} | \boldsymbol x_t, \boldsymbol x_{1:t-1}) \dby \boldsymbol z_{t-1} \\
+        &= \int \frac{p(\boldsymbol z_t, \boldsymbol z_{t-1} | \boldsymbol x_{1:t-1})}{p(\boldsymbol x_t | \boldsymbol x_{1:t-1})} \dby \boldsymbol z_{t-1} \\
+        &\propto \int p(\boldsymbol x_t|\boldsymbol z_t, \boldsymbol z_{t-1}, \boldsymbol x_{1:t-1}) p(\boldsymbol z_t | \boldsymbol z_{t-1}, \boldsymbol x_{1:t-1}) p(\boldsymbol z_{t-1} | \boldsymbol x_{1:t-1})\dby \boldsymbol z_{t-1} \\
+        &= \int p(\boldsymbol x_t|\boldsymbol z_t) p(\boldsymbol z_t | \boldsymbol z_{t-1}) p(\boldsymbol z_{t-1} | \boldsymbol x_{1:t-1})\dby \boldsymbol z_{t-1} \\
+    \end{aligned}
+    \end{equation*}
+    And we have the values as required.
+\end{proof}
+
+\begin{definition}{\textbf{(Forward Message)}}
+    We consider the quantity $\alpha_t(i)$ for which it is the joint probability of observation and the current latent variable $\boldsymbol z_t = i$ i.e:
+    \begin{equation*}
+        \alpha_t(i) = p(\boldsymbol x_1,\dots,\boldsymbol x_t, \boldsymbol z_t = i | \boldsymbol \theta)
+    \end{equation*}
+    We call this a forward message. 
+\end{definition}
+
+\begin{proposition}
+    The forward message can be calculated recursively as:
+        \begin{equation*}
+            \alpha_{t+1}(i) = \bracka{\sum^K_{j=1}\alpha_t(j) \boldsymbol \Phi_{ij}}\boldsymbol A_i(\boldsymbol x_{t+1})
+        \end{equation*}
+    where at the start: $\alpha_1(i) = \pi_i\boldsymbol A_i(\boldsymbol x)$
+\end{proposition}
+\begin{proof}
+    We consider the following:
+    \begin{equation*}
+    \begin{aligned}
+        \alpha_{t+1}(i) 
+        &= \sum^K_{j=1}p(\boldsymbol x_1, \dots, \boldsymbol x_t, \boldsymbol x_{t+1}, s_t = j | s_{t+1} = i) \\
+        &= \sum^K_{j=1}p(\boldsymbol x_1, \dots, \boldsymbol x_t| s_t = j)p(s_{t+1} = i | s_t = j)p(\boldsymbol x_{t+1} | s_{t+1} = i) \\
+        &= \bracka{\sum^K_{j=1}\alpha_t(j) \boldsymbol \Phi_{ij}}\boldsymbol A_i(\boldsymbol x_{t+1})
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(Filtering For Discrete Model)}}
+    One can solve the filtering problem, as we have:
+    \begin{equation*}
+        p(\boldsymbol s_t = i | \boldsymbol x_1,\dots,\boldsymbol x_t, \boldsymbol \theta) = \frac{\alpha_t(i)}{\sum^K_{j=1}\alpha_t(j)}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Usefulness of Filtering Method)}}
+    Given the values of $\alpha_T(i)$, we can calculate the likelihood of the parameter $\boldsymbol \theta$ in $\mathcal{O}(TK^2)$ time instead of exponential time via the marginalization:
+    \begin{equation*}
+        p(\boldsymbol x_1,\cdots, \boldsymbol x_T|\theta) = \sum^K_{k=1}\alpha_T(k)
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}{\textbf{(First Step Filter)}}
+    We can show that the $p(\boldsymbol z_1 | \boldsymbol x_{1:1})$ is equal to:
+    \begin{equation*}
+        p(\boldsymbol z_1 | \boldsymbol x_{1:1}) = \mathcal{N}\Big(\boldsymbol z_1 \Big | \underbrace{\hat{\boldsymbol z}^0_1 + \boldsymbol K_1 (\boldsymbol x_1 - \boldsymbol C\hat{\boldsymbol z}^0_1)}_{\boldsymbol z^1_1}, \underbrace{\hat{\boldsymbol V}^0_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol V}^0_1}_{\hat{\boldsymbol V}^1_1} \Big)
+    \end{equation*}
+    where we set $\boldsymbol K_1 = \hat{\boldsymbol V}^0_1\boldsymbol C^T\Big[\boldsymbol R + \boldsymbol C\hat{\boldsymbol V}^0_1 \boldsymbol C^T\Big]^{-1} $. 
+\end{proposition}
+\begin{proof}
+    For the state space model, we start with $p(\boldsymbol z_1 | \boldsymbol x_1)$. We denote $\hat{\boldsymbol z}^0_1 = \boldsymbol \mu_0$ and $\hat{\boldsymbol V}^0_1 = \boldsymbol Q_0$. Now, we apply linear Gaussian model above to get the inference. Recall that
+    \begin{equation*}
+    \begin{aligned}
+        &p(\boldsymbol z_1) = \mathcal{N}(\boldsymbol z_1 | \hat{\boldsymbol z}^0_1, \hat{\boldsymbol V}^0_1) \qquad 
+        p(\boldsymbol x_1|\boldsymbol z_1) = \mathcal{N}(\boldsymbol x_1 | \boldsymbol C\boldsymbol z_1, \boldsymbol R)
+    \end{aligned}
+    \end{equation*}
+    Now, we have the linear Gaussian model as 
+    \begin{equation*}
+        p(\boldsymbol z_1 | \boldsymbol x_1) = \mathcal{N}\Big( \boldsymbol z_1 \left| \boldsymbol \Sigma\brackb{ \boldsymbol C^T\boldsymbol R^{-1}\boldsymbol x_1 + (\hat{\boldsymbol V}^0_1)^{-1}\hat{\boldsymbol z}^0_1 }, \ \boldsymbol \Sigma\right. \Big)
+    \end{equation*}
+    where $\boldsymbol \Sigma$ is simplified using Woodbury identity:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol \Sigma &= \Big[ (\hat{\boldsymbol V}^0_1)^{-1} + \boldsymbol C^T\boldsymbol R^{-1}\boldsymbol C \Big]^{-1} \\
+        &= \hat{\boldsymbol V}^0_1 - \hat{\boldsymbol V}^0_1\boldsymbol C^T\Big[\boldsymbol R + \boldsymbol C\hat{\boldsymbol V}^0_1 \boldsymbol C^T\Big]^{-1}\boldsymbol C\hat{\boldsymbol V}^0_1 \\
+        &= \hat{\boldsymbol V}^0_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol V}^0_1
+    \end{aligned}
+    \end{equation*}
+    Now, we consider the mean, as we now have:
+    \begin{equation*}
+    \begin{aligned} 
+        \Big[ \hat{\boldsymbol V}^0_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol V}^0_1 \Big]&\brackb{ \boldsymbol C^T\boldsymbol R^{-1}\boldsymbol x_1 + (\hat{\boldsymbol V}^0_1)^{-1}\hat{\boldsymbol z}^0_1} \\
+        &= \hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}\boldsymbol x_1 + \hat{\boldsymbol z}^0_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}\boldsymbol x_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol z}^0_1 \\
+        &= \hat{\boldsymbol z}^0_1 - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol z}^0_1 + (\hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}  - \boldsymbol K_1\boldsymbol C\hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1})\boldsymbol x_1 \\
+    \end{aligned}
+    \end{equation*}
+    Let's consider the value, which we can show that it is indeed $\boldsymbol K_1$, where we will consider $\boldsymbol B = \boldsymbol C\hat{\boldsymbol V}^0_1\boldsymbol C^T$:
+    \begin{equation*}
+    \begin{aligned}
+        &\hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}  - \boldsymbol K_1\boldsymbol B\boldsymbol R^{-1}  = \boldsymbol K_1\\
+        \iff& \hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1} = \boldsymbol K_1 + \boldsymbol K_1\boldsymbol B\boldsymbol R^{-1} \\
+        \iff& \hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1} = \boldsymbol K_1(\boldsymbol I + \boldsymbol B\boldsymbol R^{-1}) \\
+        \iff& \hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}(\boldsymbol I + \boldsymbol B\boldsymbol R^{-1})^{-1} = \boldsymbol K_1 \\
+        \iff& \hat{\boldsymbol V}^0_1\boldsymbol C^T\boldsymbol R^{-1}(\boldsymbol I + \boldsymbol B\boldsymbol R^{-1})^{-1} = \hat{\boldsymbol V}^0_1\boldsymbol C^T\Big[\boldsymbol R + \boldsymbol B\Big]^{-1} \\
+        \iff& \boldsymbol R^{-1}(\boldsymbol I + \boldsymbol B\boldsymbol R^{-1})^{-1} = \Big[\boldsymbol R + \boldsymbol B\Big]^{-1} \\
+        \iff& \Big[\boldsymbol R(\boldsymbol I + \boldsymbol B\boldsymbol R^{-1})\Big]^{-1} = \Big[\boldsymbol R + \boldsymbol B\Big]^{-1} \\
+    \end{aligned}
+    \end{equation*}
+    And so equation the is proven. 
+\end{proof}
+
+\begin{proposition}{\textbf{(General Time Filtering)}}
+    We want to find the value $p(\boldsymbol z_t | \boldsymbol x_{1:t})$, which we can show that it is equal to, given $p(\boldsymbol z_{t-1} | \boldsymbol x_{1:t-1}) = \mathcal{N}(\boldsymbol z_{t-1} | \hat{\boldsymbol z}_{t-1}^{t-1}, \hat{\boldsymbol V}^{t-1}_{t-1})$:
+    \begin{equation*}
+        \mathcal{N}\Big(\boldsymbol z_t \Big| \hat{\boldsymbol z}_{t-1}^{t} + \boldsymbol K_t(\boldsymbol x_t - \boldsymbol C \hat{\boldsymbol z}_{t-1}^{t}),  \ \hat{\boldsymbol V}^{t-1}_{t} - \boldsymbol K_t\boldsymbol C\hat{\boldsymbol V}^{t-1}_{t} \Big)
+    \end{equation*}
+    where $\hat{\boldsymbol z}_{t-1}^{t} =  \boldsymbol A\hat{\boldsymbol z}_{t-1}^{t-1}$ and $\hat{\boldsymbol V}^{t-1}_{t} = \boldsymbol Q + \boldsymbol A \hat{\boldsymbol V}^{t-1}_{t-1}\boldsymbol A^T$ and $\boldsymbol K_t = \hat{\boldsymbol V}^{t-1}_{t}\boldsymbol C^T\brackb{\boldsymbol R + \boldsymbol C\hat{\boldsymbol V}^{t-1}_{t}\boldsymbol C^T}^{-1}$
+\end{proposition}
+\begin{proof}
+    Now, we want to find the probability $p(\boldsymbol z_t | \boldsymbol x_{1:t-1})$, first, which we can use the marginal distribution from the linear Gaussian model between $p(\boldsymbol z_t | \boldsymbol z_{t-1})$ and $p(\boldsymbol z_{t-1} | \boldsymbol x_{1:t-1})$, which we marginalize out $\boldsymbol z_{t-1}$, which we have:
+    \begin{equation*}
+    \begin{aligned} 
+        \int \mathcal{N}(\boldsymbol z_{t-1} &| \hat{\boldsymbol z}_{t-1}^{t-1}, \hat{\boldsymbol V}^{t-1}_{t-1})\mathcal{N}(\boldsymbol z_t | \boldsymbol A\boldsymbol z_{t-1}, \boldsymbol Q)\dby \boldsymbol z_{t-1} \\
+        &= \mathcal{N}\Big(\boldsymbol z_t \Big| \boldsymbol A\hat{\boldsymbol z}_{t-1}^{t-1}, \ \boldsymbol Q + \boldsymbol A \hat{\boldsymbol V}^{t-1}_{t-1}\boldsymbol A^T \Big) \\
+        &= \mathcal{N}\Big(\boldsymbol z_t \Big| \hat{\boldsymbol z}_{t-1}^{t}, \ \hat{\boldsymbol V}^{t-1}_{t}\Big)
+    \end{aligned}
+    \end{equation*}
+    This follows directly from linear Gaussian model. Now, we follows the same method above (as we now need to find distribution of $\boldsymbol z_t$ given \emph{addiitonal} information of $\boldsymbol x_t$), and so we have:
+    \begin{equation*}
+        \mathcal{N}\Big(\boldsymbol z_t \Big| \hat{\boldsymbol z}_{t-1}^{t} + \boldsymbol K_t(\boldsymbol x_t - \boldsymbol C \hat{\boldsymbol z}_{t-1}^{t}),  \ \hat{\boldsymbol V}^{t-1}_{t} - \boldsymbol K_t\boldsymbol C\hat{\boldsymbol V}^{t-1}_{t} \Big)
+    \end{equation*}
+    where $\boldsymbol K_t = \hat{\boldsymbol V}^{t-1}_{t}\boldsymbol C^T\brackb{\boldsymbol R + \boldsymbol C\hat{\boldsymbol V}^{t-1}_{t}\boldsymbol C^T}^{-1}$. Thus complete the prove.
+\end{proof}
+
+\begin{remark}{\textbf{(Baysian Smoothing - For Discrete Model)}}
+    To find the smoothing, we consider calculating marginal posterior as:
+    \begin{equation*}
+        p(\boldsymbol z_t | \boldsymbol x_{1:T}) = \frac{p(\boldsymbol z_t, \boldsymbol x_{t+1:T} | \boldsymbol x_{1:t})}{p(\boldsymbol x_{t+1:T} | \boldsymbol x_{1:t})} 
+        = \frac{\textcolor{red}{p(\boldsymbol x_{t+1:T} | \boldsymbol z_t)}\textcolor{blue}{p(\boldsymbol z_t|\boldsymbol x_{1:t})}}{p(\boldsymbol x_{t+1:T} | \boldsymbol x_{1:t})} 
+        = \frac{\textcolor{red}{p(\boldsymbol x_{t+1:T} | \boldsymbol z_t)}\textcolor{blue}{p(\boldsymbol z_t, \boldsymbol x_{1:t})}}{p(\boldsymbol z_{1:T})}
+    \end{equation*}
+    We can see that the probability distribution in \textcolor{blue}{blue} are the forward passing, while the probability distribution in \textcolor{red}{red} is the backward distribution.
+\end{remark}
+
+\begin{definition}{\textbf{(Backward Message)}}
+    Consider the value 
+    \begin{equation*} 
+        \beta_t(i) = p(\boldsymbol x_{t+1:T} | \boldsymbol z_t = i)
+    \end{equation*} 
+    We call it a backward message. 
+\end{definition}
+
+\begin{proposition}
+    Backward message can be calculated in recursive manner:
+    \begin{equation*}
+        \beta_t(i) = \sum^K_{j=1} \boldsymbol \Phi_{ij}\boldsymbol A_j(\boldsymbol x_{t+1})\beta_{t+1}(j)
+    \end{equation*}
+    where $\beta_T(i) = 1/K$, we consider a uniform distribution over the state.
+\end{proposition}
+\begin{proof}
+    We consider the following
+    \begin{equation*}
+    \begin{aligned}
+        \beta_t(i) 
+        &= \sum^K_{j=1} p(s_{t+1} = j, \boldsymbol x_{t+1}, \boldsymbol x_{t+2:T} | s_t = i) \\
+        &= \sum^K_{j=1} p(s_{t+1} = j | s_t = i) p(\boldsymbol x_{t+1} | s_t = i)p(\boldsymbol x_{t+2:T} | s_{t+1} = j) \\
+        &= \sum^K_{j=1} \boldsymbol \Phi_{ij}\boldsymbol A_j(\boldsymbol x_{t+1})\beta_{t+1}(j) \\
+    \end{aligned}
+    \end{equation*}
+    And so it proposition is proven.
+\end{proof}
+
+\begin{definition}{\textbf{(Forward-Backward Algorithm)}}
+    The smooth distribution can be calculated as:
+    \begin{equation*}
+        \gamma_t(i) = p(s_t = i | \boldsymbol x_{1:T}) = \frac{p(s_t = i, \boldsymbol x_{1:t})p(\boldsymbol x_{t+1:T} | s_t=i)}{p(\boldsymbol x_{1:T})} = \frac{\alpha_t(i)\beta_t(i)}{\sum^k_{j=1}\alpha_t(j)\beta_t(j)}
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Problem with Choosing State)}}
+    We consider the value of $\gamma_t(i)$ is computed using forward and backward algorithm. Choosing the state $i^*_t$ with the largest $\gamma_t(i)$ is the best way since the path has the maximum expected number of correct state. However, this may leads to the path, which is impossible.
+\end{remark}
+
+\begin{definition}{\textbf{(Viterbi Decoding)}}
+    The best path algorithm is called Viterbi decoding as we can use the Bellman's dynamics programming. This is done by compute the most probable state sequence (instead of expected state):
+    \begin{equation*}
+        \argmax{\boldsymbol z_{1:T}} p(\boldsymbol z_{1:T} | \boldsymbol x_{1:T}, \boldsymbol \theta)
+    \end{equation*}
+    And so, we use the same recursion $\max$ instead of $\sum$, just like the Bellman equation algorithm. 
+\end{definition}
+
+\begin{proposition}{\textbf{(Smoothing for LGSSM)}}
+    We receives the value $p(\boldsymbol z_{t+1} | \boldsymbol x_{1:T}) = \mathcal{N}(\boldsymbol z_{t+1} | \hat{\boldsymbol z}^T_{t+1}, \hat{\boldsymbol V}^T_{t+1})$ from the privious time step. Then we can show the following recursive calculation:
+    \begin{equation*}
+        p(\boldsymbol z_t | \boldsymbol x_{1:T}) = \mathcal{N}\bracka{\boldsymbol z_t \left| \hat{\boldsymbol z}_t +  \boldsymbol J_t(\boldsymbol z_{t+1} - \boldsymbol A\hat{\boldsymbol z}^t_{t}), \ \hat{\boldsymbol V}^t_t + \boldsymbol J_t(\hat{\boldsymbol V}^T_{t+1}-\hat{\boldsymbol V}^t_{t+1}) \boldsymbol J_t^T\right.} 
+    \end{equation*}
+    where $\boldsymbol J_t = \hat{\boldsymbol V}^t_t \boldsymbol A^T(\hat{\boldsymbol V}^t_{t+1})^{-1}$, and the first time step can be calculated from result of filtering.
+\end{proposition}
+\begin{proof}
+    We consider the following steps:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol z_t | \boldsymbol x_{1:T}) &= \int p(\boldsymbol z_t, \boldsymbol z_{t+1} | \boldsymbol x_{1:T})\dby \boldsymbol z_{t+1} \\
+        &= \int p(\boldsymbol z_t | \boldsymbol z_{t+1}, \boldsymbol x_{1:T}) p(\boldsymbol z_{t+1} | x_{1:T}) \dby \boldsymbol z_{t+1} \\
+        &= \int p(\boldsymbol z_t | \boldsymbol z_{t+1}, \boldsymbol x_{1:t}) p(\boldsymbol z_{t+1} | x_{1:T}) \dby \boldsymbol z_{t+1} \\
+        &= \int \brackb{\frac{p(\boldsymbol z_{t+1}, \boldsymbol z_t | \boldsymbol x_{1:t})}{p(\boldsymbol z_{t+1} | \boldsymbol x_{1:t})}} p(\boldsymbol z_{t+1} | x_{1:T}) \dby \boldsymbol z_{t+1}
+    \end{aligned}
+    \end{equation*}
+    The third equality comes from the markov property. Let's consider finding the value $p(\boldsymbol z_t | \boldsymbol z_{t+1}, \boldsymbol x_{1:t})$ using linear Gaussian model as we have proven above: Noted that the value $p(\boldsymbol z_t | \boldsymbol x_{1:t}) = \mathcal{N}(\boldsymbol z_t | \hat{\boldsymbol z}^t_t, \hat{\boldsymbol V}^t_t)$. We consider the mean vector $[\boldsymbol z_t, \boldsymbol z_{t+1}]^T$, we will have to consider the covariance:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{Cov}(\boldsymbol z_t, \boldsymbol z_{t+1} | \boldsymbol x_{1:t}) &= \mathbb{E}\brackb{\bracka{\boldsymbol z_t - \hat{\boldsymbol z}^t_t}\bracka{\boldsymbol z_{t+1} - \hat{\boldsymbol z}^t_{t+1}}^T \Big| \boldsymbol x_{1:t} } \\
+        &= \mathbb{E}\brackb{\bracka{\boldsymbol z_t - \hat{\boldsymbol z}^t_t}\bracka{\boldsymbol A\boldsymbol z_{t} + \boldsymbol w - \boldsymbol A\hat{\boldsymbol z}^t_{t}}^T \Big| \boldsymbol x_{1:t} } \\
+        &= \mathbb{E}\brackb{\bracka{\boldsymbol z_t - \hat{\boldsymbol z}^t_t}\bracka{\boldsymbol A\boldsymbol z_{t} - \boldsymbol A\hat{\boldsymbol z}^t_{t}}^T \Big| \boldsymbol x_{1:t} } + \mathbb{E}\brackb{\bracka{\boldsymbol z_t - \hat{\boldsymbol z}^t_t} \Big| \boldsymbol x_{1:t} }\mathbb{E}[\boldsymbol w^T] \\
+        &= \mathbb{E}\brackb{\bracka{\boldsymbol z_t - \hat{\boldsymbol z}^t_t}\bracka{\boldsymbol z_{t} - \hat{\boldsymbol z}^t_{t}}^T \Big| \boldsymbol x_{1:t} }\boldsymbol A^T = \hat{\boldsymbol V}^t_t \boldsymbol A^T \\
+    \end{aligned}
+    \end{equation*}
+    where $p(\boldsymbol w) = \mathcal{N}(\boldsymbol 0, \boldsymbol Q)$. Now, we have the following normal distirbution for the joint :
+    \begin{equation*}
+        \mathcal{N}\bracka{
+        \begin{bmatrix}
+            \boldsymbol z_t \\ \boldsymbol z_{t+1}
+        \end{bmatrix} \left|
+        \begin{bmatrix}
+            \hat{\boldsymbol z}_t^t \\ \hat{\boldsymbol z}_{t+1}^t
+        \end{bmatrix}, 
+        \begin{bmatrix}
+            \hat{\boldsymbol V}^t_t & \hat{\boldsymbol V}^t_t \boldsymbol A^T \\
+            \boldsymbol A\hat{\boldsymbol V}^t_t & \hat{\boldsymbol V}^t_{t+1}
+        \end{bmatrix}\right.}
+    \end{equation*}
+    Please note that the value $\hat{\boldsymbol V}^t_{t+1}$ can be found in the intermediate value of the filtering. Now, we use conditional Gaussian result from above, and we have:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol z_t | \boldsymbol z_{t+1}, \boldsymbol x_{1:t}) 
+        &= \mathcal{N}\bracka{\boldsymbol z_t \left| \hat{\boldsymbol z}_t +  \boldsymbol J_t(\boldsymbol z_{t+1} - \hat{\boldsymbol z}^t_{t+1}) , \  \hat{\boldsymbol V}^t_t - \boldsymbol J_t\hat{\boldsymbol V}^t_{t+1} \boldsymbol J_t^T \right.} \\ 
+        &= \mathcal{N}\bracka{\boldsymbol z_t \left| \hat{\boldsymbol z}_t +  \boldsymbol J_t(\boldsymbol z_{t+1} - \boldsymbol A\hat{\boldsymbol z}^t_{t}) , \  \hat{\boldsymbol V}^t_t - \boldsymbol J_t\hat{\boldsymbol V}^t_{t+1} \boldsymbol J_t^T \right.} \\ 
+    \end{aligned}
+    \end{equation*} 
+    where $\boldsymbol J_t = \hat{\boldsymbol V}^t_t \boldsymbol A^T(\hat{\boldsymbol V}^t_{t+1})^{-1}$. Now consider the marginalization using a normal Gaussian linear model together with $p(\boldsymbol z_{t+1} | \hat{\boldsymbol z}^T_{t+1}, \hat{\boldsymbol V}^T_{t+1})$, as we now have:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol z_t | \boldsymbol x_{1:T}) 
+        &= \mathcal{N}\bracka{\boldsymbol z_t \left| \hat{\boldsymbol z}_t +  \boldsymbol J_t(\boldsymbol z_{t+1} - \boldsymbol A\hat{\boldsymbol z}^t_{t}), \ \hat{\boldsymbol V}^t_t - \boldsymbol J_t\hat{\boldsymbol V}^t_{t+1} \boldsymbol J_t^T + \boldsymbol J_t\hat{\boldsymbol V}^T_{t+1}\boldsymbol J_t \right.} \\
+        &= \mathcal{N}\bracka{\boldsymbol z_t \left| \hat{\boldsymbol z}_t +  \boldsymbol J_t(\boldsymbol z_{t+1} - \boldsymbol A\hat{\boldsymbol z}^t_{t}), \ \hat{\boldsymbol V}^t_t + \boldsymbol J_t(\hat{\boldsymbol V}^T_{t+1}-\hat{\boldsymbol V}^t_{t+1}) \boldsymbol J_t^T\right.} 
+    \end{aligned}
+    \end{equation*}
+    Thus the prove is now complete. 
+\end{proof}
+
+\subsection{Learning Parameter}
+
+\begin{definition}{\textbf{(EM-Algorithm for SSM)}}
+    We have the following free-energy:
+    \begin{equation*}
+        F(q, \theta) = \int q(\boldsymbol z_{1:T})\Big[ \log p(\boldsymbol x_{1:T}, \boldsymbol z_{1:T} | \boldsymbol \theta) - \log q(\boldsymbol z_{1:T}) \Big]\dby \boldsymbol z_{1:T}
+    \end{equation*}
+    Now, we consider the following EM-step, as we have:
+    \begin{itemize}
+        \item \emph{E-Step}: We find $q^*(\boldsymbol z_{1:T}) = p(\boldsymbol z_{1:T} | \boldsymbol x_{1:T}, \boldsymbol \theta)$, which is already done in the Kalman smoothing.
+        \item \emph{M-Step}: We want to find $\boldsymbol \theta$ by maximizing the $\brackd{\log p(\boldsymbol z_{1:T}, \boldsymbol x_{1:T} | \boldsymbol \theta)}_{q(\boldsymbol z_{1:T} | \boldsymbol x_{1:T})}$, where we have:
+        \begin{equation*}
+            p(\boldsymbol z_{1:T}, \boldsymbol x_{1:T}|\boldsymbol \theta) = p(\boldsymbol z_1)p(\boldsymbol x_1|\boldsymbol z_1)\prod^T_{t=2}p(\boldsymbol z_t|\boldsymbol z_{t-1})p(\boldsymbol x_t|\boldsymbol z_t)
+        \end{equation*}
+        which are all Gaussian, this leads to least square problem as we will see. This also works with discrete case.
+    \end{itemize}
+\end{definition}
+
+\begin{proposition}{\textbf{(M-Step for $\boldsymbol C$)}}
+    The update for $\boldsymbol C$ is:
+    \begin{equation*}
+        \boldsymbol C = \boldsymbol R^{-1}\sum^T_{t=1}\brackd{\boldsymbol z_t}_q\boldsymbol x^T_t \bracka{\sum^T_{t=1}\brackd{\boldsymbol z_t\boldsymbol z_t^T}_q}^{-1}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We have the following log-likelihood (with removed unnecessary terms):
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial \boldsymbol C}\log p(\boldsymbol z_{1:T}, \boldsymbol x_{1:T} | \boldsymbol \theta) &= \frac{\partial}{\partial \boldsymbol C}\brackb{\sum^T_{t=1}\brackd{\boldsymbol P(\boldsymbol x_t|\boldsymbol z_t)}_{q}} \\
+        &= \frac{\partial}{\partial \boldsymbol C}\brackb{-\frac{1}{2}\sum^T_{t=1} \brackd{(\boldsymbol x_t - \boldsymbol C\boldsymbol z_t)^T\boldsymbol R^{-1}( \boldsymbol x_t - \boldsymbol C\boldsymbol z_t )}_q  } \\
+        &= \frac{\partial}{\partial \boldsymbol C}\brackb{-\frac{1}{2}\sum^T_{t=1} \brackd{\boldsymbol x^T_t\boldsymbol R^{-1}\boldsymbol x^T_t - 2\boldsymbol x^T_t\boldsymbol R^{-1}\boldsymbol C\boldsymbol z_t + \boldsymbol z_t^T\boldsymbol C^T\boldsymbol R^{-1}\boldsymbol C\boldsymbol z_t}_q  }\\
+        &= \frac{\partial}{\partial \boldsymbol C}\brackb{\operatorname{Tr}\brackb{\boldsymbol C\sum^T_{t=1}\brackd{\boldsymbol z_t}_q\boldsymbol x^T_t\boldsymbol R^{-1}} - \frac{1}{2}\operatorname{Tr}\brackb{ \boldsymbol C^T\boldsymbol R^{-1}\boldsymbol C\brackd{\sum^T_{t=1}\boldsymbol z_t\boldsymbol z_t^T}_q}  } \\
+        &= \boldsymbol R^{-1}\sum^T_{t=1}\brackd{\boldsymbol z_t}_q\boldsymbol x^T_t - \boldsymbol R^{-1}\boldsymbol C\brackd{\sum^T_{t=1}\boldsymbol z_t\boldsymbol z_t^T}_q
+    \end{aligned}
+    \end{equation*}
+    Setting this to $0$, and we have the update. 
+\end{proof}
+
+\begin{proposition}{\textbf{(M-Step for $\boldsymbol A$)}}
+    The update for $\boldsymbol A$ is:
+    \begin{equation*}
+        \boldsymbol A = \boldsymbol R^{-1}\sum^T_{t=1}\brackd{\boldsymbol z_t\boldsymbol z^T_{t+1}}_q \bracka{\sum^T_{t=1}\brackd{\boldsymbol z_t\boldsymbol z_t^T}_q}^{-1}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We see that the we have the same situation as the $\boldsymbol C$, and so the update is the same. Please note that we replace $\boldsymbol x_t$ with $\boldsymbol z_{t+}$.
+\end{proof}
+
+\begin{proposition}{\textbf{(M-Step for HMM)}}
+    We can take the free-energy with respected to the parameter $\boldsymbol \theta$, and we have:
+    \begin{itemize}
+        \item Initial State Distribution $\pi_i = \gamma_i(i)$, which is expected number of times in state $i$ at the start. 
+        \item Define the expected transition from state $i\rightarrow j$ to be:
+        \begin{equation*}
+            \xi_t(i\rightarrow j) = p(z_t = i, z_{t+1}=j | \boldsymbol x_{1:T}) = \frac{\alpha_t(i)\boldsymbol \Phi_{ij}\boldsymbol A_j(\boldsymbol x_{t+1})\beta_{t+1}(j)}{p(\boldsymbol x_{1:T})}
+        \end{equation*}
+        \item We have the transition probability and output probability to be:
+        \begin{equation*}
+            \hat{\Phi}_{ij} = \left.\sum^{T-1}_{t=1} \xi_t(i\rightarrow j) \right/ \sum^T_{t=1}\gamma_t(i) \qquad 
+            \hat{A}_{ik} = \left.\sum_{t:\boldsymbol x_t = k} \gamma_t(i) \right/ \sum^T_{t=1}\gamma_t(i)
+        \end{equation*}
+    \end{itemize}
+\end{proposition}
+\begin{proof}
+    As we have computed the E-step, now we consider the free energy, as M-Step trying to maximize the following quantity 
+    \begin{equation*}
+    \begin{aligned}
+        \langle\log &p(z_{1:T}, \boldsymbol x_{1:T})\rangle_{q(z_{1:T} | \boldsymbol x_{1:T}, \boldsymbol \theta)} \\
+        &= \mathbb{E}_{q(z_{1:T} | \boldsymbol x_{1:T})}\brackb{\log p(z_1 | \boldsymbol \pi) + \sum^T_{t=2} \log p(z_t | z_{t-1} , \boldsymbol \Phi_{ij}) + \sum^T_{t=1} \log p(\boldsymbol x_t | z_t, A_{z_t}(\boldsymbol x_t)) } \\
+        &= \mathbb{E}_{q(z_1|\boldsymbol x_{1:T})}\brackb{\log p(z_1 | \boldsymbol \pi)} + \sum^T_{t=2} \mathbb{E}_{q(z_t, z_{t-1} | \boldsymbol x_{1:T})}\brackb{\log p(z_t | z_{t-1} , \boldsymbol \Phi_{ij}) }+ \sum^T_{t=1} \mathbb{E}_{q(z_t)}[\log p(\boldsymbol x_t | z_t, A_{z_t}(\boldsymbol x_t))]  \\
+        &= \sum^L_{i=1}\gamma_1(i)\pi_i + \sum^T_{t=2} \sum^L_{i=1}\sum_{j=1}^L\xi(z_i = i, z_{t-1}=j) \Phi_{ji} + \sum^T_{t=1} \sum^L_{i=1}\gamma_t(i)A_{i\boldsymbol x_i}  \\
+    \end{aligned}
+    \end{equation*}
+    Recall that the number of state to be $L$. We will denote the emission matrix $\boldsymbol A \in \mathbb{R}^{L \times O}$ where $O$ is the number of possible observable. Furthermore, we recall that we have the following constraint to be:
+    \begin{equation*}
+        \sum_j \Phi_{ij} = 1 \qquad \sum_{\boldsymbol x \in \mathcal{X}} A_i(\boldsymbol x)  \qquad \sum_i \pi_i = 1
+    \end{equation*}
+    for all $i=1,\dots,L$ in the first and second constraint. Now, we have the following Lagrange multiplier:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{L} = \sum^L_{i=1}\gamma_1(i)\pi_i &+ \sum^T_{t=2} \sum^L_{i=1}\sum_{j=1}^L\xi(z_i = i, z_{t-1}=j) \Phi_{ji} + \sum^T_{t=1} \sum^L_{i=1}\gamma_t(i)A_{i\boldsymbol x_i}  \\
+        &-\sum^L_{i=1}\lambda_i\bracka{\sum^L_{j=1}\Phi_{ij} - 1} -\sum^L_{i=1}\nu_i\bracka{\sum^L_{j=1}A_{ij} - 1} - \eta\bracka{\sum^L_{i=1}\pi_i - 1}
+    \end{aligned}
+    \end{equation*}
+    We have the following derivative for $\pi_a$:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial \mathcal{L}}{\partial \pi_a} = \frac{\partial}{\partial \pi_a}\sum^L_{i=1}\gamma_1(i)\log \pi_i - \frac{\partial}{\partial \pi_a} \eta\bracka{\sum^L_{i=1}\pi_i - 1} = \frac{\gamma_i(a)}{\pi_a} - \eta = 0 \\
+        \iff&\gamma_1(a) = \nu\pi_a \\
+        \iff&\sum_{a=1}^L\gamma_1(a) = \nu\sum_{a=1}^L\pi_a = \nu \\
+    \end{aligned}
+    \end{equation*}
+    Solving algebra yields to solution for $\pi_a$. Let's consider the value of $\Phi_{ab}$, as we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial \mathcal{L}}{\partial \Phi_{ab}} \begin{aligned}[t]
+            &=\frac{\partial \mathcal{L}}{\partial \Phi_{ab}} \sum^T_{t=2} \sum^L_{i=1}\sum_{j=1}^L\xi(z_i = i, z_{t-1}=j) \Phi_{ji} -\frac{\partial \mathcal{L}}{\partial \Phi_{ab}} \sum^L_{i=1}\lambda_i\bracka{\sum^L_{j=1}\Phi_{ij} - 1} \\
+            &=\sum^T_{T=1}\xi(z_t = b, z_{t-1}=b)\frac{1}{\Phi_{ab}} - \lambda_a =0 
+        \end{aligned} \\
+        &\iff \lambda_a \Phi_{ab} = \sum^T_{t=1}\xi(z_t = b, z_{t-1} = a) \\
+        &\iff \sum^L_{j=1}\lambda_a \Phi_{aj} =  \sum^L_{j=1}\sum^T_{t=1}\xi(z_t = j, z_{t-1} = a) \\
+        &\iff \lambda_a 
+        \begin{aligned}[t]
+            &= \sum^L_{j=1}\sum^T_{t=1}\xi(z_t = j, z_{t-1} = a) = \sum^T_{t=1}\gamma_{t-1}(a) \\
+        \end{aligned}
+    \end{aligned} 
+    \end{equation*}
+    And, so the equality is proven. Note that there are difference in time notation but they are equivalent. The proof for $A_{ij}$ is the same, so we will not go into details.
+\end{proof}
+
+\begin{remark}{\textbf{(Practical Numerical Method)}}
+    The message passing algorithm can be implode i.e $\alpha_t(i) = p(\boldsymbol x_{1:t}, \boldsymbol z_t = i) \rightarrow 0$ to fix this, we do the following rescale:
+    \begin{equation*}
+        \bar{\alpha}_t(i) = \boldsymbol A_i(\boldsymbol x_t)\sum_{j=1}^L \tilde{\boldsymbol \alpha}_{t-1}(j)\boldsymbol \Phi_{ij} \qquad \rho_t = \sum^L_{i=1}\bar{\alpha}_t(i) \qquad \tilde{\alpha}(i) = \bar{\alpha}_t(i)/\rho_t
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    We can show that: $\rho_t = p(\boldsymbol x_t | \boldsymbol x_{1:t-1}, \boldsymbol \theta)$
+\end{proposition}
+\begin{proof}
+    We will consider the quantity $p(z_i | \boldsymbol x_{1:i})$ to be equal to:
+    \begin{equation*}
+        \tilde{\alpha}_t(z) = p(z_t | \boldsymbol x_1,\dots,\boldsymbol x_t) = \frac{\alpha_t(i)}{p(\boldsymbol x_{1:t})}
+    \end{equation*}
+    As, we will denote $\rho_t = p(\boldsymbol x_t | \boldsymbol x_{1:t-1})$, and from the product rule, we have $p(\boldsymbol x_{1:t}) = \prod^t_{i=1}\rho_i$, and so, we can recover:
+    \begin{equation*}
+        \alpha_t(i) = \bracka{\prod^t_{i=1} \rho_i} \tilde{\alpha}_t(i) = \bracka{\prod^{t-1}_{i=1} \rho_i} \rho_t \tilde{\alpha}_t(i)
+    \end{equation*}
+    Let's consider the recursive property of the $\alpha$, recall its formula:
+    \begin{equation*}
+    \begin{aligned}
+        &\alpha_{t+1}(i) = \bracka{\sum^L_{j=1}\alpha_t(j) \boldsymbol \Phi_{ij}}\boldsymbol A_i(\boldsymbol x_{t+1}) \\
+        \iff& \bracka{\prod^{n}_{i=1} \rho_i} \rho_{n+1} \tilde{\alpha}_{t+1}(i) = \bracka{\sum^L_{j=1}\brackb{\bracka{\prod^n_{i=1} \rho_i} \tilde{\alpha}(\boldsymbol z_n)} \boldsymbol \Phi_{ij}}\boldsymbol A_i(\boldsymbol x_{t+1}) \\
+        \iff& \rho_{n+1} \tilde{\alpha}_{t+1}(i) = \bracka{\sum^L_{j=1}\tilde{\alpha}(\boldsymbol z_n) \boldsymbol \Phi_{ij}}\boldsymbol A_i(\boldsymbol x_{t+1}) \\
+    \end{aligned}
+    \end{equation*}
+    Thus, we have proven the identity. For $\beta_t(i)$. we can consider the fact that $\hat{\beta}_t(i)$ is:
+    \begin{equation*}
+        \beta_t(i) = \bracka{\prod^N_{i=t+1} c_i}\hat{\beta}_t(i)
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(Decoding/Derivation of Viterbi)}}
+    We are interested in finding the best hidden state path given the observations $\boldsymbol o_{1:t}$, together with the following quantity $\delta_t(i)$:
+    \begin{equation*}
+    \begin{aligned}
+        \brackc{z_1^*,\dots,z_t^*} &= \argmax{z_1, \dots,z_t} p(z_1,\dots,z_t, \boldsymbol x_{1:t} = \boldsymbol o_{1:t} | \boldsymbol \theta) \\
+        \delta_t(i) &= p(z_1,\dots,z_{t-1}, z_t=i, \boldsymbol x_{1:t} = \boldsymbol o_{1:t} | \boldsymbol \theta)
+    \end{aligned}
+    \end{equation*}
+    We can see that we can use the induction step to find this value:
+    \begin{equation*}
+        \delta_{t+1}(j) = \brackb{\max_i \delta_t(i)\Phi_{ij}}A_i(\boldsymbol o_{t+1})
+    \end{equation*}
+    This recursion gives us the Viterbi algorithm.
+\end{remark}
+
+\begin{definition}{\textbf{(Viterbi Algorithm)}}
+    The algorithm to find the best path is given by, where the sequence of hidden state is stored in $\psi$:
+    \begin{itemize}
+        \item Initialization:
+        \begin{equation*}
+            \delta_1(i) = \pi_ib_i(\boldsymbol o_{1}) \qquad \psi_1(i) = 0
+        \end{equation*}
+        \item Induction Step:
+        \begin{equation*}
+            \delta_t(j) = \brackb{\max_{i \in [L]}\delta_{t-1}(i)a_{ij}}b_j(\boldsymbol o_t) \qquad \psi_t(j) = \argmax{i \in [L]}\delta_{t-1}(i)a_{ij}
+        \end{equation*}
+        \item Termination:
+        \begin{equation*}
+            P^* = \max_{i\in[L]} [\delta_T(i)] \qquad
+            q^*_T = \argmax{i\in[L]} [\delta_T(i)] \qquad
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(Multiple sequences)}}
+    We now consider the update for HMM but with multiple sequences $l \in [L]$, which we can show that the batch update is:
+    \begin{equation*}
+        \pi_i = \frac{1}{L}\sum^L_{l=1}\gamma_1^{(l)}(i) 
+        \qquad \boldsymbol \Phi_{ij} = \frac{\sum^L_{l=1}\sum^{T^{(i)}-1}_{t=1} \xi_t^{(l)}(i\rightarrow j)}{\sum^L_{l=1} \sum^{T^{(i)}}_{t=1}\gamma_t^{(l)}(i)} \qquad
+        \boldsymbol A_{ik} = \frac{\sum^L_{l=1}\sum^{T^{(i)}-1}_{t=1} \delta(\boldsymbol x_t = k) \gamma_t^{(l)}(i\rightarrow j)}{\sum^L_{l=1} \sum^{T^{(i)}}_{t=1}\gamma_t^{(l)}(i)} 
+    \end{equation*}
+\end{remark}

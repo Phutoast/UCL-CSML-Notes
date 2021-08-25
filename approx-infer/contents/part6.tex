@@ -1,0 +1,316 @@
+\section{Exponential families: Convexity, Duality and Free Energies}
+
+\begin{definition}{\textbf{(Log-Partition Function)}}
+    Consider the exponential family distribution with sufficient statistics $\boldsymbol s(\boldsymbol x)$ and natural parameter $\boldsymbol \theta$. We have the following probability to be $P(\boldsymbol x| \boldsymbol \theta) = \exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x) - \boldsymbol \Phi(\boldsymbol \theta))$, where $\boldsymbol \Phi(\boldsymbol \theta)$ is the log-partition, where:
+    \begin{equation*}
+        \boldsymbol \Phi(\boldsymbol \theta) = \log \int \exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}{\textbf{(Derivative of Log Partitions)}}
+    We can show that:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial \boldsymbol \theta} \boldsymbol \Phi(\boldsymbol \theta) = \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x|\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)] = \boldsymbol \mu(\boldsymbol \theta) \\
+        &\frac{\partial^2}{\partial \boldsymbol \theta^2} \boldsymbol \Phi(\boldsymbol \theta) = \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x|\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)^2] - \mathbb{E}_{\boldsymbol x\sim P(\boldsymbol x|\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)^2] = \mathbb{V}_{\boldsymbol x \sim P(\boldsymbol x|\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)] 
+    \end{aligned}
+    \end{equation*}
+    The second derivative is positive semi-definite and so $\boldsymbol \Phi(\boldsymbol \theta)$ is convex in $\boldsymbol \theta$. 
+\end{proposition}
+\begin{proof}
+    The first result is the old results. Now, consider the second derivation as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial^2}{\partial^2 \boldsymbol \theta} \boldsymbol \Phi(\boldsymbol \theta) &= \frac{\partial}{\partial \boldsymbol \theta} \brackb{ \exp(-\boldsymbol \Phi(\boldsymbol \theta)) \int \boldsymbol s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x } \\
+        &=\begin{aligned}[t]
+            \brackb{\frac{\partial}{\partial \boldsymbol \theta} \exp(-\boldsymbol \Phi(\boldsymbol \theta))} &\int \boldsymbol  s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x \\
+            &+ \exp(-\boldsymbol \Phi(\boldsymbol \theta))\brackb{ \frac{\partial}{\partial \boldsymbol \theta} \int \boldsymbol  s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x } \\
+        \end{aligned} \\
+        &=\begin{aligned}[t]
+            -\exp(-\boldsymbol \Phi(\boldsymbol \theta)) &\brackb{\frac{\partial}{\partial \boldsymbol \theta} \boldsymbol\Phi(\boldsymbol \theta) } \int s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x \\
+            &+ \exp(-\boldsymbol \Phi(\boldsymbol \theta))\brackb{ \frac{\partial}{\partial \boldsymbol \theta} \int \boldsymbol  s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x } \\
+        \end{aligned} \\
+        &=\begin{aligned}[t]
+            -\exp(-\boldsymbol \Phi(\boldsymbol \theta)) &\brackb{\frac{\partial}{\partial \boldsymbol \theta} \boldsymbol\Phi(\boldsymbol \theta) } \int \boldsymbol s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x \\
+            &+ \exp(-\boldsymbol \Phi(\boldsymbol \theta))\brackb{\int \boldsymbol s(\boldsymbol x)^2\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x } \\
+        \end{aligned} \\
+        &=\begin{aligned}[t]
+            &-\brackb{\exp(-\boldsymbol \Phi(\boldsymbol \theta))  \int \boldsymbol s(\boldsymbol x)\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x }^2+ \exp(-\boldsymbol \Phi(\boldsymbol \theta))\brackb{\int \boldsymbol s(\boldsymbol x)^2\exp(\boldsymbol \theta^T\boldsymbol s(\boldsymbol x))\dby \boldsymbol x } \\
+        \end{aligned} \\
+        &= - \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x |\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)^2] + \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x|\boldsymbol \theta)}[\boldsymbol s(\boldsymbol x)^2]
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Convex Duality/Conjugate)}}
+    Given a function $f^*(\boldsymbol x)$, we denote the duality/conjugate of the function is:
+    \begin{equation*}
+        f(\boldsymbol y) = \sup_{\boldsymbol x\in\mathcal{X}}\Big( \boldsymbol y^T\boldsymbol x - f(\boldsymbol x) \Big)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Negative Entropy of Mean parameter)}}
+    The negative entropy of the distribution as a function of mean parameter: 
+    \begin{equation*}
+    \begin{aligned}
+        \Psi(\boldsymbol \mu) = \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x|\boldsymbol \theta)}[\log P(\boldsymbol x | \boldsymbol \theta )] &= \boldsymbol \theta^T \mathbb{E}[\boldsymbol s(\boldsymbol x)] - \boldsymbol \Phi(\boldsymbol \theta) = \boldsymbol \theta^T \boldsymbol \mu - \boldsymbol \Phi(\boldsymbol \theta) \\
+    \end{aligned}
+    \end{equation*}
+    Note that the variable $\boldsymbol \mu$ is arbitary:
+\end{definition}
+
+\begin{lemma} 
+    We can observe that the derivative of negative entropy recovers the natural parameter
+    \begin{equation*}
+        \frac{d}{d\boldsymbol \mu} \boldsymbol \Psi(\boldsymbol \mu) = \boldsymbol \theta
+    \end{equation*}
+    This related to dual function.
+\end{lemma}
+\begin{proof}
+    We have the following distribution:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{d}{d\boldsymbol \mu} \boldsymbol \Psi(\boldsymbol \mu) &= \frac{\partial}{\partial\boldsymbol \mu}(\boldsymbol \theta^T\boldsymbol \mu - \boldsymbol \Phi(\boldsymbol \theta)) + \frac{d\boldsymbol \theta}{d\boldsymbol \mu}\frac{\partial}{\partial \boldsymbol \theta} (\boldsymbol \theta^T\boldsymbol \mu - \boldsymbol \Psi(\boldsymbol \theta)) \\
+        &= \boldsymbol \theta + \frac{d\boldsymbol \theta}{d\boldsymbol \theta} (\boldsymbol \mu-\boldsymbol \mu) = \boldsymbol \theta
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}{\textbf{(Duality Between Partition and Entropy)}}
+    One can show that partition and entroy are duality of each other:
+    \begin{equation*}
+        \boldsymbol \Psi(\boldsymbol \mu) = \sup_{\boldsymbol \theta'}\Big[ (\boldsymbol \theta')^T\boldsymbol \mu - \boldsymbol \Phi(\boldsymbol \theta') \Big] \qquad \boldsymbol \Phi(\boldsymbol \theta) = \sup_{\boldsymbol \mu'}\Big[\boldsymbol \theta^T\boldsymbol \mu' - \boldsymbol \Psi(\boldsymbol \mu')\Big]
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Consider the KL-divergence between distribution with natural parameter $\boldsymbol \theta$ and $\boldsymbol \theta'$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{KL}[p \| q] &= \operatorname{KL}\brackb{P(\boldsymbol x|\boldsymbol \theta) \Big\| P(\boldsymbol x | \boldsymbol \theta') } \\
+        &= \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x | \boldsymbol \theta)}\Big[ -\log P(\boldsymbol x | \boldsymbol \theta') + \log P(\boldsymbol x | \boldsymbol \theta) \Big] \\
+        &= \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x | \boldsymbol \theta)}\Big[ -\log P(\boldsymbol x | \boldsymbol \theta') \Big]+ \mathbb{E}_{\boldsymbol x \sim P(\boldsymbol x | \boldsymbol \theta)}\Big[\log P(\boldsymbol x | \boldsymbol \theta) \Big] \\
+        &= -(\boldsymbol \theta')^T\boldsymbol \mu + \boldsymbol \Phi(\boldsymbol \theta') + \boldsymbol \Psi(\boldsymbol \mu)\ge0
+    \end{aligned}
+    \end{equation*}
+    We can see that $\boldsymbol \Psi(\boldsymbol \mu)\ge (\boldsymbol \theta')^T\boldsymbol \mu - \boldsymbol \Phi(\boldsymbol \theta')$. With the minimization of KL to be $\boldsymbol \theta = \boldsymbol \theta'$, and so we have the first dual formula, while the second formula comes from the dual property (dual of dual is the function itself). 
+\end{proof}
+
+\begin{remark}{\textbf{(Another Proof)}}
+    One can consider the $\sup$ by finding derivative and set it to zero:
+    \begin{equation*}
+        \frac{\partial}{\partial \boldsymbol \theta'} \Big[ (\boldsymbol \theta')^T\boldsymbol \mu - \boldsymbol \Phi(\boldsymbol \theta') \Big] = \boldsymbol \mu - \boldsymbol \mu(\boldsymbol \theta) = 0
+    \end{equation*}
+    Setting to zero and we have that $\boldsymbol \mu = \boldsymbol \mu(\boldsymbol \theta)$, plugging it back and we get the negative entropy. This is the same as the second formula as:
+    \begin{equation*}
+        \frac{\partial}{\partial \boldsymbol \mu'} \Big[ \boldsymbol \theta^T\boldsymbol \mu' - \boldsymbol \Psi(\boldsymbol \mu') \Big] = \boldsymbol \theta - \boldsymbol \theta(\boldsymbol \mu) = 0
+    \end{equation*}
+    Note that $\boldsymbol \theta(\boldsymbol \mu)$ doesn't have a full definition but we can consider it from the definition of negative entropy. Thus, complete the proof.
+\end{remark}
+
+\begin{remark}{\textbf{(Free Energy and Dual)}}
+    We have the following components:
+    \begin{itemize}
+        \item Joint exponential family distribution of observed $\boldsymbol x$ and $\boldsymbol z$:
+        \begin{equation*}
+            P(\boldsymbol x, \boldsymbol z | \boldsymbol \theta) = \exp\Big[ \boldsymbol \theta^T\boldsymbol s(\boldsymbol x, \boldsymbol z) - \Phi_{xz}(\boldsymbol \theta) \Big]
+        \end{equation*}
+        \item The posterior $\boldsymbol z$ is in exponential family with clamped sufficient statistics:
+        \begin{equation*}
+            P(\boldsymbol z | \boldsymbol x, \boldsymbol \theta) = \exp\Big[ \boldsymbol \theta^T\boldsymbol s_z(\boldsymbol z;\boldsymbol x) - \Phi_z(\boldsymbol \theta) \Big]
+        \end{equation*}
+        where we have $s_z(\boldsymbol z;\boldsymbol x) = \boldsymbol s_{xz}(\boldsymbol x^\text{obs};\boldsymbol z)$
+    \end{itemize}
+    We consider the likelihood (of observed variables) to be as:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{L}(\boldsymbol \theta) 
+        &= P(\boldsymbol x | \boldsymbol \theta) = \int \exp\Big[ \boldsymbol \theta^T\boldsymbol s(\boldsymbol x, \boldsymbol z) - \Phi_{xz}(\boldsymbol \theta) \Big] \dby \boldsymbol z \\
+        &= \int \exp\Big[ \boldsymbol \theta^T\boldsymbol s(\boldsymbol x, \boldsymbol z) \Big] \exp\Big[- \Phi_{xz}(\boldsymbol \theta) \Big]\dby \boldsymbol z \\
+        &= \exp\Big[- \Phi_{xz}(\boldsymbol \theta) \Big]\int \exp\Big[ \boldsymbol \theta^T\boldsymbol s(\boldsymbol z; \boldsymbol x) \Big] \dby \boldsymbol z \\
+        &= \exp\Big[- \Phi_{xz}(\boldsymbol \theta) \Big] \exp\Big[ \Phi_{z}(\boldsymbol \theta) \Big] \\
+    \end{aligned}
+    \end{equation*}
+    We can see that the log-likelihood is given as:
+    \begin{equation*}
+    \begin{aligned}
+        \log \mathcal{L}(\boldsymbol \theta) = l(\boldsymbol \theta) &= \Phi_{z}(\boldsymbol \theta) - \Phi_{xz}(\boldsymbol \theta) \\
+        &= \sup_{\boldsymbol \mu_z}\Big[ \boldsymbol\theta^T\boldsymbol \mu_z - \Psi(\boldsymbol \mu_z) \Big] - \Phi_{xz}(\boldsymbol \theta) \\
+        &= \sup_{\boldsymbol \mu_z}\Big[ \underbrace{\boldsymbol\theta^T\boldsymbol \mu_z - \Phi_{xz}(\boldsymbol \theta)}_{\brackd{\log P(\boldsymbol x, \boldsymbol z)}_q} - \underbrace{\Psi(\boldsymbol \mu_z)}_{-H[q]} \Big] = \sup_{\boldsymbol \mu_z}\mathcal{F}(\boldsymbol \theta, \boldsymbol \mu_z)
+    \end{aligned}
+    \end{equation*}
+    Please note that, we can see $\boldsymbol \mu_z = \mathbb{E}_{\boldsymbol z \sim q(\boldsymbol z)}$ for some variational distribution $q$ (that we want to optimize). And so, one can recovere the free energy formulation from the duality of entropy and expected sufficient statistics.
+\end{remark}
+
+\begin{remark}{\textbf{(Optimization of Free Energy)}}
+    We can see that the optimization over the $\boldsymbol \mu$ directly, as:
+    \begin{equation*}
+        \boldsymbol \mu_z^* = \argmax{\boldsymbol \mu_z}\Big[ \boldsymbol \theta^T\boldsymbol \mu_z - \Psi(\boldsymbol \mu) \Big]
+    \end{equation*}
+    This is concave maximization; however, we have $2$ complications to the problem:
+    \begin{itemize}
+        \item The optimization must be found out feasible means. Interdependence of the sufficient statistics may prevent arbitary sets of mean sufficient statistics being achieved.
+        \item The feasible means are convex combination of all single configuration of sufficient statistics:
+        \begin{equation*}
+            \boldsymbol \mu = \int \nu(\boldsymbol x)s(\boldsymbol x)\dby \boldsymbol x \qquad \qquad \int \mu(\boldsymbol x)\dby \boldsymbol x = 1
+        \end{equation*}
+        \item Let's consider the Boltzman machine on $2$ variables, as we have:
+        \begin{itemize}
+            \item Consider the Boltzman machine on $2$ variables as we have $x_1$ and $x_2$:
+            \begin{equation*}
+                E = \frac{1}{Z}\exp\bracka{-\sum_{i < j}w_{ij}x_ix_j + \sum_i\theta_ix_i}
+            \end{equation*}
+            \item Sufficient statistics of the Boltzman machine is: $\boldsymbol s(\boldsymbol x_1, \boldsymbol x_2) = [\boldsymbol x_1,\boldsymbol x_2, \boldsymbol x_1\boldsymbol x_2]$
+            \item There are only $4$ states as we have: $\mathcal{S} = \{ [0,0,0], [0,1,0], [1,0,0], [1,1,1] \}$
+            \item It is clear that $\boldsymbol \mu$ is in the convex hull of $\mathcal{S}$. 
+        \end{itemize}
+        \item For discrete distribution, the space of possible mean is bounded exponentially many hyperplanes connected the discrete configuration set called marginal polytrope.
+        \item Even with marginal polytrope to marginal polytrope, evaluating $\boldsymbol\Psi(\boldsymbol \mu)$ is challenging.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Undirected Tree and Markov Random Field)}}
+    We can parameterize a discrete MFR:
+    \begin{equation*}
+    \begin{aligned}
+        P(\mathcal{X}) &= \frac{1}{Z}\prod_if_i(\boldsymbol x_i)\prod_{ij}f_{ij}(\boldsymbol x_i, \boldsymbol x_j) \\
+        &= \exp\bracka{ \sum_i\sum_k\theta_i(k)\delta(\boldsymbol x_i = k) + \sum_{ij}\sum_{k,l}\theta_{ij}(k,l)\delta(\boldsymbol x_i = k)\delta(\boldsymbol x_j = l) - \Phi(\boldsymbol \theta) }
+    \end{aligned}
+    \end{equation*}
+    Disrete MRF are always exponential family, with natural and mean parameter:
+    \begin{equation*}
+        \boldsymbol \theta = \Big[\theta_i(k) \quad \theta_{ij}(k, l)\Big] \quad \boldsymbol \mu = \Big[ P(\boldsymbol x_i = k) \quad P(\boldsymbol x_i = k, \boldsymbol x_j = l) \Big]
+    \end{equation*}
+    for all $i,j,k,l$. In particular, the mean parameter are just singleton and pairwise probability tables. 
+\end{remark}
+
+\begin{remark}{\textbf{(Entropy of MRF)}}
+    If the MRF has tree structure $T$ and the negate entropy, can be written in term of single state entropy and mutual information on edges as (note the reparameterization and the tree structure):
+    \begin{equation*}
+    \begin{aligned}
+        \Psi(\boldsymbol \mu_T) &= \mathbb{E}_{\boldsymbol x_i \sim P(\boldsymbol x | \boldsymbol \theta_T)}\brackb{ \log \prod_i P(\boldsymbol x_i)\prod_{(ij) \in \operatorname{edge}(T)} \frac{P(\boldsymbol x_i, \boldsymbol x_j)}{P(\boldsymbol x_i)P(\boldsymbol x_j)} } \\
+        &= -\sum_iH(\boldsymbol x_i) +\sum_{(ij)\in\operatorname{edge}(T)}I(\boldsymbol x_i, \boldsymbol x_j)
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Bathe Energy of Free Energy)}}
+    Let's consider the Bathe free energy, as a relaxation of the free-energy optimization, which is denoted as:
+    \begin{equation*}
+        \boldsymbol \mu^*_z = \argmax{\boldsymbol \mu_z}\Big[ \boldsymbol \theta^T\boldsymbol \mu_z - \Psi(\boldsymbol \mu_z) \Big]
+    \end{equation*}
+    Consider the set $\mathcal{M}$ as the set of feasible means. Now, we have the following relaxiation:
+    \begin{itemize}
+        \item \emph{Feasible Set} Relax the $\mathcal{M}$ to be $\mathcal{L}$ be the set of locally consistent means (all nested means marginalized correctly), instead of being globally estimate.
+        \item \emph{Approximate} $\Psi(\boldsymbol \mu_z)$ is the entropy of an arbitary graph. However, it is hard to evaluate it exactly, and so we consider a result from tree structure but in the final calculation, we consider every edges:
+        \begin{equation*}
+            \Psi_\text{Bathe}(\boldsymbol \mu_z) = -\sum_iH(\boldsymbol x_i) +\sum_{(ij)\in\operatorname{edge}(G)}I(\boldsymbol x_i, \boldsymbol x_j)
+        \end{equation*}
+    \end{itemize}
+    Please note that $\mathcal{L}$ is still a convex set. However, $\Psi_\text{Bathe}$ isn't convex (Please recall the dual formulation as we can find $\Phi$ instead). 
+\end{remark}
+
+\begin{remark}{\textbf{(Upperbound on Log Partition)}}
+    Consider upperbound on $\Phi(\boldsymbol \theta)$, imagine a set of spanning tree $T$ for the MRF, with corresponding: $\boldsymbol \theta_T$ and $\boldsymbol \mu_T$ (can be done by padding the entries corresponding to off-tree edges with zero, and so $\boldsymbol \theta_T$ have the same size of $\boldsymbol \theta$). Consider the following:
+    \begin{itemize}
+        \item Consider the distribution over the spanning tree $\beta$ as, we need $\mathbb{E}_\beta[\boldsymbol \theta_T] = \boldsymbol \theta$. Using the convexity of $\Phi$:
+        \begin{equation*}
+            \Phi(\boldsymbol \theta) = \Phi(\mathbb{E}_\beta[\boldsymbol \theta_T]) \le \mathbb{E}_\beta[\Phi(\boldsymbol \theta_T)]
+        \end{equation*}
+        \item The tighter upperbound can be obtained by minimizing $\Phi$ as we have:
+        \begin{equation*}
+            \Phi(\boldsymbol \theta) \le \inf_{ \boldsymbol\theta_T : \mathbb{E}_\beta[\boldsymbol \theta_T] = \boldsymbol \theta} \mathbb{E}_\beta[\Phi(\boldsymbol \theta_T)] = \Phi_\beta(\boldsymbol \theta)
+        \end{equation*}
+        \item We can maximize the free-energy as we want (together with the Lagrange multiplier) and so, we have, the following optimization problem:
+        \begin{equation*}
+            \sup_{\boldsymbol \lambda}\inf_{\boldsymbol \theta_T} \Big(\mathbb{E}_\beta[\Phi(\boldsymbol \theta_T)] - \boldsymbol\lambda^T(\mathbb{E}_\beta[\boldsymbol \theta_T] - \boldsymbol \theta)\Big)
+        \end{equation*}
+    \end{itemize}
+\end{remark}
+
+\begin{proposition}{\textbf{(Solving Optimization - Tighter Bound)}}
+    Given the following optimization problem:
+    \begin{equation*}
+        \sup_{\boldsymbol \lambda}\inf_{\boldsymbol \theta_T} \Big(\mathbb{E}_\beta[\Phi(\boldsymbol \theta_T)] - \boldsymbol\lambda^T(\mathbb{E}_\beta[\boldsymbol \theta_T] - \boldsymbol \theta)\Big)
+    \end{equation*}
+    This implies that $\boldsymbol \mu_T = \Pi_T(\boldsymbol\lambda)$ as it is Lagrange multiplier corresponding to non-zero element of $\boldsymbol \theta$ for each tree (but the $\boldsymbol \mu$ stays the same (for all tree), see tree-reparametrisation view of BP). The Lagrange multiplier and $\Phi_\beta(\boldsymbol \theta)$ can be find by:
+    \begin{equation*}
+        \Phi_\beta(\boldsymbol \theta) = \sup_{\boldsymbol \lambda} \boldsymbol \lambda^T\boldsymbol \theta + \sum_i H_\lambda(\boldsymbol \theta) - \sum_{ij}\beta_{ij}I_\lambda(\boldsymbol x_i, \boldsymbol x_j)
+    \end{equation*}
+    where $\beta_{ij}$ is the probability distribution over tree. 
+\end{proposition}
+\begin{proof}
+    Consider the derivative of Lagrange multiplier as we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial \boldsymbol \theta_T} \sum_T\beta(T)\Phi(\boldsymbol \theta_T) - \boldsymbol \lambda^T\frac{\partial}{\partial \boldsymbol \theta_T}\sum_{\boldsymbol T}\beta(\boldsymbol T) \boldsymbol \theta_T = 0 \\
+        \iff& \beta(T)\boldsymbol \mu_T - \beta(T)\Pi_T(\boldsymbol \lambda) = 0 \\
+        \iff& \boldsymbol \mu_T = \Pi_T(\boldsymbol \lambda)
+    \end{aligned}
+    \end{equation*}
+    Thus the first point is proven. Now, consider the $\Phi_\beta(\boldsymbol \beta)$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \Phi_\beta(\boldsymbol \theta) &= \sup_{\boldsymbol \lambda}\inf_{\boldsymbol \theta_T} \Big(\mathbb{E}_\beta[\Phi(\boldsymbol \theta_T)] - \boldsymbol\lambda^T(\mathbb{E}_\beta[\boldsymbol \theta_T] - \boldsymbol \theta)\Big) \\
+        &= \sup_{\boldsymbol \lambda} \boldsymbol \lambda^T\boldsymbol \theta + \mathbb{E}_\beta\brackb{\inf_{\boldsymbol \theta_T} \Big(\Phi(\boldsymbol \theta_T) - \boldsymbol \theta^T_T\Pi_T(\boldsymbol \lambda) \Big) } \\
+        &= \sup_{\boldsymbol \lambda} \boldsymbol \lambda^T\boldsymbol \theta + \mathbb{E}_\beta\Big[-\Psi(\Pi_T(\boldsymbol \lambda))\Big] \\
+        &= \sup_{\boldsymbol \lambda} \boldsymbol \lambda^T\boldsymbol \theta + \mathbb{E}_\beta\brackb{\sum_i H_\lambda(\boldsymbol x_i) - \sum_{(ij)\in T}I_\lambda(\boldsymbol x_i, \boldsymbol x_j)} \\
+        &= \sup_{\boldsymbol \lambda} \boldsymbol \lambda^T\boldsymbol \theta + \sum_i H_\lambda(\boldsymbol x_i) - \sum_{(ij)\in T}\beta_{ij}I_\lambda(\boldsymbol x_i, \boldsymbol x_j) \\
+    \end{aligned}
+    \end{equation*}
+    Thus the proposition is proven. 
+\end{proof}
+
+\begin{remark}{\textbf{(Interpretation of Result)}}
+    This is the convexifaction of the Bethe free energy. We can optimization with respected to $\boldsymbol \lambda$, which is approximate inference applied to tightest bound on $\Phi(\boldsymbol \theta)$ for a fixed $\beta$. The bound can be tighten by the optimization of $\beta$.
+\end{remark}
+
+\begin{remark}{\textbf{(Bathe Free Energy and EP - Setup)}}
+    A Bathe-like approach also casts EP as variational energy fixed point method. Consider the marginals of a posterior distribution by cliques potential:
+    \begin{equation*}
+        P(\mathcal{Z}) \propto f_0(\mathcal{Z})\prod_i f_i(\mathcal{Z})
+    \end{equation*}
+    There are some remarks on each of the components:
+    \begin{itemize}
+        \item All factors are exponential form
+        \item $f_0$ is tractable exponential family (possible uniform)
+        \item $f_i$ are jointly intractable, but the product can't be marginalized, although individual terms maybe tractable. 
+    \end{itemize}
+    We consider the tractable exponential family terms with zero natural parameter together with the tractable sufficient statistics $\tilde{s}(\mathcal{Z}_i)$ as (can be seen as an approximating sites):
+    \begin{equation*}
+        P(\mathcal{Z}) = \exp\bracka{\boldsymbol \theta^T_0\boldsymbol s_0(\mathcal{X})}\prod_i\exp\bracka{\boldsymbol \theta_i^T\boldsymbol s_i(\mathcal{Z}_i)}\exp\bracka{\boldsymbol 0^T\tilde{\boldsymbol s}(\mathcal{Z}_i)}
+    \end{equation*}
+    Now, we can consider any given natural parameter $\tilde{\boldsymbol \theta}$ but it will be initialized with $\boldsymbol 0$ (it can change):
+    \begin{equation*}
+        P(\mathcal{Z}) = \exp\bracka{\boldsymbol \theta^T_0\boldsymbol s_0(\mathcal{X}) + \sum_i \boldsymbol \theta_i^T\boldsymbol s_i(\mathcal{Z}_i) + \tilde{\boldsymbol \theta}^T\tilde{\boldsymbol s}(\mathcal{Z}_i)}
+    \end{equation*}
+    The variational dual principle will tell us that the expected sufficient statistics:
+    \begin{equation*}
+        \boldsymbol \mu^*_0 = \brackd{\boldsymbol s_0}_P \qquad \boldsymbol \mu^*_i = \brackd{\boldsymbol s_i(\mathcal{Z})}_P  \qquad \tilde{\boldsymbol \mu}_i^* = \brackd{\tilde{\boldsymbol s}_i}_P
+    \end{equation*}
+    which are also the maximization of the likelihood, which is given by:
+    \begin{equation*}
+        \brackc{\boldsymbol \mu^*_0, \boldsymbol \mu^*_i, \tilde{\boldsymbol \mu}_i^*} = \argmax{\brackc{\boldsymbol \mu_0, \boldsymbol \mu_i, \tilde{\boldsymbol \mu}_i} \in \mathcal{M}} \brackb{\boldsymbol \theta^T_0\boldsymbol \mu_0 + \sum_i(\boldsymbol \theta^T_i + \boldsymbol 0^T\tilde{\boldsymbol \mu}_i) - \Phi(\boldsymbol \mu_0, \boldsymbol \mu_i, \tilde{\boldsymbol \mu}_i)}
+    \end{equation*}
+    Note that the negative entropy terms is evaluated over the full distribution i.e $\tilde{\boldsymbol \theta}$ doesn't have to be zero.
+\end{remark}
+
+\begin{remark}{\textbf{(EP Relaxiation)}}
+    We consider the following relaxation to get the EP:
+    \begin{itemize}
+        \item We will have to relax the feasible sets $\mathcal{M}$, as we want a local consistency instead of global, where:
+        \begin{itemize}
+            \item We want all edges connecting $\brackc{\boldsymbol \mu_0, \tilde{\boldsymbol \mu}_i}$, as $\boldsymbol \mu_0$ is the expected sufficient statistics over all $\mathcal{Z}$, thus we need it, when marginalized, to be consistent with all $\tilde{\mu}_i$
+            \item We want all pairs $\bracka{\boldsymbol \mu_i, \tilde{\boldsymbol \mu}_i}$ to be consistent also. This is equivalent to projection step (in EP) as we are matching expected sufficient statistics. 
+        \end{itemize}
+        \item The message entropy should be given by:
+        \begin{equation*}
+            \Phi_\text{Bathe}(\brackc{\boldsymbol \mu_0, \tilde{\boldsymbol \mu}_i}) - \sum_i\bracka{H[\boldsymbol \mu_i, \tilde{\boldsymbol \mu}_i] - H[\tilde{\boldsymbol \mu}_i]}
+        \end{equation*}
+        We have all graph structure entropy (without $\boldsymbol \mu_i$) together with conditional entropy (which is joint entropy minus by individual entropy)
+        \item By doing this, we have dropped all the intractable terms and use the tractable terms to do the calculation (and talk to each other).  
+        \item Free-energy based approximation marginal include $\mu_i$ and run reparameterization on a junction graph. 
+        \item Direct learning on EP free-energy would use these marginal rather than approximate one and a local normalizer from the integration over $f_i(\mathcal{Z}_i)q_{\neg i}(\mathcal{Z}_i)$ (see the last part of the EP section.)
+    \end{itemize}
+\end{remark}
+
+

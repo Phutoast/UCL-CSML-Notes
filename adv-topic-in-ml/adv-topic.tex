@@ -1,0 +1,163 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage[colorlinks]{hyperref}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm} 
+\usepackage{algpseudocode} 
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{cancel}
+\usepackage{hyperref}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{shadows}
+\usetikzlibrary{positioning}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{example}{Example}[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+ 
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+
+\newcommand{\Phu}[1]{{\bf \color{red} [[Phu: #1]]}}
+\setlength\parindent{0pt}
+\setlength\parskip{5pt}
+\usepackage[margin=1.0in]{geometry}
+
+\newcommand{\dby}{\ \mathrm{d}}
+\newcommand{\argmax}[1]{\underset{#1}{\arg\max \ }}
+\newcommand{\argmin}[1]{\underset{#1}{\arg\min \ }}
+\newcommand{\const}{\text{const.}}
+\newcommand{\bracka}[1]{\left( #1 \right)}
+\newcommand{\brackb}[1]{\left[ #1 \right]}
+\newcommand{\brackc}[1]{\left\{ #1 \right\}}
+\newcommand{\brackd}[1]{\left\langle #1 \right\rangle}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\correctquote}[1]{``#1''}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+% From https://tex.stackexchange.com/questions/194426/split-itemize-into-multiple-columns
+\usepackage{etoolbox,refcount}
+\usepackage{multicol}
+
+\newcounter{countitems}
+\newcounter{nextitemizecount}
+\newcommand{\setupcountitems}{%
+  \stepcounter{nextitemizecount}%
+  \setcounter{countitems}{0}%
+  \preto\item{\stepcounter{countitems}}%
+}
+\makeatletter
+\newcommand{\computecountitems}{%
+  \edef\@currentlabel{\number\c@countitems}%
+  \label{countitems@\number\numexpr\value{nextitemizecount}-1\relax}%
+}
+\newcommand{\nextitemizecount}{%
+  \getrefnumber{countitems@\number\c@nextitemizecount}%
+}
+\newcommand{\previtemizecount}{%
+  \getrefnumber{countitems@\number\numexpr\value{nextitemizecount}-1\relax}%
+}
+\makeatother    
+\newenvironment{AutoMultiColItemize}{%
+\ifnumcomp{\nextitemizecount}{>}{3}{\begin{multicols}{2}}{}%
+\setupcountitems\begin{itemize}}%
+{\end{itemize}%
+\unskip\computecountitems\ifnumcomp{\previtemizecount}{>}{3}{\end{multicols}}{}}
+
+
+\title{Advanced Topics in Machine Learning}
+\author{Phu Sakulwongtana}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Convex Optimization}
+\input{notes/Opitimization.tex}
+
+\chapter{RKHS in Machine Learning}
+\input{notes/RKHS.tex}
+
+\chapter{Statisical Learning}
+\input{notes/statLearning.tex}
+
+\appendix
+\chapter{Additional Proof}
+\input{notes/RKHSAppendix.tex}
+\input{notes/statLearningAppendix.tex}
+
+
+% \section{Introduction}
+
+% \begin{algorithm}[H]
+%     \caption{$PSRO_{RN}$}
+% 	\begin{algorithmic}[1]
+% 	    \State \textbf{Input}: Initial Population $\mathcal{B}_1$
+% 		\For {$i=1,2,\cdots, T$}
+% 		    \State $p \leftarrow \text{Nash}(A_{\mathcal{B}_i})$
+% 		    \For {agent $v_i$ with positive mass in $p_t$}
+%                 \State $v_{i+1} \leftarrow \text{oracle}(v_i, \sum_{w \in \mathcal{B}_i} p[i](\phi_{v_i}(\cdot))_+)$
+%             \EndFor
+%             \State $\mathcal{B}_{i+1} = \mathcal{B} \cup \{v_{i+1} : \text{as updated above}\}$
+% 		\EndFor
+% 	\end{algorithmic} 
+% \end{algorithm}
+
+% \begin{table}[!h]
+%   \centering
+%   \begin{tabular}{lcccc}
+%     \toprule
+%     \textbf{Methods/Metrics}     & \textbf{Accuracy}  & \textbf{Precision} &  \textbf{Recall}  & \textbf{F1} \\
+%     \midrule
+%     Logistic Regression          & $48.26 \pm 0.0f0$  & $49.79 \pm 0.00$  & $47.94 \pm 0.00$  & $47.75 \pm 0.00$  \\
+%     Support Vector Machine       & $\mathbf{48.91} \pm 0.00$  & $\mathbf{50.50} \pm 0.00$  & $\mathbf{48.95} \pm 0.00$  & $\mathbf{49.18 }\pm 0.00$  \\
+%     Random Forest Classifier     & $44.38 \pm 1.57$  & $44.60 \pm 1.60$  & $44.30 \pm 1.58$  & $44.38 \pm 1.57$  \\
+%     \midrule
+%     Multi-Dimensional ELO        & $34.51 \pm 3.12$  & $23.01 \pm 2.06$  & $33.70 \pm 3.03$  & $27.33 \pm 2.47$  \\
+%     TrueSkill\texttrademark      & $44.99 \pm 0.00$  & $45.26 \pm 0.00$  & $44.17 \pm 0.00$  & $38.32 \pm 0.00$  \\
+%     \bottomrule
+%   \end{tabular}
+  
+%   \caption{Results from average of 10 random seeds with 2 standard deviations. The top rows are baseline and the bottom are proposed methods. Precision, Recall and F1 are all macro-averaged. Note that some of the standard deviations are near zero. All deep learning models are trained for 3 epochs.}
+  
+%   \label{table:result-table}
+%   \vspace{-16pt}
+% \end{table}
+
+% \begin{AutoMultiColItemize}
+%   \item Item 1
+%   \item Item 2
+%   \item Item 3
+%   \item Item 4
+%   \item Item 5
+%   \item Item 6
+% \end{AutoMultiColItemize}
+
+
+% \bibliographystyle{plain}
+% \bibliography{references}
+\end{document}

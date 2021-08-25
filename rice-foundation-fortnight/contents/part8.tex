@@ -1,0 +1,596 @@
+\section{Linear Least Squares}
+
+\begin{remark}{\textbf{(Vocabulary Used)}}
+    We consider the straight like is to fit the points $(y_i, x_i)$ where $i=1,\dots,n$ where we call the following components: $y$ is called dependent/response variables. $x$ is called independent/predictor variables.
+\end{remark}
+
+\begin{definition}{\textbf{(Objective)}}
+    We are interested to minimize the following objective function:
+    \begin{equation*}
+        S(\beta_0, \beta_1) = \sum^n_{i=1}(y_i - \beta_0 - \beta_1x_i)^2
+    \end{equation*}
+    where we consider to find the $\beta_0$ and $\beta_1$ that minimizes this value. 
+\end{definition}
+
+\begin{proposition}{\textbf{(Solution of Simiple Linear Regression)}}
+    We can show that the expression of $\beta_0$ and $\beta_1$ can be found (given the dataset $\brackc{(y_i, x_i)}^n_{i=1}$)  as:
+    \begin{equation*}
+        \hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x} \qquad \hat{\beta}_1 = \frac{\sum^n_{i=1}(x_i - \bar{x})(y_i-\bar{y})}{\sum^n_{i=1}(x_i - \bar{x})^2}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the derivative of the objective with respected to $\beta_0$ and $\beta_1$ as we have:
+    \begin{equation*}
+        \frac{\partial S}{\partial \beta_0} = -2\sum^n_{i=1}(y_i - \beta_0 - \beta_1x_i) \qquad
+        \frac{\partial S}{\partial \beta_1} = -2\sum^n_{i=1}x_i(y_i - \beta_0 - \beta_1x_i) \qquad
+    \end{equation*}
+    Setting the partial derivative to zero, we have the minimizer of $\hat{\beta}_0$ and $\hat{\beta}_1$ to be:
+    \begin{equation*}
+        \sum^n_{i=1}y_i = n\hat{\beta}_0 + \hat{\beta}_1\sum^n_{i=1}x_i \qquad \sum^n_{i=1}x_iy_i = \hat{\beta}_0 \sum^n_{i=1}x_i + \hat{\beta}_1\sum^n_{i=1}x_i^2
+    \end{equation*}
+    which we can solve for the $\hat{\beta}_0$ and $\hat{\beta}_1$ to obtain:
+    \begin{equation*}
+        \hat{\beta}_0 = \frac{\bracka{\sum^n_{i=1}x_i^2}\bracka{\sum^n_{i=1}y_i} - \bracka{\sum^n_{i=1} x_i}\bracka{\sum^n_{i=1}x_iy_i}}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} \qquad \hat{\beta}_1 = \frac{n\sum^n_{i=1}x_iy_i - \bracka{\sum^n_{i=1}x_i}\bracka{\sum^n_{i=1}y_i}}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2}
+    \end{equation*}
+    With some rearrangement, and we have the required expression.
+\end{proof}
+
+\begin{remark}{\textbf{(Adding Non-Linearity)}}
+    We can consider the non-linear transformation of the input $x_i$ before perform the linear Least square to increase the capacity of the model. 
+\end{remark}
+
+\begin{definition}{\textbf{(Linear Least Square)}}
+    It is a function of the form:
+    \begin{equation*}
+        f(x_1,x_2,\dots,x_{p-1}) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots + \beta_{p-1}x_{p-1}
+    \end{equation*}
+    This involves $p$ unknown parameters $\beta_0, \beta_1,\dots,\beta_{p-1}$ as we fit the $n$ data points:
+    \begin{equation*}
+    \begin{aligned}
+        y_1, x_{11}, x_{12}&,\dots,x_{1,p-1} \\
+        y_2, x_{21}, x_{22}&,\dots,x_{2,p-1} \\
+        &\vdots \\
+        y_n, x_{n1}, x_{n2}&,\dots,x_{n,p-1} \\
+    \end{aligned}
+    \end{equation*}
+    The function $f(x)$ is called linear regression of $y$ on $x$. We will always assume that $p < n$.
+\end{definition}
+
+\subsection{Simple Linear Regression}
+
+\begin{definition}{\textbf{(Statistical Model)}}
+    We consider the observed value of $y$ is a linear function $x$ plus the random noise:
+    \begin{equation*}
+        y_i = \beta_0 + \beta_1 x_i + e_i \qquad i =1,\dots,n
+    \end{equation*}
+    Here $e_i$ is the independent random variable with $\mathbb{E}[e_i] = 0$ and $\operatorname{var}(e_i) = \sigma^2$. Furthermore, $x_i$ is assumed to be fixed. We will consider the statistics of $\beta_0$ and $\beta_1$, which are $\hat{\beta}_0$ and $\hat{\beta}_1$ respectively. 
+\end{definition}
+
+\begin{proposition}
+    Under the assumption of the standard statistical model, the least square estimate are unbiased as $\mathbb{E}[\hat{\beta}_j] = \beta_j$ for $j = 0, 1$
+\end{proposition}
+\begin{proof}
+    We will consider the proof for $\hat{\beta}_0$ only as the proof for $\beta_1$ is similar. Note that $\mathbb{E}[y_i] = \beta_0 + \beta_1 x_i$:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[\hat{\beta}_0] &= \frac{\bracka{\sum^n_{i=1}x_i^2}\bracka{\sum^n_{i=1} \mathbb{E}[y_i]} - \bracka{\sum^n_{i=1} x_i}\bracka{\sum^n_{i=1}x_i\mathbb{E}[y_i]}}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} \\
+        &= \frac{\bracka{\sum^n_{i=1}x_i^2}\bracka{n\beta_0 + \beta_1\sum^n_{i=1} x_i} - \bracka{\sum^n_{i=1} x_i}\bracka{\beta_0\sum^n_{i=1}x_i + \beta_1\sum^n_{i=1}x_i^2}}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} \\
+        &= \beta_0
+    \end{aligned}
+    \end{equation*}
+    Thus complete the proof.
+\end{proof}
+
+\begin{theorem}
+    Under the assuption of the standard statistical model, we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\operatorname{var}(\hat{\beta}_0) = \frac{\sigma^2\sum^n_{i=1}x_i^2}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2}\qquad \operatorname{var}(\hat{\beta}_1) = \frac{n\sigma^2}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} \\
+        &\operatorname{cov}(\hat{\beta}_0, \hat{\beta}_1) = \frac{-\sigma^2\sum^n_{i=1}x_i}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2}
+    \end{aligned}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We will consider the more general proof later. 
+\end{proof}
+
+\begin{definition}{\textbf{(Residual Sum of Squares)}}
+    We define RSS to be:
+    \begin{equation*}
+        \operatorname{RSS} = \sum^n_{i=1}(y_i - \hat{\beta}_0 - \hat{\beta}_1x_i)^2
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Statistical Testing)}}
+    The value of $\sigma^2$ is used to find the variance $\hat{\beta}_0$ and $\hat{\beta}_1$. Replacing the $\sigma^2$ by $s^1$ yielding estimates that we will denote $s^2_{\hat{\beta}_0}$ and $s^2_{\hat{\beta}_1}$. We will show that:
+    \begin{equation*}
+        s^2 = \frac{\text{RSS}}{n-2}
+    \end{equation*}
+    It is unbiased estimate of $\sigma^2$. If the error $e_i$ are independent normal random variable, then the linear combination of them are normal distributed as well. Furthermore, we have:
+    \begin{itemize}
+        \item If $e_i$ are independent and $x_i$ satisfies certain assumption, a version of CLT implies that (for large $n$)m the estimated slow and intercept are approximately normally distributed. 
+        \item The normality assuption, makes possible to construct of confidence interval and hypothesis test, which can be shown that:
+        \begin{equation*}
+            \frac{\hat{\beta}_i - \beta_i}{s_{\hat{\beta}_i}}\sim t_{n-2}
+        \end{equation*}
+        We allows the $t$ distribution to be used for CI and hypothesis tests.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Correlation)}}
+    Let's start with finding the correlation coefficient, which is equal to:
+    \begin{equation*}
+        r = \frac{s_{xy}}{\sqrt{s_{xx}s_{yy}}}
+    \end{equation*}
+    where we have:
+    \begin{equation*}
+        s_{xx} = \frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2 \qquad 
+        s_{yy} = \frac{1}{n}\sum^n_{i=1}(y_i-\bar{y})^2 \qquad 
+        s_{xy} = \frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})(y_i-\bar{y}) \qquad 
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(On connection between Correlation)}}
+    We can show that the slope of the least square line is given by:
+    \begin{equation*}
+        \hat{\beta}_1 = \frac{s_{xy}}{s_{xx}} \qquad r = \hat{\beta}_1\sqrt{\frac{s_{xx}}{s_{yy}}}
+    \end{equation*}
+    The correlation is zero iff the slope is zero. Furthermore, if $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1x$, as we have the $\hat{\beta}_1$ is expressed the terms of $r$, then after some manipulation, we have:
+    \begin{equation*}
+        \frac{\hat{y} - \bar{y}}{\sqrt{s_{yy}}} = r\frac{x-\bar{x}}{\sqrt{s_{xx}}}
+    \end{equation*}
+    We can interpret the following equation to be:
+    \begin{itemize}
+        \item Suppose that $r>0$ and that $x$ is one standard deviation greater than its average, the $y$ is $r$ standard deviation bigger than its average. 
+        \item The predicted value thus deviates from its average by few standard deviation than does the predictor. (as $r\le 1$)
+        \item In unit of standard deviations, it is closer to its average than is the predictor. 
+    \end{itemize}
+\end{remark}
+
+\subsection{Matrix Approach}
+
+\begin{remark}{\textbf{(Matrix Formulation)}}
+    Consider the model of the form:
+    \begin{equation*}
+        y = \beta_0 + \beta_1x_1 + \cdots + \beta_{p-1}x_{p-1}
+    \end{equation*}
+    It is to be fit to data, which we denote as $y_i, x_{i1},x_{i2},\dots,x_{ip-1}$ as we have $i=1,\dots,n$. We have:
+    \begin{itemize}
+        \item $\boldsymbol Y$ is a vector of observations $y_i$ where $i=1,\dots,n$.
+        \item $\boldsymbol \beta$ is the unknown $\beta_0, \dots,\beta_{p-1}$. 
+        \item $\boldsymbol X_{n\times p}$ being the matrix:
+        \begin{equation*}
+            \boldsymbol X = \begin{bmatrix}
+                1 & x_{11} & x_{12} & \cdots & x_{1,p-1} \\
+                1 & x_{21} & x_{22} & \cdots & x_{2,p-1} \\
+                \vdots & \vdots & \ddots & \vdots \\
+                1 & x_{n1} & x_{n2} & \cdots & x_{n,p-1} \\
+            \end{bmatrix}
+        \end{equation*}
+    \end{itemize}
+    We have the predicted value to be given by $\hat{\boldsymbol Y} = \boldsymbol X\boldsymbol \beta$.  We want to find $\boldsymbol \beta$ to minimize:
+    \begin{equation*}
+    \begin{aligned}
+        S(\boldsymbol \beta) &= \sum^n_{i=1}(y_i - \beta_0 - \beta_1x_{i1} - \cdots - \beta_{p-1}x_{i,p-1})^2 \\
+        &= \norm{\boldsymbol Y - \boldsymbol X\boldsymbol \beta}^2 = \norm{\boldsymbol Y - \hat{\boldsymbol Y}}^2
+    \end{aligned}
+    \end{equation*}
+    Note that the residual can be find out as $\boldsymbol Y - \boldsymbol X\hat{\boldsymbol \beta}$, where $\hat{\boldsymbol \beta}$ is the solution to the optimization problem.
+\end{remark}
+
+\begin{proposition}{\textbf{(Solution of Least Square)}}
+    If $\boldsymbol X^T\boldsymbol X$ is non-singular, the formal solution is given as:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} = (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol Y
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    If differetiate the $S$ with respected to each $\beta_k$, then we see that the minimizer of $\hat{\beta}_0,\dots,\hat{\beta}_{p-1}$ satisfies the following equation:
+    \begin{equation*}
+    \begin{aligned}
+        &n\hat{\beta}_0 + \hat{\beta}_1\sum^n_{i=1}x_{i1} + \cdots + \hat{\beta}_{p-1}\sum^n_{i=1}x_{i,p-1} = \sum^n_{i=1}y_i \\
+        &\hat{\beta}_0\sum^n_{i=1}x_{ij} + \hat{\beta}_1\sum^n_{i=1}x_{i1}x_{ik} + \cdots + \hat{\beta}_{p-1}\sum^n_{i=1}x_{ik}x_{i,p-1} = \sum^n_{i=1}y_ix_{ik} \qquad k=1,\dots,p-1
+    \end{aligned}
+    \end{equation*}
+    This can be written in the matrix form as $\boldsymbol X^T\boldsymbol X\hat{\boldsymbol \beta} = \boldsymbol X^T\boldsymbol Y$ this is called normal equation, and the results above follows. 
+\end{proof}
+
+\begin{lemma}
+    If $\boldsymbol X^T\boldsymbol X$ is non-singular iff the rank of $\boldsymbol X$ equals to $p$. 
+\end{lemma}
+\begin{proof}
+    Suppose that $\boldsymbol X^T\boldsymbol X$ is singular. There exiss a non-zero vector $\boldsymbol u$ such that: $\boldsymbol X^T\boldsymbol X\boldsymbol u = \boldsymbol 0$. Multiply the left-handside of this equation by $\boldsymbol u^T$, we have:
+    \begin{equation*}
+        \boldsymbol  0 = \boldsymbol u^T\boldsymbol X^T\boldsymbol X\boldsymbol u = (\boldsymbol X\boldsymbol u)^T(\boldsymbol X\boldsymbol u)
+    \end{equation*}
+    And so $\boldsymbol X\boldsymbol u=\boldsymbol 0$, thu rank $\boldsymbol X$ is less than $p$. Now suppose that the rank of $\boldsymbol X$ is less than $p$, then there is a vector $\boldsymbol u$ such that $\boldsymbol X\boldsymbol u = \boldsymbol 0$. Then $\boldsymbol X^T\boldsymbol X\boldsymbol u=\boldsymbol 0$ hence $\boldsymbol X^T\boldsymbol X$ is singular.
+\end{proof}
+
+\begin{remark}{\textbf{(On equivalent to eariler derivation)}}
+    Let's consider each matrices:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol X^T\boldsymbol X = 
+        \begin{bmatrix}
+            1 & \cdots & 1 \\
+            x_1 & \cdots & x_n
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 & x_1 \\
+            \vdots & \vdots \\
+            1 & x_n
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            n & \sum^n_{i=1}x_i \\
+            \sum^n_{i=1}x_i & \sum^n_{i=1}x_i^2
+        \end{bmatrix} \\
+        &(\boldsymbol X^T\boldsymbol X)^{-1} = \frac{1}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} 
+        \begin{bmatrix}
+            \sum^n_{i=1}x_i^2 & -\sum^n_{i=1}x_i \\
+            -\sum^n_{i=1}x_i & n 
+        \end{bmatrix} \\
+        &\boldsymbol X^T\boldsymbol Y = \begin{bmatrix}
+            \sum^n_{i=1}y_i \\ \sum^n_{i=1}x_iy_i
+        \end{bmatrix}
+    \end{aligned}
+    \end{equation*}
+    And so, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \hat{\boldsymbol \beta} &= \begin{bmatrix}
+            \hat{\beta}_0 \\ \hat{\beta}_1 
+        \end{bmatrix} = (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol Y \\
+        &= \frac{1}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} 
+        \begin{bmatrix}
+            \sum^n_{i=1}x_i^2 & -\sum^n_{i=1}x_i \\
+            -\sum^n_{i=1}x_i & n 
+        \end{bmatrix} \begin{bmatrix}
+            \sum^n_{i=1}y_i \\ \sum^n_{i=1}x_iy_i
+        \end{bmatrix} \\
+        &= \frac{1}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2}\begin{bmatrix}
+        \bracka{\sum^n_{i=1}x_i^2}\bracka{\sum^n_{i=1}y_i} - \bracka{\sum^n_{i=1} x_i}\bracka{\sum^n_{i=1}x_iy_i} \\
+        n\sum^n_{i=1}x_iy_i - \bracka{\sum^n_{i=1}x_i}\bracka{\sum^n_{i=1}y_i}
+        \end{bmatrix}
+    \end{aligned}
+    \end{equation*}
+    Thus the equivalent is established.
+\end{remark}
+
+\subsection{Statistical Properties of Least Square}
+
+\begin{definition}{\textbf{(Mean Vector and Covariance Matrix)}}
+    Given the random vector, $\boldsymbol Y$, the element, which are jointly distributed random variables:
+    \begin{equation*}
+        \mathbb{E}[Y_i] = \mu_i \qquad \operatorname{cov}(Y_i, Y_j) = \sigma_{ij}
+    \end{equation*}
+    The mean vector $\boldsymbol \mu_Y$ and the covariance matrix $\boldsymbol \Sigma$ of $\boldsymbol Y$, are defined as:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol Y] = \boldsymbol \mu_Y = \begin{bmatrix}
+            \mu_1 \\ \mu_2 \\ \vdots \\ \mu_n
+        \end{bmatrix} \qquad \qquad \boldsymbol Z = \begin{bmatrix}
+            \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1n} \\
+            \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2n} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            \sigma_{n1} & \sigma_{n2} & \cdots & \sigma_{nn} \\
+        \end{bmatrix}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}
+    If $\boldsymbol Z = \boldsymbol c + \boldsymbol A\boldsymbol Y$ where $\boldsymbol Y$ is a random variable and $\boldsymbol A$ a matrix with $\boldsymbol c$ a fixed vector, then:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol Z] = \boldsymbol c + \boldsymbol A \mathbb{E}[\boldsymbol Y]
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    The $i$-th components of $\boldsymbol Z$ is given as:
+    \begin{equation*}
+        Z_i = c_i + \sum^n_{j=1}a_{ij}Y_j \implies \mathbb{E}[Z_i] = Z_i = c_i + \sum^n_{j=1}a_{ij}\mathbb{E}[Y_j]
+    \end{equation*}
+    The implication follows from the linearity of the expectation. As this can be written in matrix form, this completes the proof.
+\end{proof}
+
+\begin{proposition}
+    Given the same setting as the above, if the covariance matrix of $\boldsymbol Y$ is $\boldsymbol \Sigma_{YY}$, then the covariance of $\boldsymbol Z$ is:
+    \begin{equation*}
+        \boldsymbol \Sigma_{ZZ} = \boldsymbol A\boldsymbol \Sigma_{YY}\boldsymbol A^T
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    The constant $\boldsymbol c$ doesn't affect the covariance:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{cov}(Z_i, Z_j) = \operatorname{cov}\bracka{\sum^n_{k=1}a_{ik}Y_k, \sum^n_{l=1}a_{jl}Y_l} = \sum^n_{k=1}\sum^n_{l=1}a_{ik}a_{jl}\operatorname{cov}(Y_k, Y_l) = \sum^n_{k=1}\sum^n_{l=1}a_{ik}\sigma_{kl}a_{jl}
+    \end{aligned}
+    \end{equation*}
+    The last expression in $ij$ element of the desired matrix.
+\end{proof}
+
+\begin{proposition}
+    Let $\boldsymbol X$ be a random $n$ vector with means $\boldsymbol \mu$ and covariance $\boldsymbol \Sigma$ and let $\boldsymbol A$ be fixed matrix:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol X^T\boldsymbol A\boldsymbol X] = \operatorname{tr}[\boldsymbol A\boldsymbol \Sigma] + \boldsymbol \mu^T\boldsymbol A\boldsymbol \mu
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    The trace of square matrix is defined to be sum of diagonal terms, as we have:
+    \begin{equation*}
+        \mathbb{E}[X_iX_j] = \sigma_{ij} + \mu_i\mu_j
+    \end{equation*}
+    We have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}\bracka{\sum^n_{i=1}\sum^n_{j=1}X_iX_ja_{ij}} &= \sum^n_{i=1}\sum^n_{j=1}\sigma_{ij}a_{ij} + \sum^n_{i=1}\sum^n_{j=1}\mu_i\mu_ja_{ij} \\
+        &= \operatorname{tr}[\boldsymbol A\boldsymbol \Sigma] + \boldsymbol \mu^T\boldsymbol A\boldsymbol \mu
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(Alternative Proof of Variance Estimator)}}
+    We are interested in finding $\mathbb{E}[\sum^n_{i=1}(X_i-\bar{X})^2]$ where $X_i$ is uncorrelated random variable with common mean $\mu$. Note that the vector $\bar{X}$ is given as:
+    \begin{equation*}
+        \bar{X} = \frac{1}{n}\boldsymbol 1^T\boldsymbol X
+    \end{equation*}
+    THe entries of check are $\bar{X}$ can be written as: $(1/n)\boldsymbol 1\boldsymbol 1^T\boldsymbol X$ and $\boldsymbol A$ can be written as:
+    \begin{equation*}
+        \boldsymbol A = \boldsymbol I - \frac{1}{n}\boldsymbol 1\boldsymbol 1^T
+    \end{equation*}
+    Thus, it is clear that:
+    \begin{equation*}
+        \sum^n_{i=1}(X_i - \bar{X})^2 = \norm{\boldsymbol A\boldsymbol X}^2 = \boldsymbol X^T\boldsymbol A^T\boldsymbol A\boldsymbol X = \boldsymbol X^T\boldsymbol A\boldsymbol X
+    \end{equation*}
+    Note that the matrix $\boldsymbol A$ is symmetric and $\boldsymbol A^2 = \boldsymbol A$, where note that $\boldsymbol 1^T\boldsymbol 1 = n$. Finally, consider the expectation of the summation, which we can use our results:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol X^T\boldsymbol A\boldsymbol X] = \sigma^2\operatorname{tr}[\boldsymbol A] + \boldsymbol \mu^T\boldsymbol A\boldsymbol \mu = \sigma^2(n-1)
+    \end{equation*}
+    where $\boldsymbol \mu = \mu \boldsymbol 1$, it can be verified that $\boldsymbol A\boldsymbol \mu = 0$, als trace $\boldsymbol A = n-1$, so we have the value required.
+\end{remark}
+
+\begin{definition}{\textbf{(Cross-Covariance Matrix)}}
+    Given the random vectors $\boldsymbol Y \in \mathbb{R}^{p\times 1}$ and $\boldsymbol Z \in \mathbb{R}^{m\times 1}$, then the cross-covariance of $\boldsymbol Y$ and $\boldsymbol Z$ is defined to be $\boldsymbol \Sigma \in \mathbb{R}^{p\times m}$ with $ij$ element $\sigma_{ij} = \operatorname{cov}(Y_i, Z_j)$. The entries quanify the strengths of linear relationship between elements of $\boldsymbol Y$ and $\boldsymbol Z$. 
+\end{definition}
+
+\begin{proposition}
+    Let $\boldsymbol X$ be a random vector with covariance matrix $\boldsymbol \Sigma_{XX}$ if $\boldsymbol Y = \boldsymbol A\boldsymbol X$ and $\boldsymbol Z = \boldsymbol B\boldsymbol X$ where $\boldsymbol A \in \mathbb{R}^{p\times n}$ and $\boldsymbol B\in \mathbb{R}^{m\times n}$, where the cross-covariance matrix of $\boldsymbol Y$ and $\boldsymbol Z$ is:
+    \begin{equation*}
+        \boldsymbol \Sigma_{YZ} = \boldsymbol A\boldsymbol \Sigma_{XX}\boldsymbol B^T
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}{\textbf{(Alternative Proof of Independence)}}
+    Consider a random vector $\boldsymbol X$ of size $n$ with $\mathbb{E}=\mu\boldsymbol I$ and $\boldsymbol \Sigma_{XX} = \sigma^2\boldsymbol I$. Let $Y = \bar{X}$ and $\boldsymbol Z$ be vector with $i$-th element $\boldsymbol X_i - \bar{\boldsymbol X}$. Let's consider the $\boldsymbol \Sigma_{ZY} \in \mathbb{R}^{n\times 1}$ as we have:
+    \begin{equation*}
+        \boldsymbol Z = \bracka{\boldsymbol I - \frac{1}{n}\boldsymbol 1\boldsymbol 1^T}\boldsymbol X \qquad Y = \frac{1}{n}\boldsymbol 1^T\boldsymbol X
+    \end{equation*}
+    From theorem above, we have:
+    \begin{equation*}
+        \boldsymbol \Sigma_{ZY} = \bracka{\boldsymbol I - \frac{1}{n}\boldsymbol 1\boldsymbol 1^T}(\sigma^2 \boldsymbol I)\bracka{\frac{1}{n}\boldsymbol 1}
+    \end{equation*}
+    This comes $\mathbb{R}^{n\times 1}$ vector of zeros. Thus, the mean $\bar{X}$ is uncorrelated with each of $X_i - \bar{X}$ for $i=1,\dots,n$. This implies that $\bar{X}$ and $S^2$ are independent of each other. 
+\end{remark}
+
+\begin{remark}{\textbf{(Least Squares Estimates)}}
+    We consider the following model to be:
+    \begin{equation*}
+        Y_i = \beta_0 + \sum^{p-1}_{j=1}\beta_jx_{ij} + e_i \qquad i=1,\dots,n
+    \end{equation*}
+    where $e_i$ are the random error, as we have:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol e_i] = 0\qquad \operatorname{var}(e_i) = \sigma^2 \qquad \operatorname{cov}(e_i, e_j) = 0 \quad i\ne j
+    \end{equation*}
+    Given the matrix notation as we have $\boldsymbol Y = \boldsymbol X\boldsymbol \beta + \boldsymbol e$, as we have:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol e] = \boldsymbol 0 \qquad \boldsymbol \Sigma_{ee} = \sigma^2\boldsymbol I
+    \end{equation*}
+\end{remark}
+
+\begin{theorem}{\textbf{(Unbias)}}
+    Given the assumption that the error has mean $0$, the least square estimate is unbiased. 
+\end{theorem}
+\begin{proof}
+    The least square estimate of $\boldsymbol \beta$ is given:
+    \begin{equation*}
+    \begin{aligned}
+        \hat{\boldsymbol \beta} &= (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol Y \\
+        &= (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T(\boldsymbol X\boldsymbol \beta + \boldsymbol e) \\
+        &= \boldsymbol \beta + (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol e
+    \end{aligned}
+    \end{equation*}
+    From the results aboue, we have the following expectation:
+    \begin{equation*}
+        \mathbb{E}[\hat{\boldsymbol \beta}] = \boldsymbol \beta + (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T \mathbb{E}[\boldsymbol e] = \boldsymbol \beta
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}{\textbf{(Covaraince Matrix of Least Square)}}
+    Under the assumption that the error have mean zero and uncorrelated with constant variance $\sigma^2$, the covariance matrix of the least square estimate $\hat{\boldsymbol \beta}$ is:
+    \begin{equation*}
+        \boldsymbol \Sigma_{\hat{\beta}\hat{\beta}} = \boldsymbol \sigma^2(\boldsymbol X^T\boldsymbol X)^{-1}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    From the results above, we have:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol \Sigma_{\hat{\beta}\hat{\beta}} &= (\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol \Sigma_{ee} \boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1} \\
+        &= \sigma^2(\boldsymbol X^T\boldsymbol X)^{-1}
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+        
+\begin{remark}{\textbf{(Recovery of Original Result)}}
+    We return to the case of fitting a straight like. From the computation of $(\boldsymbol X^T\boldsymbol X)^{-1}$ as we have:
+    \begin{equation*}
+        \boldsymbol \Sigma_{\hat{\beta}\hat{\beta}} =  \frac{\sigma^2}{n\sum^n_{i=1}x_i^2 - \bracka{\sum^n_{i=1}x_i}^2} 
+        \begin{bmatrix}
+            \sum^n_{i=1}x_i^2 & -\sum^n_{i=1}x_i \\
+            -\sum^n_{i=1}x_i & n 
+        \end{bmatrix} \\
+    \end{equation*}
+    And so we have the variance and covaraince results, which are the same as above.
+\end{remark}
+
+\begin{remark}{\textbf{(Residual Vector)}}
+    Because $\sigma^2$ is the expected square value of an error $e_i$, its is natural to use the sample average squared the residual, as we have:
+    \begin{equation*}
+        \hat{\boldsymbol e} = \boldsymbol Y - \hat{\boldsymbol Y} = \boldsymbol Y - \boldsymbol X\hat{\boldsymbol \beta} = \boldsymbol Y - \boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T\boldsymbol Y = \boldsymbol Y - \boldsymbol P\boldsymbol Y
+    \end{equation*}
+    where $\boldsymbol P = \boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T$ is an $n\times n$ matrix. 
+\end{remark}
+
+\begin{lemma}
+    Let $\boldsymbol P$ be defined as before, then we have:
+    \begin{equation*}
+        \boldsymbol P = \boldsymbol P^T = \boldsymbol P^2 \qquad (\boldsymbol I - \boldsymbol P) = (\boldsymbol I - \boldsymbol P)^T = (\boldsymbol I - \boldsymbol P)^2
+    \end{equation*}
+\end{lemma}
+
+\begin{remark}
+    The $\boldsymbol P$ is the projection matrix that is $\boldsymbol P$ projects on the subspace of $\mathbb{R}^n$ spanned by the columns of $\boldsymbol X$. We may think geometrically of the fitted values, $\hat{\boldsymbol Y}$ as being the projection of $\boldsymbol Y$ onto subspace spanned by columns of $\boldsymbol X$.
+\end{remark}
+
+\begin{theorem}
+    Under the assumption that the error are uncorrelated with constant variance $\sigma^2$, an unbiased estimate of $\sigma^2$ is:
+    \begin{equation*}
+        s^2 = \frac{\norm{\boldsymbol Y - \hat{\boldsymbol Y}}^2}{n-p}
+    \end{equation*}
+    The sum of squared residual, $\norm{\boldsymbol Y - \hat{\boldsymbol Y}}^2$ is often denoted by RSS. 
+\end{theorem}
+\begin{proof}
+    The sum of squared residual is, using the lemma:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^n_{i=1}(Y_i - \hat{Y}_i)^2 = \norm{\boldsymbol Y - \boldsymbol P\boldsymbol Y}^2 = \norm{(\boldsymbol I - \boldsymbol P)\boldsymbol Y}^2 = \boldsymbol Y^T(\boldsymbol I-\boldsymbol P)^T(\boldsymbol I-\boldsymbol P)\boldsymbol Y
+    \end{aligned}
+    \end{equation*}
+    We can compute the expected value of this quadratic form:
+    \begin{equation*}
+        \mathbb{E}[\boldsymbol Y^T(\boldsymbol I-\boldsymbol P)\boldsymbol Y] = \mathbb{E}[\boldsymbol Y]^T(\boldsymbol I-\boldsymbol P)\mathbb{E}[\boldsymbol Y] + \sigma^2\operatorname{tr}(\boldsymbol I - \boldsymbol P)
+    \end{equation*}
+    Please note that $\mathbb{E}[\boldsymbol Y] = \boldsymbol X\boldsymbol \beta$ so we have:
+    \begin{equation*}
+        (\boldsymbol I - \boldsymbol P)\mathbb{E}[\boldsymbol Y] = \brackb{\boldsymbol I - \boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T}\boldsymbol X\boldsymbol \beta = \boldsymbol 0
+    \end{equation*}
+    Furthermore, we consider the trace terms as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{tr}(\boldsymbol I - \boldsymbol P) &= \operatorname{tr}(\boldsymbol I) - \operatorname{tr}(\boldsymbol P) \\
+        &= n - \operatorname{tr}\brackb{\boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol X^T} \\
+        &= n - \operatorname{tr}\brackb{\boldsymbol X^T\boldsymbol X(\boldsymbol X^T\boldsymbol X)^{-1}} \\
+        &= n - \operatorname{tr}[\boldsymbol I] = n-p
+    \end{aligned}
+    \end{equation*}
+    adding them together given us the result.
+\end{proof}
+
+\begin{proposition}
+    The covariance matrix of the residual is given by:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol \Sigma_{\hat{\boldsymbol e}\hat{\boldsymbol e}} &= (\boldsymbol I - \boldsymbol P)(\sigma^2\boldsymbol I)(\boldsymbol I - \boldsymbol P)^T = \sigma^2(\boldsymbol I - \boldsymbol P)
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+
+\begin{definition}{\textbf{(Standardized Residual)}}
+    To put residual in the familar scale corrsponding to the normal distribution with means $0$ and variance is:
+    \begin{equation*}
+        \frac{Y_i-\hat{Y}_i}{s\sqrt{1 - p_{ii}}}
+    \end{equation*}
+    where $p_{ii}$ is the $i$-th diagonal element of $\boldsymbol P$.
+\end{definition}
+
+\begin{theorem}
+    If the error have the covariance matrix $\sigma^2\boldsymbol I$, the residual are uncorrelated with the fitted values. 
+\end{theorem}
+\begin{proof}
+    The residual are $\hat{\boldsymbol e} = (\boldsymbol I - \boldsymbol P)\boldsymbol Y$, and the fitted values are:
+    \begin{equation*}
+        \hat{\boldsymbol Y} = \boldsymbol P\boldsymbol Y
+    \end{equation*}
+    from the theorem above, the cross-covaraince matrix of $\hat{\boldsymbol e}$ and $\hat{\boldsymbol Y}$ is given by:
+    \begin{equation*}
+        \Sigma_{\hat{e}\hat{Y}} = (\boldsymbol I-\boldsymbol P)(\sigma^2\boldsymbol I)\boldsymbol P^T = \sigma^2(\boldsymbol P^T-\boldsymbol P\boldsymbol P^T) = 0
+    \end{equation*}
+    Thus the theorem result is proven. 
+\end{proof}
+
+\begin{remark}{\textbf{(Inference About $\boldsymbol{\beta}$)}}
+    We have the following observation of the result:
+    \begin{itemize}
+        \item Each components $\hat{\beta}_i$ of $\hat{\boldsymbol \beta}$ can be show that it sample $\mathcal{N}(\beta_i, \sigma^2c_{ii})$, where $\boldsymbol C = (\boldsymbol X^T\boldsymbol X)^{-1}$
+        \item The standard error of $\hat{\beta}_i$ may thus be estimated as $s_{\hat{\beta}_i} = s\sqrt{c_{ii}}$
+    \end{itemize}
+    We will use this result to construct the CI and hypothesis test. Under normality assumption is given as:
+    \begin{equation*}
+        \frac{\hat{\beta}_i - \beta_i}{s_{\hat{\beta}_i}} \sim t_{n-p}
+    \end{equation*}
+    Now we have $100(1-\alpha)\%$ CI for $\beta_i$ so that: $\hat{\beta}_i \pm t_{n-p}(\alpha/2)s_{\hat{\beta}_i}$
+\end{remark}
+
+\begin{remark}{\textbf{(Test for Parameter)}}
+    To test the null hypothesis $H_0 : \beta_i = \beta_{i0}$ where $\beta_{i0}$ is a fixed number, we can use the test statistics:
+    \begin{equation*}
+        t = \frac{\hat{\beta}_i -\beta_{i0}}{s_{\hat{\beta}_i}}
+    \end{equation*}
+    Under the $H_0$ the test statistics follows the $t_{n-p}$. The most commonly tested null hypothesis is $H_0 : \beta_i =0$, which states that $x_i$ has no predicted value.
+\end{remark}
+
+\begin{remark}{\textbf{(Test for Prediction)}}
+    We can see that the obvious estimate is given as $\hat{\mu}_0 = \boldsymbol x_0^T\hat{\boldsymbol \beta}$. The variance of this estimate is given as:
+    \begin{equation*}
+        \operatorname{var}(\hat{\mu}_0) = \boldsymbol x_0^T\boldsymbol \Sigma_{\hat{\beta}\hat{\beta}}\boldsymbol x_0 = \sigma^2\boldsymbol x_0^T(\boldsymbol X^T\boldsymbol X)^{-1}\boldsymbol x_0
+    \end{equation*}
+    This variance can be estimated by substuiting $s^2$ for $\sigma^2$ as we have: $\hat{\mu}_0 \pm t_{n-p}(\alpha/2)s_{\hat{\mu}_0}$. Note that the variance depends on $\boldsymbol x_0$.
+\end{remark}
+
+\begin{definition}{\textbf{(Squared Multiple Correlated Coefficient)}}
+    This coefficient is simply defined as the squared correlation of the dependent variable and fitted values. It can be shown that it is equal to:
+    \begin{equation*}
+        R^2 = \frac{s_y^2 - s^2_{\hat{e}}}{s^2_y}
+    \end{equation*}
+    It is used as a crude measure of the strength of relationship that has been fitted by least squares. 
+\end{definition}
+
+\subsection{Conditional Inferece, Unconditional Inference, and Bootstrap}
+
+\begin{remark}{\textbf{(Differece View)}}
+    Instead of consider $\boldsymbol X$ and $\boldsymbol Y$ to be constant like most of the analysis above, we consider both variable to be random and use the boostrap to quanify the uncertainty in parameter estimates. 
+\end{remark}
+
+\begin{remark}{\textbf{(Some notations)}}
+    We consider the design matrix $\boldsymbol \Xi$ and particular realization of this random matrix will be denoted as $\boldsymbol X$. The rows of $\boldsymbol \Xi$ will be denoted by $\boldsymbol \xi_1,\boldsymbol \xi_2,\dots,\boldsymbol \xi_n$. In place of model $Y_i = \boldsymbol x_i\boldsymbol \beta + e_i$, where $\boldsymbol x_i$ is fixed and $e_i$ is random with mean $0$ and variance $\sigma^2$, where we have:
+    \begin{equation*}
+        \mathbb{E}[Y | \boldsymbol \xi = \boldsymbol x] = \boldsymbol X\boldsymbol \beta \qquad \operatorname{var}[Y | \boldsymbol \xi = \boldsymbol x] = \sigma^2
+    \end{equation*}
+    In the random $\boldsymbol X$ model, $\boldsymbol Y$ and $\boldsymbol \xi$ have a joint distribution and the data are modeled as $\boldsymbol n$ independent random vectors:
+    \begin{equation*}
+        (Y_1,\boldsymbol \xi_1), (Y_n,\boldsymbol \xi_2), \dots, (Y_n,\boldsymbol \xi_n)
+    \end{equation*}
+    Let's consider how the mean and the variance of the parameter given the uncertainty in the data points:
+    \begin{itemize}
+        \item $\mathbb{E}[\hat{\boldsymbol \beta} | \boldsymbol \Xi = \boldsymbol X ] = \boldsymbol \beta$. Using the nested expectation, we have:
+        \begin{equation*}
+            \mathbb{E}[\hat{\boldsymbol \beta}] = \mathbb{E}[\mathbb{E}[\hat{\boldsymbol \beta} | \boldsymbol \Xi]] = \mathbb{E}[\hat{\boldsymbol \beta}] = \hat{\boldsymbol \beta}
+        \end{equation*}
+        \item $\operatorname{var}[\hat{\beta}_i | \boldsymbol \Xi = \boldsymbol X] = \sigma^2(\boldsymbol X^T\boldsymbol X)^{-1}_{ii}$. Using the marginalized, we have:
+        \begin{equation*}
+        \begin{aligned}
+            \operatorname{var}(\hat{\beta}_i) &= \operatorname{var}[\mathbb{E}[\hat{\beta}_i | \boldsymbol \Xi]] + \mathbb{E}[\operatorname{var}[\hat{\beta}_i | \boldsymbol \Xi]] \\
+            &= \operatorname{var}(\beta_i) + \mathbb{E}[\sigma^2(\boldsymbol \Xi^T\boldsymbol \Xi)^{-1}_{ii}] \\
+            &= \sigma^2 \mathbb{E}[\boldsymbol \Xi^T\boldsymbol \Xi]^{-1}_{ii} 
+        \end{aligned}
+        \end{equation*}
+    \end{itemize} 
+    This is highlt non-linear function of the random vectors $\boldsymbol \xi_1,\boldsymbol \xi_2,\dots,\boldsymbol \xi_n$. This is hard to evaluate the analysically. 
+    \begin{itemize}
+        \item Surprisingly, it turns out that the CI still holds at their nominal level of coverage. Let $C(\boldsymbol X)$ denote the $100(1-\alpha)\%$ CI for $\beta_j$ for the old model. 
+        \item Using the $I_A$ denotes the indicator variable of the event $A$, we can express the fact that $100(1-\alpha)\%$ CI as: $\mathbb{E}[I\brackc{\beta_j \in C(\boldsymbol X)} | \boldsymbol \Xi = \boldsymbol X] = 1-\alpha$
+        \item Because the conditional probability of coverage is the same for every value of $\boldsymbol \Xi$, the unconditional probability of coverage $1-\alpha$:
+        \begin{equation*}
+            \mathbb{E}[I\brackc{\beta_j \in C(\boldsymbol X)}] = \mathbb{E}[\mathbb{E}[I\brackc{\beta_j \in C(\boldsymbol X)} | \boldsymbol \Xi = \boldsymbol X]] = \mathbb{E}[1-\alpha] = 1-\alpha
+        \end{equation*}
+        This is every useful result for forming the CI as we can use the old fixed-$\boldsymbol X$ model. 
+    \end{itemize}
+    We can complete this section by discussing how the boostrap can be used to estimate the variability of the parameter estimate under the new model. 
+\end{remark}

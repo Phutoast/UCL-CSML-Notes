@@ -1,0 +1,458 @@
+\section{Markov Chain (Monte Carlo)}
+
+\subsection{Markov Chain}
+
+\begin{definition}{\textbf{(Transition Matrix)}}
+    We consider the probability of state $i \in [d]$ will move to state $j \in [d]$ i.e $P_{i\rightarrow j}$, where $d$ is the number of states. This information for the markov chain is stored in $d\times d$ transtion matrix:
+    \begin{equation*}
+        \boldsymbol P = \begin{pmatrix}
+            P_{1 \rightarrow 1} & \cdots & P_{1 \rightarrow d} \\
+            \vdots & \ddots & \vdots \\
+            P_{d \rightarrow 1} & \cdots & P_{d \rightarrow d} \\
+        \end{pmatrix}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Initial Distribution)}}
+    At the start, we consider the distribution over the states:
+    \begin{equation*}
+        \boldsymbol p_\text{init} = \Big(p(x_0 = 1), \cdots, p(x_0=d)\Big)^T
+    \end{equation*}
+\end{definition}
+
+\begin{lemma}
+    Given the state distribution $p_t$, we can find the probability distribution over the next state after transtion $\boldsymbol p_{t+1}$ is:
+    \begin{equation*}
+        \boldsymbol p_{t+1} =  \boldsymbol P\boldsymbol p_t
+    \end{equation*}
+    Note that $ \boldsymbol p_t \in \mathbb{R}^{d \times 1}$ for any $t\in \mathbb{N}$
+\end{lemma}
+\begin{proof}
+    Consider the distribution of the first state:
+    \begin{equation*}
+        \boldsymbol p_{t+1}(s) = p(x_{t+1} = s) = \sum^d_{i=1}p(x_{t+1} = s | x_t = i)p(x_t = i) = \sum^d_{i=1}P_{si}\boldsymbol p_{t}[i]
+    \end{equation*}
+    And so it is proven. 
+\end{proof}
+
+\begin{definition}{\textbf{(Stationary)}}
+    Stationary markov chain is when the transtion matrix $\boldsymbol P$ doesn't depends on time step. 
+\end{definition}
+
+\begin{definition}{\textbf{(Equilibrium Distribution)}}
+    Let $\boldsymbol P$ be transtion matrix, then a distribution $\boldsymbol p$ such that: $\boldsymbol P\boldsymbol p = \boldsymbol p$ is called equilibrium distribution. 
+\end{definition}
+
+\begin{remark}
+    Please note that if we consider applying transtion matrix to any starting distribution:
+    \begin{equation*}
+        \boldsymbol p_\infty = \lim_{n\rightarrow} \boldsymbol P^n\boldsymbol p_\text{init}
+    \end{equation*}
+    assuming that it exists, then we can show that it gives rise to (somewhat) equilibrium distribution:
+    \begin{equation*} 
+        \boldsymbol P \boldsymbol p_\infty = \boldsymbol P \lim_{n\rightarrow} \boldsymbol P^n\boldsymbol p_\text{init} = \lim_{n\rightarrow} \boldsymbol P^n\boldsymbol p_\text{init} = \boldsymbol p_\infty 
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Aperiodic MC)}}
+    A stationary MC is aperiodic if: $\boldsymbol P_{ii} = 0$ for $i \in [d]$.
+\end{definition}
+
+\begin{definition}{\textbf{(Irreducible)}}
+    MC is irreducible if there is a path from each state to every other state in the transtion.
+\end{definition}
+
+\begin{theorem}
+    If first-order (depends only last time step), stationary MC with finite state space is a periodic and irreducible, then:
+    \begin{itemize}
+        \item Limit distribution $\boldsymbol p_\infty$ exists.
+        \item Limit distribution is also the equilibrium distribution.
+        \item Equilibrium distribution is unique. 
+        \item Equilibrium distribution doesn't depends on initial distribution.
+    \end{itemize}
+\end{theorem}
+
+\begin{definition}{\textbf{(Aperiodic State)}}
+    The state $i$ is a aperiodic if there exits a time $t$ such that for all $t\ge t_0$ with positive integer $t_0$, the state comes back to itself with positive probability. 
+\end{definition}
+
+\begin{definition}{\textbf{(Positive Recurrence State)}}
+    The state $i$ is positive recurrence if the expected number of times that it will return to itself is finite. 
+\end{definition}
+
+\begin{definition}{\textbf{(Ergodicity)}}
+    There exists a positive integer $t_0$, such that for all pair of states $i, j$, if markov chain starts at time $0$ at state $i$, then for all $t\ge t_0$, the probability of being in state $j$ at time $t$ is more than $0$. Note that this implies all states are positive recurrence and aperiodic.
+\end{definition}
+
+\begin{theorem}{\textbf{(Result of Ergodicity)}}
+    The ergodicity implies the existence of unique stationary distribution $\boldsymbol p_\infty$ given any initialized probability distribution. 
+\end{theorem}
+
+\begin{definition}{\textbf{(Detailed Balance wrt. $\boldsymbol p^*$)}}
+    The markov chain is detailed balance with respect to a stationary distribution $\boldsymbol p^*$ if for all states $i, j$:
+    \begin{equation*}
+        p^*_i P_{ij} = p^*_j P_{ji}
+    \end{equation*}
+    This also means that the markov chain is \emph{reversible} under this stationary distribution.
+\end{definition}
+
+\begin{remark}{\textbf{(Solving Detailed Balance)}}
+    Detailed balance implies that we have to solve $|\mathcal{S}|^2$ equation, which is more than the simple stationary equation, which require only $|\mathcal{S}|$ equations. 
+\end{remark}
+
+\begin{proposition}
+    The stationary distribution of detailed balance markov chain with respect to stationary distribution $\boldsymbol p^*$ is $\boldsymbol p^*$
+\end{proposition}
+\begin{proof}
+    We consider the summation over the detailed balance equation, as we have:
+    \begin{equation*}
+        \sum^{|\mathcal{S}|}_{i=1}p^*_i P_{ij} = \sum^{|\mathcal{S}|}_{i=1}p^*_j P_{ji} = p^*_j\sum^{|\mathcal{S}|}_{i=1} P_{ji} = p^*_j
+    \end{equation*}
+    This complete the proof.
+\end{proof}
+
+\begin{remark}{\textbf{(Ergodicity and Detailed Balance)}}
+    Eventhough the detailed balance with respect to stationary distribution $\boldsymbol p^*$, will have the stationary distribution to be $p^*$, this doesn't means that it is unique. For the uniqueness to hold, ergodicity is required. 
+\end{remark}
+
+\begin{remark}{\textbf{(Finding Equilibrium)}}
+    There are $2$ ways we can find the equilibrium: power method, and eigenvalue. Both of them is based on finding the underlying eigenvalue and eigenvectors.
+\end{remark}
+
+\begin{definition}{\textbf{(Random Walk)}}
+    Given a directed graph $G$ with $d$ vertices, a random walk generates a sequence of nodes: $x_0, x_1,\cdots$ by first select the vertex $x_0$ at random and, at time $t$, we uniformly at random select the children of $x_{t-1}$ to get to vertex $x_t$. 
+\end{definition}
+
+\begin{remark}
+    Random walk can be defined as a markov chain, where:
+    \begin{equation*}
+        \boldsymbol p_\text{init} = \bracka{\frac{1}{p},\cdots,\frac{1}{p}} \qquad P_{ij} = \begin{cases}
+            \cfrac{1}{\text{number of edges}} & \text{ if } i \text{ links to } $j$ \\
+            0 & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}
+    PageRank algorithm applies random walk to a graph, in order to make the original markov chain defined by a transtion matrix $\boldsymbol T$ to be irreducible and aperiodic:
+    \begin{equation*}
+        \boldsymbol P_{ij} = (1-\alpha)\boldsymbol T_{ij} + \frac{\alpha}{d}
+    \end{equation*}
+    where $\boldsymbol \alpha \in (0, 1)$
+\end{remark}
+
+\subsection{Sampling Algorithm}
+
+\begin{definition}{\textbf{(Sampling Algorithm)}}
+    Given a distribution $p$, the sampling algorithm samples to get the random point $\boldsymbol x_1,\dots,\boldsymbol x_n$ such that the marginal distribution is $p$. Ideally, the drawning are independent.
+\end{definition}
+
+\begin{remark}{\textbf{(Usefulness of Sampling Algorithm)}}
+    There are many use-cases of sampling algorithm notably:
+    \begin{itemize}
+        \item Compute expectation. Given the output $\boldsymbol x_1,\dots,\boldsymbol x_N$ to be independent from distribution $p$, the expectation is:
+        \begin{equation*}
+            \mathbb{E}[f(\boldsymbol x)] \approx \frac{1}{N}\sum^N_{i=1}f(\boldsymbol x_i)
+        \end{equation*}
+        \item We can approximate the distribution using the sample to perform a density estimation.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Sampling in Baysian Model)}}
+    Sometimes the posterior over parameter $\hat{q}(\boldsymbol \theta | \boldsymbol x_{1:n})$ can't be computed analytically, we can still sample from it to get $\boldsymbol \theta_1,\dots, \boldsymbol \theta_m$ given the posterior $\hat{q}$. We can now use it for computing expectation like above or perform a prediction:
+    \begin{equation*}
+        p(\boldsymbol x_{n+1} | \boldsymbol x_{1:n}) = \int_{\Theta} p(\boldsymbol x_{n+1} | \boldsymbol \theta) \hat{q}(\boldsymbol \theta | \boldsymbol x_{1:n})\dby \boldsymbol \theta \approx \frac{1}{m}\sum^m_{i=1}p(\boldsymbol x_{n+1}|\boldsymbol \theta_i)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Boxed Rejection Sampling)}}
+    We perform the following procedure, as we want to sample from distribution $\tilde{p}$:
+    \begin{itemize}
+        \item We generates the $X_i \sim \mathcal{U}[a, b], Y_i\sim\mathcal{U}[0, c]$ uniformly to define the box. 
+        \item If $Y_i \le \tilde{p}(X_i)$, then we keep the sample $X_i$.
+        \item Otherwise, we reject the sample and repeat the process. 
+    \end{itemize}
+\end{definition}
+
+
+\begin{remark}{\textbf{(Invariance to Scale)}}
+    Please note that rejection sampling still works if we have $Y_i\sim\mathcal{U}[0, kc]$ given the distribution $kp(\cdot)$ for $k>0$. This means that rejection sampling only require us to know the shape of the distribution, as long as $kc$ is big enough to cover the whole distribution $p$. This also means that, in Baysian inference, we doesn't have to know the evidence in order to sample from the posterior:
+    \begin{equation*}
+        p(\boldsymbol \theta | \mathcal{X}) = \frac{p(\mathcal{X}|\boldsymbol \theta)p(\boldsymbol \theta)}{Z} \qquad \text{ where } \qquad Z = \int p(\mathcal{X}|\boldsymbol \theta) p(\boldsymbol \theta)\dby \boldsymbol \theta 
+    \end{equation*}
+    We only need $\tilde{p} = p(\mathcal{X}|\boldsymbol \theta)p(\boldsymbol \theta)$ to do rejection sampling. 
+\end{remark}
+
+\begin{definition}{\textbf{(Rejection Sampling)}}
+    One doesn't have to use the uniform distribution to sample proposed point. We simply have to find the distribution $r$ such that $\tilde{p} < r$ everywhere:
+    \begin{itemize}
+        \item Sample $X_i \sim r$
+        \item Sample $Y_i | X_i \sim \mathcal{U}[0, r(X_i)]$
+        \item If $Y_i \le \tilde{p}(X_i)$, then we keep the sample $X_i$.
+        \item Otherwise, we reject the sample and repeat the process. 
+    \end{itemize} 
+    The scaling properties still holds. It will generates iid sample $\theta_1,\dots,\theta_m$, where the samples $1/m\sum^m_{i=1}f(x_i)$ is an unbiased estimate of $\mathbb{E}_p[f(x)]$. 
+\end{definition}
+
+\begin{remark}
+    Given the hight of $r$, $|A|$ is too high, and the hight of $\tilde{p}$, $|B|$. The rejection sampling will accepts sample with probability $|B|/|A|$, so if $|A|$ is too high, the algorithm may be inefficient. 
+\end{remark}
+
+\begin{definition}{\textbf{(Improtance Sampling)}}
+    Importance sampling is given distribution $p = 1/Z_p \tilde{p}$ that we want to sample to and arbitary proposal distribution $q = 1/Z_q \tilde{q}$ (that we can sample), then:
+    \begin{itemize}
+        \item Draw $\boldsymbol x_1,\boldsymbol x_2,\dots,\boldsymbol x_m$ iid from proposal $q$. 
+        \item Expectation $\mathbb{E}_p[f(\boldsymbol x)]$ is approximated as:
+        \begin{equation*}
+            \frac{1}{m}\sum^m_{i=1}\frac{f(\boldsymbol x_i)[\tilde{p}(\boldsymbol x_i)/\tilde{q}(\boldsymbol x_i)]}{\sum^m_{j=1}\tilde{p}(\boldsymbol x_j)/\tilde{q}(\boldsymbol x_j)}
+        \end{equation*}
+    \end{itemize}
+\end{definition}
+
+\begin{proposition}
+    The importance sampling gives unbiased estimate of $\mathbb{E}_p[f(\boldsymbol x)]$. 
+\end{proposition}
+\begin{proof}
+    We have the following sampling:
+    \begin{equation*}
+        \mathbb{E}_p[f(\boldsymbol x)] = \int f(\boldsymbol x)p(\boldsymbol x)\dby \boldsymbol x = \int f(\boldsymbol x)\frac{p(\boldsymbol x)}{q(\boldsymbol x)}q(\boldsymbol x)\dby \boldsymbol x = \mathbb{E}\brackb{ f(\boldsymbol x)\frac{p(\boldsymbol x)}{q(\boldsymbol x)} } \approx \frac{1}{m}\sum^m_{i=1}\frac{f(\boldsymbol x_i)p(\boldsymbol x_i)}{q(\boldsymbol x_i)}
+    \end{equation*}
+    where $\boldsymbol x_1,\dots,\boldsymbol x_m \sim q$. Now, consider the ratio of normalized factor:
+    \begin{equation*}
+        \frac{Z_p}{Z_q} = \frac{\int \tilde{p}(\boldsymbol x)\dby\boldsymbol x}{Z_q} = \frac{\int \tilde{p}(\boldsymbol x)\frac{q(\boldsymbol x)}{q(\boldsymbol x)}\dby\boldsymbol x}{Z_q} = \int \tilde{p}(\boldsymbol x)\frac{q(\boldsymbol x)}{Z_qq(\boldsymbol x)}\dby \boldsymbol x = \mathbb{E}_q \brackb{\frac{\tilde{p}(\boldsymbol x)}{\tilde{q}(\boldsymbol x)}} \approx \frac{1}{m}\sum^m_{i=1}\frac{\tilde{p}(\boldsymbol x_i)}{\tilde{q}(\boldsymbol x_i)}
+    \end{equation*}
+    Now, the estimator of $f$ can be found as 
+    \begin{equation*} 
+        \mathbb{E}_p[f(\boldsymbol x)] \approx \frac{1}{m}\sum^m_{i=1}\frac{f(\boldsymbol x_i)p(\boldsymbol x_i)}{q(\boldsymbol x_i)} = \frac{1}{m}\sum^m_{i=1}\frac{f(\boldsymbol x_i)p(\boldsymbol x_i)}{q(\boldsymbol x_i)}\frac{\tilde{p}(\boldsymbol x_i)}{\tilde{q}(\boldsymbol x_i)}\frac{Z_q}{Z_p} = \frac{1}{m}\sum^m_{i=1}\frac{f(\boldsymbol x_i)[\tilde{p}(\boldsymbol x_i)/\tilde{q}(\boldsymbol x_i)]}{\sum^m_{j=1}\tilde{p}(\boldsymbol x_j)/\tilde{q}(\boldsymbol x_j)}
+    \end{equation*}
+\end{proof}
+
+\subsection{More Probabilistic Models}
+
+\begin{definition}{\textbf{(Random Field)}}
+    Given a weighted undirected graph $\mathcal{N} = (v_\mathcal{N}, w_\mathcal{N})$ where $v_\mathcal{N}$ is the vertex set, and $w_\mathcal{N}$ is the set of edge weights. The edge weights are scalar $w_{ij} \in \mathbb{R}$. An edge weight $w_{ij}$ means to edge between $i$ and $j$. Each vertex $v_i$ is associated with random variable $\Theta_i$. The neighbourhood of vertex $v_i$ is the set:
+    \begin{equation*}
+        \partial (i) = \brackc{j : w_{ij} \ne 0}
+    \end{equation*}
+    The set $\brackc{\Theta_j : j \in \partial(i)}$ of random variable associated with neighbourhood is called Markov blanket of $\Theta_i$
+\end{definition}
+
+\begin{definition}{\textbf{(Markov Property)}}
+    The Markov properties is when:
+    \begin{equation*}
+        p(\theta_i | \theta_j, j \ne i) = p(\theta_i|\theta_j, j \in \partial (i))
+    \end{equation*}
+    Each $\Theta$ is conditionally independent of remaining field given its Markov blanket. A Markov random field is a random field that is Markov. 
+\end{definition}
+
+\begin{definition}{\textbf{(Energy Function)}}
+    Any (strictly positive) probability or density can be rewritten as:
+    \begin{equation*}
+        p(x) = \frac{1}{Z}\exp(-H(x)) \qquad \text{ where } \qquad H : \mathcal{X}\rightarrow \mathbb{R}_+ \text{ and } Z = \int \exp(-H(x))\dby x
+    \end{equation*}
+    where $H$ is called potential.
+\end{definition}
+
+\begin{remark}
+    The Markov random field (MRF) density for random variable $\Theta_{1:n}$ can be written as:
+    \begin{equation*}
+        p(\theta_1,\dots,\theta_n) = \frac{1}{Z}\exp(-H(\theta_1,\dots,\theta_n))
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Potts Model)}}
+    Let $\mathcal{N}$ be a neighbourhood of graph with weight $w_{ij}$ and $\beta>0$. The MRF, where we have:
+    \begin{equation*}
+        p(\theta_1, \dots,\theta_n) = \frac{1}{Z(\beta)} \exp\bracka{\beta\sum_{ij}w_{ij} \mathbb{I}\brackc{\theta_i=\theta_j}}
+    \end{equation*}
+    Note that the energy is additive over pairs. Positive weight encorate smoothness:
+    \begin{itemize}
+        \item $w_{ij}>0$, this means that $\theta_i=\theta_j$ increases probability. 
+        \item $w_{ij}<0$, this means that $\theta_i=\theta_j$ decreases probability. 
+        \item $w_{ij}=0$, this means that no interaction between $\theta_i$ and $\theta_j$.
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Ising Model)}}
+    We have the following distribution:
+    \begin{equation*}
+        p(\boldsymbol \theta_{1:n}) = \frac{1}{Z(\beta)} \exp\bracka{\sum_{(i, j) \in \text{edge}} \beta \mathbb{I}[\theta_i = \theta_j] }
+    \end{equation*}
+    Given rejection sampling, we can sample the distribution without the normalizing factor $Z(\beta)$, where $\theta_i \in \brackc{-1, +1}$ and $w_{ij} \in \brackc{0, 1}$. This model is on the $d$-dimensional grid.
+\end{definition}
+
+\begin{remark}{\textbf{(Usage of Markov Random Field)}}
+    Given the problem with observation $x_i$ for each $i$ location on a grid. If we want to model the observation with a distribution $p(x_i | \Theta_i)$ for each location, with its own parameter $\Theta_i$. We can use MRF as a prior distribution, while we represent $p(x_i  | \Theta_i)$ as the emission probability:
+    \begin{itemize}
+        \item Define a joint $(\Theta_1,\dots,\Theta_n) $ as an MRF on the grid graph. 
+        \item Given a positive weight, the MRF will encorate the model to explain a neighbourhood of $x_i$ by similar paramter value. This leads to smoothing in the result. 
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Baysian Mixture Model)}}    
+    The model of the form:
+    \begin{equation*}
+        \pi(\boldsymbol x) = \sum^K_{k=1} c_kp(\boldsymbol x|\Theta_k)
+    \end{equation*}
+    is called Baysian model if $p(\boldsymbol x | \theta)$ is an exponetial model and:
+    \begin{itemize}
+        \item $\Theta_1,\dots,\Theta_K\sim q$ where $q$ is a prior over $\Theta$
+        \item $(c_1,\dots,c_K)$ is sampled from $K$-dimensional dirichlet distribution. 
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Posterior Baysian Mixture Model)}}
+    Another intractable model that may need sampling is:
+    \begin{equation*}
+        \hat{q}_n(c_{1:k}, \boldsymbol \theta | \boldsymbol x_{1:n}) \propto \prod^n_{i=1}\bracka{\sum^K_{k=1}c_kp(\boldsymbol x_i | \boldsymbol \theta_n)}\bracka{\prod^K_{k=1}q(\boldsymbol \theta_k)}q_\text{dir}(\boldsymbol c_{1:K})
+    \end{equation*}
+    individual evaluate of non-normalized $\tilde{q}$ is numerically unstable but given specific value of $c, \boldsymbol x$ or $\boldsymbol \theta$, this collapse to $\sum^K_{k=1}c_k p(\boldsymbol x_i | \boldsymbol \theta_k)$ making it tractable. Furthermore, please note that: we can multiple the Baysian Mixture model $\prod^K_{k=1}q(\boldsymbol \theta_k)$ with MRF prior to get smoothing effect.
+\end{definition}
+
+\begin{remark}{\textbf{(Problems and Solution)}}
+    If MRF is used as prior, we have to compute or approximate the posterior distribution. The solution of MRF distribution on grids are not analytically tractable, so we have to perform sampling and inference using Markov chain sampling algorithm.
+\end{remark}
+
+
+\subsection{Markov Chain Monte Carlo}
+
+\begin{definition}{\textbf{(MCMC)}}
+    We want to sample from distribution with density $p$. Suppose, we can define Markov chain with invariance distribution i.e $P_\text{inv}\equiv P$. If we sample $\boldsymbol x_1,\boldsymbol x_2,\dots$ from the chain, then once it has converged and we obtain the sample. 
+\end{definition}
+
+\begin{definition}{\textbf{(Continuous MC)}}
+    A continuous Markov chain is defined by an initial $p_\text{init}$ and conditional probability $t(y|x)$ is transtion probability or transtion kernel. For example, markov chain on $\mathbb{R}^2$, we can define Markov chain by:
+    \begin{equation*}
+        x_{i+1}|x_i = x_i \sim g(\cdot | x_i,\sigma^2_i)
+    \end{equation*}
+    where $g$ is the spherical Gaussian with fixed variance. Suppose the state $\mathcal{X}$ is uncountable, so the transtion matrix is substuited by conditional probability $t$. The distribution $p_\text{inv}$ with density $p_\text{inv}$ is invariance if:
+    \begin{equation*}
+        \int_\mathcal{X} t(y|x)p_\text{inv}(x)\dby x = p_\text{inv}(y)
+    \end{equation*}
+\end{definition}
+
+\begin{remark}{\textbf{(Several Problems)}}
+    There are several problems that we have to solve. We have to construct MC with invariance distribution $p$. We can't actually start sampling with $x_1\sim p$ as if we know how to sample, our method would be pointless. Furthermore, each point $x_i$ is marginally distribution as $x_i\sim p$ but the points are not iid. 
+\end{remark}
+
+\begin{definition}{\textbf{(Metropolis-Hasting)}}
+    We define the conditional probability $q(y|x)$ on $\mathcal{X}$. We then define a rejection kernel $A$ as we have:
+    \begin{equation*}
+        A(\boldsymbol x_{i+1}|\boldsymbol x_i) = \min\brackc{1, \frac{q(\boldsymbol x_i | \boldsymbol x_{i+1})p(\boldsymbol x_{i+1})}{q(\boldsymbol x_{i+1}|x_i)p(\boldsymbol x_i)}}
+    \end{equation*}
+    Knowing $\tilde{p}$ (unnormalized) is enough for the rejection kernel $A(\cdot|\cdot)$ as the normalizing factor is cancelled. We define the trasntion probability of the chain as:
+    \begin{equation*}
+        t(\boldsymbol x_{i+1} | \boldsymbol x_i) = q(\boldsymbol x_{i+1} | \boldsymbol x_i)A(\boldsymbol x_{i+1}|\boldsymbol x_i) + \delta_x(\boldsymbol x_{i+1})c(\boldsymbol x_i) \quad \text{ where } \quad c(\boldsymbol x_i) = \int q(\boldsymbol y|\boldsymbol x_i)(1 - A(\boldsymbol y|\boldsymbol x_i))\dby \boldsymbol y
+    \end{equation*}
+    To sample from the MH algorithm, at each step $i+1$, generate a proposal $\boldsymbol x^* \sim q(\cdot|\boldsymbol x_i)$ and $\boldsymbol u_i\sim\mathcal{U}[0, 1]$:
+    \begin{itemize}
+        \item If $u_i>A(\boldsymbol x^* | \boldsymbol x_i)$ reject a proposal, and we set $\boldsymbol x_{i+1}=\boldsymbol x_i$ 
+        \item If $u_i \le A(\boldsymbol x^* | \boldsymbol x_i)$, accept proposal, and we set $\boldsymbol x_{i+1}=\boldsymbol x^*$
+    \end{itemize}  
+\end{definition}
+
+\begin{remark}{\textbf{(Derivation of Metropolis-Hasting)}}
+    Now, we will consider how Metropolis-Hasting can to be. Starting with the detailed balance equation, as we have:
+    \begin{equation*}
+        p(\boldsymbol x_{i+1} | \boldsymbol x_i)p(\boldsymbol x) = p(\boldsymbol x|\boldsymbol x_{i+1})p(\boldsymbol x_{i+1}) \qquad \iff \qquad \frac{p(\boldsymbol x_{i+1}|\boldsymbol x)}{p(\boldsymbol x|\boldsymbol x_{i+1})} = \frac{p(\boldsymbol x_{i+1})}{p(\boldsymbol x)}
+    \end{equation*}
+    Now, we will separate the transition step to be:
+    \begin{itemize}
+        \item Proposal Distribution $q(\boldsymbol x_{i+1} | \boldsymbol x_i)$
+        \item Acceptance Distribution $A(\boldsymbol x_{i+1} | \boldsymbol x_i)$
+    \end{itemize}
+    Now, we have:
+    \begin{equation*}
+        \frac{A(\boldsymbol x_{i+1} | \boldsymbol x_i)}{A(\boldsymbol x_i | \boldsymbol x_{i+1})} = \frac{p(\boldsymbol x_{i+1})}{p(\boldsymbol x_i)}\frac{q(\boldsymbol x_i | \boldsymbol x_{i+1})}{q(\boldsymbol x_{i+1} | \boldsymbol x_i)}
+    \end{equation*}
+    Now, if we use the Metropolis-Hasting rejection kernel, we now have:
+    \begin{equation*}
+    \begin{aligned}
+        &A(\boldsymbol x_{i+1} | \boldsymbol x_i) p(\boldsymbol x_i)q(\boldsymbol x_{i+1} | \boldsymbol x_i) = A(\boldsymbol x_i|\boldsymbol x_{i+1})p(\boldsymbol x_{i+1})q(\boldsymbol x_i|\boldsymbol x_{i+1}) \\
+        \iff&\min\Big\{ P(\boldsymbol x_i)q(\boldsymbol x_{i+1} | \boldsymbol x_i), p(\boldsymbol x_{i+1})q(\boldsymbol x_i|\boldsymbol x_{i+1}) \Big\} = \min\Big\{ q(\boldsymbol x_{i+1}|x_i)p(\boldsymbol x_i), p(\boldsymbol x_{i+1})q(\boldsymbol x_i|\boldsymbol x_{i+1}) \Big\}
+    \end{aligned}
+    \end{equation*}
+    Thus the detailed balance is satisfied. 
+\end{remark}
+
+\begin{remark}
+    There are several observations on the Metropolis-Hasting as we have:
+    \begin{itemize}
+        \item We accept if the second term is larger than $1$: $q(\boldsymbol x_i | \boldsymbol x_{i+1})p(\boldsymbol x_{i+1}) > q(\boldsymbol x_{i+1} | \boldsymbol x_i)p(\boldsymbol x_i)$. We accept if the proposal increases the probability under $p$. 
+        \item If it decreases the probability, we still accept with a probability which depends on the difference to the current probability. 
+        \item We can see this as noisy hill-climbing as it tends to move to the probability under $p$. 
+        \item However, there are some probability that the sampling can move down-hill with certain probability. Finally, we can show that it won't stuck at the local maxima. 
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Burn-in and Mixing-Time)}}
+    The first $m$ samples are called burn-in phase. The first $m$ samples are discarded. And, we have:
+    \begin{equation*}
+        \boldsymbol x_1,\dots,\boldsymbol x_{m-1},\boldsymbol x_m,\boldsymbol x_{m+1},\dots
+    \end{equation*}
+    We don't know the $m$ but we can use a certain heuristic called convergence dianostic. 
+\end{definition}
+
+\begin{definition}{\textbf{(Sequential Dependence)}}
+    Even after burn-in MC are not iid, we can use the following strategy as we have to consider the when the sample can be used:
+    \begin{itemize}
+        \item Estimate empirically how many steps $L$ are needed for $\boldsymbol x_i$ and $\boldsymbol x_{i+L}$ to be independent. We keep every $L$-th sample and discard in the between. 
+        \item The most common method uses is called auto-correlation function as we have:
+        \begin{equation*}
+            \operatorname{Auto}(\boldsymbol x_i, \boldsymbol x_j) = \frac{\mathbb{E}[(\boldsymbol x_i - \boldsymbol \mu_i)(\boldsymbol x_j- \boldsymbol \mu_j)]}{\sigma_i\sigma_j}
+        \end{equation*}
+        where $\boldsymbol \mu_i$ is the mean and $\sigma_i$ is the standard deviation of $\boldsymbol x_i$. We can use this auto-correlation to calculate the value $L$. 
+    \end{itemize} 
+\end{definition}
+
+\begin{definition}{\textbf{(Gelman-Rubin Criterion)}}
+    We can also start several chain at random for chain $k$ the sample $x^k_i$ has the marginal of $p^i_k$:
+    \begin{itemize}
+        \item The distribution has to converge to all $p_i = p_\text{inv}$, which are all idetical. 
+        \item We can use hypothesis testing to compare $p^k_i$ for difference $k$. 
+        \item Once the test doesn't reject anymore, assume that the chain has passed the burn-in phase
+    \end{itemize}
+\end{definition}
+
+\begin{remark}{\textbf{(Rules for Selecting a Proposal Distribution)}}
+    Selecting a proposal distribution, we have to be aware of the tradeoff, where if $\operatorname{var}(q)$ is too large will overstep $p$ and leads to rejection. If $\operatorname{var}(q)$ is too small as many steps will be needed to achives a good converge of the domain. 
+    \begin{itemize}
+        \item If $p$ is unimodal and can be roughly approximate by Gaussian, $\operatorname{var}(q)$ should be choosen to be smaller than the covariance of $p$.
+        \item With complex posterior, choosing $q$ is difficult but it is important to convergence speed. If we know some information about the posterior, this might help choosing $q$. 
+    \end{itemize}
+    There are mnay other ways to sample for example mixture of proposal. 
+\end{remark}
+
+\begin{definition}{\textbf{(Gibbs Sampling)}}
+    Suppose $p(\boldsymbol x)$ is a distribution on $\mathbb{R}^d$ and so $\boldsymbol x = (\boldsymbol x_1,\dots, \boldsymbol x_D)$. The full conditional probability of the entry $\boldsymbol x_d$ is given by the other entries to be:
+    \begin{equation*}
+        p(\boldsymbol x_d | \boldsymbol x_1,\dots,\boldsymbol x_{d-1},\boldsymbol x_{d+1},\dots,\boldsymbol x_D)
+    \end{equation*}
+    The Gibbs sampler is the special case of MH-algorithm where the proposal of $\boldsymbol x_d$ is the full conditional over $\boldsymbol x_d$
+\end{definition}
+
+\begin{remark}{\textbf{(Connection to HM)}}
+    Suppose $p$ is a distribution on $\mathbb{R}^D$ so each sampler is of the form $\boldsymbol x_i = (\boldsymbol x_{i, 1},\dots, \boldsymbol x_{i, D})$. We generate a proposal $\boldsymbol x_{i+1}$ as:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol x_{i+1, 1} &\sim p(\cdot | \boldsymbol x_{i, 2},\dots,\boldsymbol x_{i, D}) \\
+        &\vdots \\
+        \boldsymbol x_{i+1, d} &\sim p(\cdot | \boldsymbol x_{i+1,1},\dots,\boldsymbol x_{i+1, d-1}, \boldsymbol x_{i, d+1},\dots,\boldsymbol x_{i, D}) \\
+        &\vdots \\
+        \boldsymbol x_{i+1, D} &\sim p(\cdot | \boldsymbol x_{i, 1},\dots,\boldsymbol x_{i, D-1}) \\
+    \end{aligned}
+    \end{equation*}
+    This is like Metropolis-Hasting as we use the proposal distribution and accepting probability to be $1$. 
+\end{remark}
+
+\begin{remark}{\textbf{(MRF with Gibbs Sampling)}}
+    Consider $D$ nodes, each dimension $d$ and markov property:
+    \begin{equation*}
+    \begin{aligned}
+        \tilde{p}(&\theta_d | \theta_1,\dots, \theta_{d-1},\theta_{d+1})  \\
+        &= \exp\Big(\beta(\mathbb{I}\brackc{\theta_d = \theta_\text{left}} + \mathbb{I}\brackc{\theta_d = \theta_\text{right}}), \mathbb{I}\brackc{\theta_d = \theta_\text{up}}, \mathbb{I}\brackc{\theta_d = \theta_\text{down}})\Big)
+    \end{aligned}
+    \end{equation*}
+    And so we can sample it.
+\end{remark}
+

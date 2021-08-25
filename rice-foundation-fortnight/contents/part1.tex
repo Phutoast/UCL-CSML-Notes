@@ -1,0 +1,257 @@
+\section{Too Many Distributions (And Its related Quantities)}
+
+\subsection{Normal Distribution and Friends}
+
+\begin{definition}{\textbf{(Normal Distribution)}}
+    We define the normal distribution to be:
+    \begin{equation*}
+        \mathcal{N}(x | \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\bracka{-\frac{(x-\mu)^2}{2\sigma^2}}
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Cumulative Normal Distribution)}}
+    We define CDF of normal distribution as:
+    \begin{equation*}
+        \mathcal{N}(x \le y | \mu, \sigma^2) = \Phi\bracka{\frac{x-\mu}{\sigma}} = \frac{1}{2}\brackb{1 + \operatorname{erf}\bracka{\frac{x-\mu}{\sigma \sqrt{2}}}} \quad \text{ where } \quad \operatorname{erf}(x) = \frac{2}{\sqrt{\pi}}\int^x_0\exp(-t^2)\dby t
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Multinomial Cell Probabilities)}}
+    We consider $X_1,\dots,X_m$ the counts in cells $1,\dots,m$ follows multinomial distribution with total count of $n$ and cell probabilities $p_1,\dots,p_m$ as we have:
+    \begin{equation*}
+        p(X_1,\dots,X_m |p_1,\dots,p_m) = \frac{n!}{\prod^m_{i=1} X_i!}\prod^m_{i=1}p_i^{X_i}
+    \end{equation*}
+    The marginal distribution of each $X_i$ that is binomial $(n,p_i)$, and the joint frequency function isn't product of marignal frequency function. 
+\end{definition}
+
+\subsection{Statistical Properties}
+
+\begin{definition}{\textbf{(Mean/Variance)}}
+    Mean and Variance of a random variable $x$ are defined as:
+    \begin{equation*}
+        \mathbb{E}[f(x)] = \int f(x)p(x)\dby x \qquad \operatorname{var}(x) = \mathbb{E}[(x - \mathbb{E}[x])^2] 
+    \end{equation*}
+\end{definition}
+
+\begin{definition}{\textbf{(Covariance/Correlation Coefficient)}}
+    Covariance and Correlation coefficient between $2$ variables are defined as:
+    \begin{equation*}
+        \operatorname{cov}(x, y) = \mathbb{E}[(x - \mathbb{E}[x])(y - \mathbb{E}[y])] \qquad \rho = \frac{\operatorname{cov}(x, y)}{\sqrt{\operatorname{var}(x)\operatorname{var}(y)}}
+    \end{equation*}
+\end{definition}
+
+\begin{theorem}{\textbf{(Markov's Inequality)}}
+    If $X$ is a random variable with $P(X\ge0) = 1$ and for which $\mathbb{E}[X]$ exists then:
+    \begin{equation*}
+        \mathbb{P}(X\ge t) \le \frac{\mathbb{E}[X]}{t}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Consider the expectation:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[X] &= \int x p(x)\dby x \\
+        &= \int_{x < t} xp(X)\dby x + \int_{x \ge t} xp(X)\dby x 
+    \end{aligned}
+    \end{equation*}
+    All the terms in the integral are non-negative because $X$ takes only non-negative value, and so:
+    \begin{equation*}
+    \begin{aligned}
+        \mathbb{E}[X] &\ge \int_{x \ge t} xp(X)\dby x \\
+        &\ge \int_{x\ge t} tp(x) = t \mathbb{P}(X\ge t)
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{theorem}{\textbf{(Chebyshev's Inequality)}}
+    Let $X$ be a random variable with mean $\mu$ and $\sigma^2$. Then for any $t>0$:
+    \begin{equation*}
+        \mathbb{P}(\abs{X - \mu} > t) \le \frac{\sigma^2}{t^2}
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We let $Y = (X - \mu)^2$. Then $\mathbb{E}[Y] = \sigma^2$ and this result follows from Markov inequality to $Y$.
+\end{proof}
+
+\begin{theorem}{\textbf{(Law of Large Number)}}
+    Let $X_1,X_2,\dots,X_i,\dots$ be sequence of independent random variables with $\mathbb{E}[X_i] = \mu$ and $\operatorname{var}(X_i) = \sigma^2$. Let $\bar{X}_n = 1/n\sum^n_{i=1}X_i$. Then for any $\varepsilon>0$:
+    \begin{equation*}
+        \mathbb{P}(\abs{\bar{X}_n - \mu} > \varepsilon) \rightarrow 0 \qquad \text{ as } \qquad n\rightarrow \infty
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Let's find the $\mathbb{E}[\bar{X}_n]$ and $\operatorname{var}(\bar{X}_n)$, and since $X_i$ are independent
+    \begin{equation*}
+        \mathbb{E}[\bar{X}_n] = \frac{1}{n}\sum^n_{i=1}\mathbb{E}[X_i] = \mu
+        \qquad \operatorname{var}(\bar{X}_n) = \frac{1}{n^2}\sum^n_{i=1}\operatorname{var}(X_i) = \frac{\sigma^2}{n}
+    \end{equation*}
+    This follows from Chebyshev's inequality, which is:
+    \begin{equation*}
+        \mathbb{P}(\abs{\bar{X}_n - \mu}>\varepsilon)\le\frac{\operatorname{var}(\bar{X}_n)}{\varepsilon^2} = \frac{\sigma^2}{n\varepsilon^2} \rightarrow 0
+    \end{equation*}
+    as $n\rightarrow \infty$. Thus the thoerem is proven.
+\end{proof}
+
+\begin{definition}{\textbf{(Convergence of Distribution Function)}}
+    Let $X_1,X_2,\dots$ be a sequence of random variable with CDF $F_1, F_2,\dots$ and let $X$ be random variable with distribution $F$. We say that $X_n$ converge to $X$ if:
+    \begin{equation*}
+        \lim_{n\rightarrow\infty} F_n(X) = F(X)
+    \end{equation*}
+    at every point at which $F$ is continuous.
+\end{definition}
+
+\begin{theorem}{\textbf{(Continuiy Theorem)}}
+    Let $F_n$ be a sequence of CDF with the corresponding momement generating function $M_n$. Let $F$ be a CDF with momement-generating funcion $M$. If $M_n(t) \rightarrow M(t)$ for all $t$ in an open interval containing zero, then $F_n(x)\rightarrow F(x)$ at all continuity points of $F$. 
+\end{theorem}
+
+\begin{theorem}{\textbf{(Central Limit Theorem)}}
+    Let $X_1,X_2,\dots$ be a sequence of independent random variable having mean $0$ and variance $\sigma^2$ and the common distribution function $F$ and momement-generating function $M$ defined in a neighborhood of zero. Let:
+    \begin{equation*}
+        S_n = \sum^n_{i=1} X_i
+    \end{equation*}
+    Then, we have:
+    \begin{equation*}
+        \lim_{n\rightarrow\infty} \mathbb{P}\bracka{\frac{S_n}{\sigma\sqrt{n}} \le x} = \Phi(x) \qquad -\infty<x<\infty
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    Let $Z_n = S_n/(\sigma\sqrt{n})$. We will show that the mgf of $Z_n$ tends to the mgf of the standard normal distribution. Since $S_n$ is the sum of independent random variable:
+    \begin{equation*}
+        M_{S_n}(t) = [M(t)]^n \qquad M_{Z_n}(t) = \brackb{M\bracka{\frac{t}{\sigma\sqrt{n}}}}^n
+    \end{equation*}
+    Consider tthe Taylor series expansion about zero, as we have:
+    \begin{equation*}
+        M(s) = M(0) + sM'(0) + \frac{1}{2}s^2M''(0) + \varepsilon_s
+    \end{equation*}
+    Please note that $\varepsilon_s/s^2\rightarrow0$ as $s\rightarrow0$. Since $\mathbb{E}[X] = 0, M'(0) = 0$ and $M''(0) = \sigma^2$. As $n\rightarrow\infty$, and $t/(\sigma\sqrt{n})\rightarrow0$ and:
+    \begin{equation*}
+        M\bracka{\frac{t}{\sigma\sqrt{n}}} = 1 + \frac{1}{2}\sigma^2\sigma^2\bracka{\frac{t}{\sigma\sqrt{n}}}^2 + \varepsilon_n
+    \end{equation*}
+    Please note that $\varepsilon_n/(t^2/(n\sigma^2))\rightarrow0$ as $n\rightarrow\infty$, and we have:
+    \begin{equation*}
+        M_{Z_n}(t) = \bracka{1 + \frac{t^2}{2n} + \varepsilon_n}^n
+    \end{equation*}
+    It can be shown that if $a_n\rightarrow a$, then we have:
+    \begin{equation*}
+        \lim_{n\rightarrow \infty}\bracka{1 + \frac{a_n}{n}}^n=\exp(a)
+    \end{equation*}
+    From this result it follows that:
+    \begin{equation*}
+        M_{Z_n}(t)\rightarrow\exp(t^2/2) \quad \text{ as } \quad n\rightarrow\infty
+    \end{equation*}
+    And, so $\exp(t^2/2)$ is the mgf of the standard normal distribution, as we have shown.
+\end{proof}
+
+\subsection{Quantities}
+
+\begin{definition}{\textbf{(Sample Mean and Sample Variance)}}
+    Let $X_1,\dots,X_n$ be independent $\mathcal{N}(\mu, \sigma^2)$ random variable. We refer to them as sample, and we denote sample mean $\bar{X}$ and sample variance $S^2$ to be:
+    \begin{equation*}
+        \bar{X} = \frac{1}{n} \sum^n_{i=1}X_i \qquad S^2 = \frac{1}{n-1}\sum^n_{i=1}(X_i - \bar{X})^2
+    \end{equation*}
+    We have $\mathbb{E}[\bar{X}] = \mu$ and $\operatorname{var}(\bar{X}) = \sigma^2/n$.
+\end{definition}
+
+\begin{theorem}
+    The random variable $\bar{X}$ and the vector of random variables $(X_1-\bar{X}, X_2-\bar{X}, \dots, X_n-\bar{X})$ are independent. And so, $\bar{X}$ and $S^2$ are independently distributed. 
+\end{theorem}
+\begin{proof}
+    The proof will be based on momement-generating function:
+    \begin{equation*}
+        M(s, t_1,\dots,t_n) = \mathbb{E}\Big\{ \exp\Big[ s\bar{X} + t_1(X_1 - \bar{X}) + \cdots + t_n(X_n-\bar{X}) \Big] \Big\}
+    \end{equation*}
+    We observe that since:
+    \begin{equation*}
+        \sum^n_{i=1}t_i(X_i - \bar{X}) = \sum^n_{i=1}t_iX_i - n\bar{X}\bar{t}
+    \end{equation*}
+    Then, we have:
+    \begin{equation*}
+    \begin{aligned}
+        s\bar{X} + \sum^n_{i=1}t_i(X_i - \bar{X}) &= \sum^n_{i=1}\brackb{\frac{s}{n} + (t_i - \bar{t})}X_i = \sum^n_{i=1}a_iX_i
+    \end{aligned}
+    \end{equation*}
+    where we have $a_i = s/n + (t_i - \bar{t})$. Furthermore, we observe that:
+    \begin{equation*}
+        \sum^n_{i=1}a_i = s \qquad\quad \sum^n_{i=1} a^2_i = \frac{s^2}{n} + \sum^n_{i=1}(t_i-\bar{t})^2
+    \end{equation*}
+    Now, we have $M(s, t_1,\dots,t_n) = M_{X_1,\dots,X_n}(a_1,\dots,a_n)$. Since $X_i$ are independent normal random variable, we have:
+    \begin{equation*}
+    \begin{aligned}
+        M(s, t_1,\dots,t_n) &= \prod^n_{i=1}M_{X_i}(a_i) = \prod^n_{i=1}\exp\bracka{\mu a_i + \frac{\sigma^2}{2}a_i^2} \\
+        &= \exp\bracka{\mu\sum^n_{i=1}a_i + \frac{\sigma^2}{2}\sum^n_{i=1}a_i^2} \\
+        &= \exp\brackb{\mu s + \frac{\sigma^2}{2}\bracka{\frac{s^2}{n}} + \frac{\sigma^2}{2}\sum^n_{i=1}(t_i - \bar{t})^2} \\
+        &= \exp\bracka{\mu s + \frac{\sigma^2}{2n}s^2}\exp\brackb{\frac{\sigma^2}{2}\sum^n_{i=1}(t_i - \bar{t})^2}
+    \end{aligned}
+    \end{equation*}
+    We can see that the first factor is mgf of $\bar{X}$. Since the mgf of the vector $(X_1-\bar{X}, \dots,X_n-\bar{X})$ can be obtained by setting $s = 0$ in $M$, the factor is this mgf. Thus the prove is shown.
+\end{proof}
+
+\subsection{Distribution from Normal Distribution}
+
+\begin{definition}{\textbf{($\boldsymbol \chi^2$-Distribution)}}
+    \begin{itemize}
+        \item If $Z$ is a standard normal random variable, the distribution of $U = Z^2$ is called the chi-square distribution with $1$ degree of freedom.
+        \item If $U_1,U_2,\dots,U_n$ are independent $1$ degree of freedom, the distribution of $V = U_1+U_2+\cdots+U_n$ is called $\chi^2$-distribution with $n$ degrees of freedom and it is denoted by $\chi^2_n$. 
+    \end{itemize}
+    We can see that the $\chi^2$-square $n$-degree of is gamma distribution with $\alpha=n/2$ and $\lambda=1/2$, so pdf is:
+    \begin{equation*}
+        p(v) = \frac{1}{2^{n/2}\Gamma(n/2)}v^{(n/2)-1}\exp(-v/2)
+    \end{equation*}
+    for $v\ge0$, and so $\mathbb{E}[V] = n$ and $\operatorname{var}(V) = 2n$. Finally, it is clear that if $U \sim \chi^2_{n}$ and $V\sim\chi^2_m$, then we have $U+V\sim\chi^2_{m+n}$
+\end{definition}
+
+\begin{definition}{\textbf{($\boldsymbol T$-Distribution)}}
+    If $Z\sim\mathcal{N}(0, 1)$ and $U\sim\chi^2_n$ and $Z$ and $U$ are independent, then the distribution of $Z/\sqrt{U/n}$ is called the $t$-distribution with $n$ degrees of freedom. The density function of the $t$ distribution with $n$ degrees of freedom is:
+    \begin{equation*}
+        p(t) = \frac{\Gamma[(n+1)/2]}{\sqrt{n\pi}\Gamma(n/2)}\bracka{1+\frac{t^2}{n}}^{-(n+1)/2}
+    \end{equation*}
+    It is clear that $f(t) = f(-t)$, and so it is symmetric about zero. As the number of degree of freedom appraoches $\infty$ the t-distribution tends to standard normal distribution. 
+\end{definition}
+
+\begin{definition}{\textbf{($\boldsymbol F$-Distribution)}}
+    Let $U$ and $V$ be independent $\chi^2$-distribution with $m$ and $n$ degrees of freedom. The distribution of:
+    \begin{equation*}
+        W = \frac{U/m}{V/n}
+    \end{equation*}
+    is called F-distribution with $m$ and $n$ degrees of freedom, and is denoted by $F_{m,n}$, where its pdf is:
+    \begin{equation*}
+        p(w) = \frac{\Gamma[(m+n)/2]}{\Gamma(m/2)\Gamma(n/2)}\bracka{\frac{m}{n}}^{m/2}w^{m/2-1}\bracka{1 + \frac{m}{n}w}^{-(m+n)/2}
+    \end{equation*}
+    One can show that, for $n>2$ as $\mathbb{E}[W]$ exists and equal $n/(n-2)$. Finally, from the definition of $t_n$ random variable follows an $F_{1,n}$ distribution.
+\end{definition}
+
+\begin{theorem}
+    The distribution of $(n-1)S^2/\sigma^2$ is $\chi^2_{n-1}$-distribution
+\end{theorem}
+\begin{proof}
+    Please note that:
+    \begin{equation*}
+        \frac{1}{\sigma^2}\sum^n_{i=1}(X_i - \mu)^2 = \sum^n_{i=1}\bracka{\frac{X_i-\mu}{\sigma}}^2 \sim\chi_n^2
+    \end{equation*}    
+    And, note that:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{\sigma^2}\sum^n_{i=1}(X_i = \mu)^2 &= \frac{1}{\sigma^2}\sum^n_{i=1}[(X_i - \bar{X}) + (\bar{X} - \mu)]^2 \\
+        &= \frac{1}{\sigma^2}\sum^n_{i=1}(X_i - \bar{X})^2 + \bracka{\frac{\bar{X} - \mu}{\sigma/\sqrt{n}}}^2
+    \end{aligned}
+    \end{equation*}
+    Note that $\sum^n_{i=1}(X_i-\bar{X}) = 0$. Now this relation is like $W = U + V$, as $U$ and $V$ are independent, we have $M_W(t)=M_U(t)M_V(t)$ as both $W$ and $V$ are $\chi^2$-distribution, we have:
+    \begin{equation*}
+        M_U(t) = \frac{M_W(t)}{M_V(t)} = \frac{(1-2t)^{-n/2}}{(1-2t)^{-1/2}} = (1-2t)^{-(n-1)/2}
+    \end{equation*}
+    The last expression is the mgf of a random variable with a $\chi^2_{n-1}$ distribution. 
+\end{proof}
+
+\begin{corollary}
+    We can show that:
+    \begin{equation*}
+        \frac{\bar{X}-\mu}{S/\sqrt{n}} \sim t_{n-1}
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    We can show that it is equivalent to the following ratio:
+    \begin{equation*}
+        \frac{\bar{X}-\mu}{S/\sqrt{n}} = \frac{\cfrac{\bar{X}-\mu}{\sigma/\sqrt{n}}}{\sqrt{S^2/\sigma^2}}
+    \end{equation*}
+    The latter ratio is $\mathcal{N}(0, 1)$ and the square root of $\chi^2_{n-1}$ distribution. And so from the definition is $t_{n-1}$.
+\end{proof}

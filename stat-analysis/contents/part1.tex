@@ -1,0 +1,1587 @@
+
+\section{Introduction}
+
+\begin{definition}{\textbf{(Linear Model)}}
+    Given the explainatory variable $x$, the model is 
+    \begin{equation*}
+        Y_i = \beta_i + \beta_ix_i + e_i
+    \end{equation*}
+    for $i=1,2,\dots,N$ as $Y_i$ denotes the $i$-th observation and $Y$ corresponds to value $x_i$, where we have:
+    \begin{itemize}
+        \item Explanatory variable $x$
+        \item $e_i$ is the error associated with $i$-th observation. 
+        \item $\beta_0, \beta_1$ are unknown variable. 
+    \end{itemize}
+    The model can be defined as $\mathbb{E}[Y_i] = \beta_0 + \beta_1 x_i$ where have $i=1,\dots,N$, as we can define: $e_i = Y_i - \mathbb{E}[Y_i]$. Furthermore, we can write the prediction $\mathbb{E}[Y_i | X_i = x_i]$ in order to make clear that the $x$-value are random variable. We are interested in how $Y$ depends on $x$.
+\end{definition}
+
+\begin{remark}{\textbf{(General Linear Regression)}}
+    In general, there are $m$ explainatory variables labelled $x_1, \dots, x_m$ by consider the following model:
+    \begin{equation*}
+        Y_i = \beta_0 + \beta_1x_1 + \cdots + \beta_mx_{im} + c_i \quad \text{ where } \quad i = 1,\dots, M
+    \end{equation*}
+    If some of the explainatory variables are discrete and some are continuous then we have a general linear regression, as we can describe the model in compacted manner $Y_i = \boldsymbol x_i^T\boldsymbol \beta + c_i$
+\end{remark}
+
+\begin{remark}{\textbf{(Error in General Linear Regression)}}
+    The error usually assume to be independent, normally distribution with $0$ means and constant variance $\sigma$, thus $Y_i$ is independent normally distributed random variable:
+    \begin{equation*}
+        \mathbb{E}[Y_i] \boldsymbol x_i^T\boldsymbol \beta \qquad \operatorname{var}(Y_i) = \sigma^2
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Example Model)}}
+    The model might compare the mean of $2$ groups i.e a $2$ sample problem. For $j$-th observation in the $i$-th group, we have:
+    \begin{equation*}
+        Y_{ij} = \nu_i + e_{ij} \qquad i = 1,2 \quad j=1,\dots,n
+    \end{equation*}
+    with the assuption about the error, then $Y_{ij}$ is independent of $\mathcal{N}(\mu_i, \sigma^2)$. The above model is:
+    \begin{equation*}
+        Y_{ij} = x_{ij1} \mu_1 + x_{ij2}\mu_2 + e_{ij} \qquad \text{ where } \qquad x_{ijk} = \begin{cases}
+            1 & \text{ if } k = i \\
+            0 & \text{ if } k \ne i
+        \end{cases}
+    \end{equation*}
+    $x_{ijk}$ is called the dummy variable or indicator variable. Furthermore, we can extend the problem into $I\ge2$ groups where:
+    \begin{equation*}
+        Y_{ij} = x_{ij1}\mu_1 + \cdots + x_{ijI}\mu_I + e_{ij}
+    \end{equation*}
+\end{remark}
+
+\section{Inference for Linear Model}
+
+\begin{definition}{\textbf{(Least Square Estimation)}}
+    The least square established of the element $\boldsymbol \beta$ minimizer the following sum of square:
+    \begin{equation*}
+        S(\boldsymbol \beta) = \sum^N_{i=1}e_i^2 = \sum^N_{i=1}(Y_i - \boldsymbol x_i^T\boldsymbol \beta)^2
+    \end{equation*}
+    with respected to elements of $\beta$. Note that the method can be written in the matrix of the form $Y = X\boldsymbol \beta + \boldsymbol e$, where we have:
+    \begin{equation*}
+        \boldsymbol Y = \begin{pmatrix}
+            Y_1 \\ \vdots \\\ Y_N
+        \end{pmatrix} \qquad X = \begin{pmatrix}
+            \boldsymbol x_1^T \\ \vdots \\ \boldsymbol x_N^T
+        \end{pmatrix} \in \mathbb{R}^{N\times p} \qquad \boldsymbol \beta = \begin{pmatrix}
+            \beta_1 \\ \vdots \\ \beta_p
+        \end{pmatrix} \qquad \boldsymbol e = \begin{pmatrix}
+            e_1 \\ \vdots \\ e_N
+        \end{pmatrix}
+    \end{equation*}
+    as we have $X$ is known as design matrix in the context of design experiment. The optimization objective can be written as: 
+    \begin{equation*}
+        S(\boldsymbol \beta) = \boldsymbol e^T\boldsymbol e = (\boldsymbol Y - X\boldsymbol \beta)^T(\boldsymbol Y - X\boldsymbol \beta) 
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    If we consider the differentiate with respected to $\boldsymbol \beta$ and we have $\hat{\boldsymbol \beta} = (X^TX)^{-1}X^TY $ assuming $p < N$ and so $X^TX$ is full rank. We can show that $\hat{\boldsymbol \beta}$ is an unbiased estimator with $\mathbb{E}[\hat{\boldsymbol \beta}] = \boldsymbol \beta$. The covariance matrix of $\hat{\beta}$ if in addition $e_i : i = 1,\dots,N$  are independent with constant variance $\sigma^2$:
+    \begin{equation*}
+        \operatorname{v}(\hat{\boldsymbol \beta}) = \sigma^2(X^TX)^{-1}
+    \end{equation*}
+    and so we can assume the error are independent normally distribution with mean of $0$ and constant variance of $\sigma^2$, then we have: $\hat{\boldsymbol \beta} \sim \mathcal{N}_p(\boldsymbol\beta, \sigma^2(X^TX)^{-1})$
+\end{remark}
+
+\begin{theorem}{\textbf{(Gauss-Markov)}}
+    If $\boldsymbol \psi = \boldsymbol c^T\boldsymbol \beta$ is an estimatable function, there exists the unique a linear unbiased estimator of it which has minimal variance, which is equal to $\hat{\psi} = \boldsymbol c^T\hat{\boldsymbol \beta}$ 
+\end{theorem}
+
+\begin{remark}
+    The least square estimator is MLE of a data that is normall distributed, we can see that the normal distribution is:
+    \begin{equation*}
+        L(\boldsymbol \beta, \sigma^2) = \bracka{\frac{1}{\sqrt{2\pi\sigma^2}}}^N\exp\bracka{-\frac{S(\boldsymbol \beta)}{2\sigma^2}}
+    \end{equation*}
+    from which it can be seen that maximization of $L(\boldsymbol \beta, \sigma^2)$.
+\end{remark}
+
+\begin{remark}
+    The estimation of $\sigma^2$. For the residuals, the fitted values are the estimator of the mean response for each observation: for the $i$-th observation of the fitted value $\hat{\mu}_i = \boldsymbol x_i\hat{\beta}$ with the following residual:
+    \begin{equation*}
+        \hat{\boldsymbol e} = \boldsymbol Y - X\hat{\boldsymbol \beta} = \boldsymbol Y - X(X^TX)^{-1}X^T\boldsymbol Y
+    \end{equation*}
+    where $\hat{e} = (I_N - H)\boldsymbol Y$ where $H = X(X^TX)^{-1}X^T$.
+\end{remark}
+
+\begin{definition}{\textbf{(RSS)}}
+    The sum of the squared where the residual sum of square (RSS) and is the minimal of $S(\boldsymbol \beta)$ and so:
+    \begin{equation*}
+        \text{RSS} = \hat{\boldsymbol e}^T\boldsymbol e = \sum^n_{i=1}\hat{\boldsymbol e}^2 = \sum^N_{i=1} (Y_i - \boldsymbol x_i^T\hat{\boldsymbol \beta})^2
+    \end{equation*}
+    We can so that the expected value of RSS:
+    \begin{equation*}
+        \mathbb{E}[\text{RSS}] = \mathbb{E}[\hat{\boldsymbol e}^T\hat{\boldsymbol e}] = \mathbb{E}[Y^T(I_n-H)Y] = (N-p)\sigma^2
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    The unbiased estimator of $\hat{\sigma}^2 = \text{RSS}/(N-p)$ under the assuption of independent $e_i\sim\mathcal{N}(0, \sigma^2)$, it can be shown that $\text{RSS}/\sigma^2\sim\mathcal{X}^2_{N-p}$ independent of $\hat{\boldsymbol \beta}$. 
+\end{remark}
+
+\begin{definition}{\textbf{(Weight Least Square)}}
+   Weighted Least Square is used when we know that the error isn't constantly the weighted least square estimation of $\boldsymbol \beta_j$ minimizes  
+   \begin{equation*}
+        S(\boldsymbol \beta) = \sum^N_{i=1}w_i(Y_i - \boldsymbol x_i^T\boldsymbol \beta)^2
+   \end{equation*}
+\end{definition}
+
+\begin{remark}
+   The greater the weight, the more reliable i.e having small variance. Ideally, we would like to put $w_i = 1/\operatorname{var}(Y_i)$. This is what we obtained from normal criterion with $Y_i\sqrt{w_i}$, which has constant variance. Furthermore, the matrix form is:
+   \begin{equation*}
+       S(\boldsymbol \beta) = (\boldsymbol Y - X\boldsymbol \beta)^TV^{-1}(\boldsymbol Y - X\boldsymbol \beta)
+   \end{equation*} 
+   where $\boldsymbol V$ is $N\times N$ diagonal matrix with $\operatorname{var}(Y_i)$ is the diagonal. The estimator of $\hat{\boldsymbol \beta}$ is:
+   \begin{equation*}
+        \hat{\boldsymbol \beta} = (X^TV^{-1}X)^{-1}X^TV^{-1}\boldsymbol Y
+   \end{equation*}
+   Note that $V$ can be genearlized to a correlated errors, while the solution is scale invariance for the value $V$. 
+\end{remark}
+
+\begin{remark}
+    However, we don't really know $V$ in practice and there are $2$ ways we can fix this:
+    \begin{itemize}
+        \item It is sometimes to assume that the variance of $Y_i$ are propotional to $f(\boldsymbol x_i)$ as $\boldsymbol w_i = 1/f(\boldsymbol x_i)$ even if $\operatorname{var}(\boldsymbol x_i) = cf(\boldsymbol x_i)$ and still works. 
+        \item The weighted least square can be used iteratively as we can guess $\boldsymbol V$ and re-estimate it. 
+    \end{itemize}
+\end{remark}
+
+\section{Confidence Interval Test}
+
+\begin{remark}{\textbf{(Test For Regression Parameter)}}
+    We can derive that $\hat{\beta}_j \sim \mathcal{N}(\beta_j, \sigma^2v_j)$ where $v_j$ is the $(j, j)$-th diagonal $(X^TX)^{-1}$ as we have $\text{RSS}/\sigma^2\sim\mathcal{X}^2_{N-p}$ as we have:
+    \begin{equation*}
+        t = \frac{\hat{\beta}_j - \beta_j}{\sqrt{\hat{\sigma}^2 v_j}}
+    \end{equation*}
+    where we have $\hat{\sigma}^2 = \text{RSS}/(N-p)$ an exact $100(1-\alpha)$ percent for $\beta_j$ has limit: 
+    \begin{equation*}
+        \hat{\beta}_j \pm t_{N-p, 1/(2\alpha)}\operatorname{se}(\hat{\beta}_j)
+    \end{equation*}
+    where $\text{se}(\hat{\beta}_j) = \sqrt{\hat{\sigma}^2v_j}$ and $t_{N-p, 1/(2\alpha)}$ is upperbound $100\cdot1/2\alpha$ point of $t_{N-p}$ distribution. It can be used to test hypothesis of the form:
+    \begin{itemize}
+        \item $H_0 : \beta_j = \beta^*$ for given $j$
+        \item $H_0 : \beta_j = 0$ for a given $j$, where we obtain the $p$-value the usual way. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(CI Test for Linear Combination of Parameters)}}
+    Inference about $\psi = \boldsymbol c^T\boldsymbol \beta$ an estimated expected response. Let $\hat{\psi} = \boldsymbol c^T\hat{\boldsymbol \beta}$, which we have:
+    \begin{equation*}
+        \frac{\hat{\psi} - \psi}{\sqrt{\hat{\sigma}^2 v}} \sim t_{N-p}
+    \end{equation*}
+    where $c^T(X^TX)^{-1}c = v$, we can construct $100(1-\alpha)$-percent interval and we have the test start for $H_0: \psi = \psi^*$.
+\end{remark}
+
+\begin{remark}{\textbf{(Test About Multiple Parameter)}}
+    Consider testing null hypothesis $H_0$ that a subset of $p-q$ parameter out of $p$ are $0$, leaning $q$ non-zero parameter. Let $H_1$ denotes an alternative hypothesis that all $p$ are not $0$. 
+    \begin{itemize}
+        \item We let $\text{RSS}_0$ and $\text{RSS}$ denote the residual sum of square under $H_0$ and $H_1$ respectively. 
+        \item It can be shown that the difference between $\text{RSS}_0-\text{RSS}$ is independent of $\text{RSS}$ and so:
+        \begin{equation*}
+            \frac{\text{RSS}_0 - \text{RSS}}{\sigma^2}\sim\mathcal{X}^2_{p-q}
+        \end{equation*}
+        under $H_0$
+        \item We obtain $F$-test, as we have:
+        \begin{equation*}
+            \frac{(\text{RSS}_0 - \text{RSS})/(p-q)}{\text{RSS}/(N-p)} \sim F_{p-q, N-p} 
+        \end{equation*}
+        under $H_0$, in case where $p-q=1$ and $F=t^2$ where $t$ is the $t$-statistics given above.
+    \end{itemize}
+\end{remark}
+
+\section{Multiple Linear Regression}
+
+\begin{definition}{\textbf{(Multiple-Linear Regression)}}
+   We consider the following model as we have:
+   \begin{equation*}
+       Y_i = \beta_0 + \beta_1x_{i1} + \cdots + \beta_mx_{im} + e_i \qquad \text{ for } \qquad i = 1,\dots,N
+   \end{equation*} 
+   where $Y_i$ is the response $\boldsymbol Y$ corresponds to $x_{i1},\dots,x_{im}$. 
+\end{definition}
+
+\begin{remark}
+    Given the normally distributed errors $e_1,\dots,e_N$ with constant variance $\sigma^2$. We can see that $Y_i$ is independent $\mathcal{N}(\mu_i, \sigma^2)$ where:
+   \begin{equation*}
+       \mu_i = \beta_0 + \beta_1x_{i1} + \cdots + \beta_{m}x_{im}
+   \end{equation*}
+   The matrix form of the model $\boldsymbol Y = X\boldsymbol \beta + \boldsymbol e$ where $i$-th row of $X$ is $(1, x_{i1},\dots, x_{im})$ and $\boldsymbol \beta = (\beta_0, \dots, \beta_m)^T$. We will assume that $X^TX$ is invertible.
+\end{remark}
+
+\begin{remark}
+    We have the following results on the multiple linear regression models:
+    \begin{itemize}
+        \item Least Square Estimate $\hat{\boldsymbol \beta} = (X^TX)^{-1}X^T\boldsymbol Y$
+        \item Sampling Distribution of $\hat{\boldsymbol \beta}$ where we have $\hat{\boldsymbol \beta} \sim \mathcal{N}(\boldsymbol \beta, \sigma^2(X^TX)^{-1})$
+        \item Residual Sum of Square is 
+        \begin{equation*}
+        \begin{aligned}
+            \text{RSS} &= (\boldsymbol Y - X\hat{\boldsymbol \beta})^T(\boldsymbol Y - X\hat{\boldsymbol \beta}) = \boldsymbol Y^T\boldsymbol Y - 2\hat{\boldsymbol \beta}^TX^T\boldsymbol Y + \hat{\boldsymbol \beta}^TX^TX\hat{\boldsymbol \beta} \\
+            &= \boldsymbol Y^T\boldsymbol Y - \hat{\boldsymbol \beta}^TX^T\boldsymbol Y
+        \end{aligned}
+        \end{equation*}
+        \item Unbiased Estimator of $\sigma^2$: $\hat{\sigma}^2 = \bracka{\text{RSS}}/\bracka{N-m-1}$
+        \item T-test for $H_0: \beta_j=0$ as we have $t = \hat{\beta}_j/\text{se}(\hat{\beta}_j) \sim t_{N-m-1}$ under $H_0$.
+        \item F-test for $H_0: \nu$ of regression parameter $\beta_1,\dots,\beta_m$ are $0$ i.e testing for omission of $\nu$ explainatory variable where $\nu\le m$ as we have:
+        \begin{equation*}
+            F = \frac{(\text{RSS}_0 - \text{RSS})/\nu}{\text{RSS}/(N-m-1)} \sim F_{\nu, N-m-1} \qquad \text{ under } H_0
+        \end{equation*}
+        \item Special Case: $H_0: \beta_1=\beta_2=\cdots=\beta_m = 0$ under $H_0$. The least square estimator of $\beta_0$ is the sample mean:
+        \begin{equation*}
+            \text{RSS}_0 = \sum_i (Y_i - \bar{Y})^2 = \text{ correlated total sum of square}
+        \end{equation*}
+    \end{itemize}
+    The results are represented in a table of analysis of variance table:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Source of Variation} & \textbf{Sum of Square} & \textbf{Degree of Freedom} &  \textbf{Mean-Square}  & \textbf{F} \\
+        \midrule
+        Regression & $\operatorname{SS}(\text{reg})$ & $m$ & $\operatorname{SS}(\text{reg})/m$ & $\cfrac{\operatorname{SS}(\text{reg})/m}{\operatorname{RSS}/(N-m-1)}$ \\
+        Residual & $\operatorname{RSS}$ & $N-m-1$ & $\cfrac{\operatorname{RSS}}{N-m-1}$ & $-$ \\
+        \midrule
+        Total & $\text{CTSS}$ & $N-1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+    where we have $\operatorname{SS}(\text{reg}) = \sum^N_{i=1}(\hat{\mu}_i - \bar{Y})^2 = \operatorname{CTSS} - \operatorname{RSS}$ where $\hat{\mu}_i = \boldsymbol x_i^T\hat{\boldsymbol \beta}$ are fitted value. 
+\end{remark}
+
+\section{Interpretation of Regression Parameter}
+\begin{remark}{\textbf{(Partial Regression Coefficient)}}
+    The coefficient $\beta_j$ of an explainatory variable $x_j$ in a multiple linear regression that includes other explainatory variable called partial regression coefficient. It makes sure that the rate of change of the mean response with $x_j$ while holding constant the values of other explainatory variable in model. 
+\end{remark}
+
+\begin{remark}{\textbf{(Total Regression Coefficient)}}
+    The coefficient $x_j$ in the simple linear regression of the respons variable $x_j$ on its own is called total regression coefficient. It measures the rate of the mean response with $x_j$ ignorning the value of the other. 
+\end{remark}
+
+\begin{remark}{\textbf{(Checking Model Adequacy)}}
+    Assessment of the model assumptions, we have:
+    \begin{itemize}
+        \item Linearity of the relationship between predictor and $Y$. 
+        \item Normality of $e_i$: Though the normal distribution theoretically can guarantee generting the arbitary real number, very extreme values occurs under normal distribution with small probability. 
+        \begin{itemize}
+            \item The outier have strong influence of least square regression as the detection of it is the most important task. 
+            \item Another possible deviation could be skewness of the distributed shape. 
+            \item Some deviation from normality are less dangerous: Limited/Restricted Value Range. 
+            \item Normality is an idealization that never holds precisely in practice, we have to find whether the deviation that gives us misleading conclusion about the data. 
+        \end{itemize}
+        \item Homogeneocity of the variance of $e_i$: The variance don't depends on any of the predictor variable. (oppose to heteroscedastic)
+        \item Independent of $e_i$ of each other. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Matrix Plot)}}
+    All scratter plot of any pair of predictor variables and response arranged in matrix form can be used without having fitted the linear regression or access linearlity, outlier and heteroscedastic. 
+
+    The danger of over-interpreting as it doesn't give a full impression. Non-linearity shape of the plot of single predictor vs response is caued by the value of other predictor than the real violation of linearity. It may reveal co-linearity and leverate points, which are not violation but problematic. 
+\end{remark}
+
+\begin{remark}{\textbf{(Residual and Standardized Residual)}}
+    Residuals are the deviation of the observation of their ideal. It can be interpreted as the estimation of error $e_i$ (denoted by $\hat{e}_i$). Standardized residual are residual divded by their estimated standard-deviation so it have $\sigma = 1$. This helps us access their size. 
+    \begin{itemize}
+        \item Too mant standardized with manitude of greater than $2$ suggests that the eror distribution have heavier tail but around $5$-percent of the standardized residual should be expected to be $>2$
+        \item The covariance of residual is $V(\hat{\boldsymbol e}) = \sigma^2[I - H]$ where $H = X(X^TX)^{-1}X^T$ called hat matrix, and so we have:
+        \begin{equation*}
+            \operatorname{var}(\hat{e}_i) = \sigma^2(1-h_{ii}) \qquad \operatorname{cov}(\hat{e}_i, \hat{e}_j) = -\sigma^2h_{ij} \text{ for } i \ne j
+        \end{equation*}
+        while the error are assumed to be uncorrelated, we just show that the residual are correlated. For i-th observation, the standard deviation residual is given by:
+        \begin{equation*}
+            r_i = \frac{\hat{e}_i}{\sigma\sqrt{1-h_{ii}}}
+        \end{equation*}
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Residual Plots)}}
+    Makes sense to use standardized residual for the plot but a raw plot but other kinds of plots may works well as we have the following kinds of plots:
+    \begin{itemize}
+        \item \emph{Predictor vs Residual}: Error is assumed to be independent from the predictor variable. 
+        \begin{itemize}
+            \item The plot should be randomly scrattered. 
+            \item Plot reveals non-linearity, heteroscedastic, auto-correlation of residual with neighbouring values of outier. 
+        \end{itemize} 
+        \item \emph{Fitted Values vs Residuals}: If the model is true, the correlation between the residual are fitted value is zero. If any problem, it will have similar problem with predictor and residual plot. 
+        \item \emph{Observation vs Residual}: If the observation order is informative, the error should be iid and plot should randomly scrattered. It may reveal the autocorrelation and heteroscedasity as well. 
+        \item \emph{Normal Probability Plot of Residual}: The normal probability plot the sorted residual (standardized) $r_{(i)}$ ($i$ smallest residual) against theoretically quantity of normal distribution $\Phi^{-1}\bracka{(i-0.5)/n}$
+        \begin{itemize}
+            \item Ideal local sorted realization of standard normal distribution.
+            \item They should looks like a straight line. 
+            \item It also indicates a deviation from normality, including outlier too.
+        \end{itemize}
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Remedies for Violate Model Assumption)}}
+    \begin{itemize}
+        \item \emph{Non-Linearity}: It helps to transform one or more predictors and/or response. A linear nodel may holds some non-linear function of observed variable.
+        \item \emph{Non-Normality} of error distribution. Robust linear regression may help with outlier. Skewness can be helped using a transformation. Some transformation to response and predictor. 
+        \item \emph{Heteroscedasity}: Weighted square, transformation, and robust regression. 
+        \item \emph{Dependence of Errors}: Not affect regression parameter estimator but it affects standard deviation and confidence interval. If assuption can be made, time series may apply. 
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Coefficient of Determination)}}
+    $R^2$ is defined by:
+    \begin{equation*}
+        R^2 = \frac{\sum (\hat{\mu}_i - \bar{y})^2}{\sum (y_i - \bar{y})^2} = \frac{\operatorname{SS}(\text{reg})}{\text{CTSS}} = 1 - \frac{\text{RSS}}{\text{CTSS}}
+    \end{equation*}
+    Propotion of the total variations explained by regression model. It is also a square of the correlation between the observed and filled values. This is known as multiple correlation coefficient. 
+    \begin{itemize}
+        \item Measures how the models accounts for data. This isn't directly related to be model assuption. 
+        \item Small value of $R^2$ means that the assuption are violated or some crutial information is missing in the data or model is fine but the error variance is large. 
+    \end{itemize}
+    The model violation still possible if $R^2$ is relatively high:
+    \begin{itemize}
+        \item True relationship is strong and monotone but slightly non-linear
+        \item The case of heteroscedasity with small error variances a linear may yield a good fit with high $R^2$. 
+    \end{itemize}
+\end{definition}
+
+\begin{definition}{\textbf{(Regression Outlier)}}
+    Observation with unusual $y$-values compared to other observation with small $x$-values. If there are small number of regression outlier, these may show up in residual plot with large residual.  
+\end{definition}
+
+\begin{definition}{\textbf{(Leverage Points)}}
+    Observation with usual $x$-values compared to the bulk of data. Linear regression don't assume normality for the predictors therefore leverage points don't violate the model. However, this cause instability of the regression as if there is a small change in the data, it may lead to large change in the least square regression estimator. It can be distinguished between $2$ points:
+    \begin{itemize}
+        \item Good Leverage Points: If the $y$-values are inline with the other $y$-value. The fitted $\boldsymbol x^T_i\hat{\boldsymbol \beta}$ is similar to the observation value $y_i$, as the omitting the observation won't change the fitting. 
+        \item Bad Leverage Points: $y$-value is unusual, then $\boldsymbol x_i^T\hat{\boldsymbol \beta}$ is difference from $y_i$ depending on the extended of the effected. 
+    \end{itemize}
+    Leverage describes the potential for affecting the model fit. We introduce the Mahalanobis distance $\operatorname{MD}_i$, as we have:
+    \begin{equation*}
+        \operatorname{MD}_i = \sqrt{(x_i - \bar{x})\hat{\Sigma}_x^{-1}(x_i - \bar{x})}
+    \end{equation*}
+    where $\hat{\Sigma}_X$ is empirical covariance matrix of $x$-observation. There is ono-to-one relation with diagonal element of Hat, as we have:
+    \begin{equation*}
+        \operatorname{MD}_i^2 = (N-1)\bracka{h_{ii} - \frac{1}{N}}
+    \end{equation*}
+    We see that $\operatorname{MD}_i^2 \sim \mathcal{X}^2_{p-1}$ which can be used to access whether a distance is unusually large. Note that the leverage points can be prevented in design experiment. 
+\end{definition}
+
+\begin{remark}
+    Checking for the outlier can be given by:
+    \begin{itemize}
+        \item It is good to check before fitting the data. In higher dimension, it is hard to spot such unusual observation: residual plot can help but as it is derived from fitted model, which might be affected by outlier. 
+        \item Another possibility is Cook's statistics, fit the model repeatedly by omitting one observation and see how the fit value change. The change is given as $X(\hat{\beta} - \hat{\beta}_{(i)})$ where $\hat{\beta}_{(i)}$ is the least square without the $i$-th observation. It is given by:
+        \begin{equation*}
+            D_i = \frac{1}{p\hat{\sigma}^2}(\hat{\beta} - \hat{\beta}_{(i)})^TX^TX(\hat{\beta} - \hat{\beta}_{(i)})
+        \end{equation*}
+        The largest value of $D_i$ indicates the $i$-th observation is influential. It can be shown that:
+        \begin{equation*}
+            D_i = \frac{1}{p} \bracka{\frac{h_{ii}}{1-h_{ii}}}r_i^2
+        \end{equation*}
+        There is no need to fit at all. 
+    \end{itemize}
+    Both Mahalanobis distance and Cook's statistics can't reliabily finds all the points. As there can be masking effect, when there are $>1$ outlier points prevents the effect of each other. 
+\end{remark}
+
+\begin{remark}{\textbf{(Collinearity)}}
+    Strict collinearity means that these is linear dependence among the predictor variables:
+    \begin{itemize}
+        \item $X^TX$ isn't invertible and least square estimator doesn't exists. 
+        \item This may happen if the number of predictors is large compared to the observation. 
+    \end{itemize}
+    The approximation collinearity is when predictors are linear dependents. This Happens when some of predictions are strongly correlated. This can be detected from matrix plot. 
+    \begin{itemize}
+        \item Although the least square can be computed, $X^TX$ is close to singularity, this means that some of regression parameter estimator may be unstable and should be interpreted with care. 
+        \item $\sigma^2(X^TX)^{-1}$ convariance matrix of $\beta$ might have large variance entry. 
+    \end{itemize}
+\end{remark}
+
+\section{Robust Regression}
+
+\begin{remark}{\textbf{(Problems with Least Square Error)}}
+    The least square error can be sensitive to recall that the estimator is found by minimizing 
+    \begin{equation*}
+        S(\boldsymbol \beta) = \sum^N_{i=1}e_i(\boldsymbol \beta)^2 = \sum^N_{i=1}(Y_i - \boldsymbol x_i^T\boldsymbol \beta)^2
+    \end{equation*}
+    and so any residual that already has high value will have high contribution to the sum. 
+\end{remark}
+
+\begin{remark}
+    They should be a good under the normal model (efficiency) as we have: Under linear regression with other distribution of error term (espescially with the heavy tail). They should not also be sensitivity to outlier.     
+\end{remark}
+
+\begin{remark}{\textbf{(Constructing a Robust Classifier)}}
+    The square error can be seen as minimizes the error variance estimator $\hat{\sigma^2}$. This means that constructing a linear regression is to minimize the scale estimator (function that is propotional to the variation of the residual around hyperplane). The way to estimate the size of the residual leads to difference regression estimator. There are $2$ ways to make LS robust:
+    \begin{itemize}
+        \item Instead of using square the residual, use another function to reflect distance on $Y_i$, we have:
+        \begin{equation*}
+            \sum^N_{i=1}\abs{e_i(\beta)} = \sum^N_{i=1}\abs{Y_i - \boldsymbol x_i^T\boldsymbol \beta}
+        \end{equation*}
+        The minimize of $\beta$ is known as $L_1$-estimator. The generalization is known as $M$-estimation. It can be shown to be MLE of the double exponential. For $m=0$ can be $L_1$-estimator is $\beta_0$ is median. 
+        \item We could minimize the median of the residual as we have:
+        \begin{equation*}
+            \operatorname{MED}\brackc{e_i(\boldsymbol \beta)^2 : i =1,\dots,N} = \operatorname{MED}\brackc{(Y_i - \boldsymbol x_i^T\boldsymbol \beta_i)^2 : i = 1,\dots, N}
+        \end{equation*}
+        This is known as least median of the squares. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Effect of Leverage Points)}}
+    The deficiency of least square estimate and it applied to regression outliers, but least square is also affected by leverage points. Consider a simple linear regression: least square estimator for the slope $\boldsymbol \beta_1$ is 
+    \begin{equation*}
+        \beta_1 = \frac{\sum_i(x_i - \bar{x})y_i}{\sum_k(x_k - \bar{x})^2} = \sum_iv_iy_i
+    \end{equation*}
+    with $v_i = (x_i-\bar{x})/\brackc{\sum_k(x_k-\bar{x})^2}$. Hence $\beta_i$ is the weighted sum of the $y_i$ where the large weight is given by observation with large $(x_i - \bar{x})$, which are the leverage points. 
+\end{remark}
+
+\begin{remark}
+    It can be shown that $R^2$ is affeced by leverage poitns in the sense that good leverage points imposing the fit (increase $\mathbb{R}^2$) and vice versa. We will see not far later that $M$-estimator aren't much better than the least square in dealing with leverage points but least median square-estimator is.
+\end{remark}
+
+\begin{remark}{\textbf{(Comments on the Least Square)}}
+    \begin{itemize}
+        \item We have discussed earlier. Our old methods works best with one outlier. We have to use the residual from the fitted model to find outlier. 
+        \item In term of efficiency, robust methods are designed to only slightly affected by small deviations from model assuption and not be catastrophically affected by large deviations. 
+        \item Some robust models are not as efficient as least square. Their asymptotics variance is larger than the one that the least square estimator holds. 
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(M-Estimators)}}
+    Instead of minimizing on square residual, another function is the be used with the following criterior for $\boldsymbol u \in \mathbb{R}$ as we have:
+    \begin{itemize}
+        \item Positivity $\rho(\boldsymbol u) \ge 0$
+        \item Zero for zero residual $\rho(0) = 0$
+        \item Symmetric $\rho(\boldsymbol u) = \rho(-\boldsymbol u)$
+        \item Increase for increasing the residual $\rho(\boldsymbol u)\ge\rho(\boldsymbol u')$ if $\abs{u}\ge\abs{u'}$
+    \end{itemize}
+    Assume we know $\sigma$, the $M$-estimator $\hat{\boldsymbol \beta}_M$ is defined as $\hat{\boldsymbol \beta}$ that minimizes:
+    \begin{equation*}
+        \sum^N_{i=1}\bracka{\frac{e_i(\boldsymbol \beta)}{\sigma}} = \sum^N_{i=1}\rho\bracka{\frac{Y_i - \boldsymbol x_i^T\boldsymbol \beta}{\sigma}}
+    \end{equation*}
+    in $\boldsymbol \beta$. Note that the least square and $L_1$-estimator are $M$-estimators.
+\end{definition}
+
+\begin{remark}
+    The differentiate with respected to $\boldsymbol \beta$ and setting the zero yields: 
+    \begin{equation*}
+        \sum^N_{i=1}\boldsymbol x_i^T\psi\bracka{\frac{Y_i - \boldsymbol x_i^T\hat{\boldsymbol \beta}}{\sigma}} = \boldsymbol 0
+    \end{equation*}
+    where we have $\psi(\cdot) = \rho'(\cdot)$. The equation can't be solved analytically. By setting $u_i = (Y_i - \boldsymbol x_i^T\hat{\boldsymbol \beta})/\sigma$ as we can rewrite:
+    \begin{equation*}
+        \sum^N_{i=1}\boldsymbol x_i^T\boldsymbol w_i\omega_i = 0
+    \end{equation*}
+    where $w_i = \psi(\boldsymbol u_i)/u_i$. This is like weighted $w_i$, which we can approximate the $\hat{\beta}_M$ as solution of:
+    \begin{equation*}
+        \hat{\boldsymbol \beta}_M = (X^TWX)^{-1}X^TW\boldsymbol Y
+    \end{equation*}
+    where $W = \operatorname{diag}(w_1,\dots,w_N)$ as $w_i$ depends on $\hat{e}_i$ and hence $\hat{\boldsymbol \beta}_M$ and we use the iteration to be:
+    \begin{equation*}
+        \hat{\boldsymbol \beta}^{(k+1)}_M = (X^TW^{(k)}X)^{-1}X^TW^{(k)}\boldsymbol Y
+    \end{equation*}
+    until convergence. The value $\boldsymbol w_1, \cdots, \boldsymbol w_N$ can be interpreted as robustness weight and can be used as outlier identification. The observation is an outlier by $M$-estimator if $\boldsymbol w_i$ is small. 
+    \begin{itemize}
+        \item The residual $\hat{e}_i(\boldsymbol \beta)$ only enter through $\psi(\boldsymbol u_i)$. If $\psi$ is bounded, the influence of large residual on regression is bounded as well. 
+        \item The influence on leverage point isn't bounded because of the factor $\boldsymbol x_i$, unless $\psi(u) = 0$ or $\psi(u)$ very small for those observation with large $\boldsymbol x_i$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    Under fiarly general condition, $M$-estimator can be shown to be consistent. A necessary condition is that $\mathbb{E}[\psi(Z)] = 0$ where $Z\sim F$ as $F$ is the error distribution holds for all symmetric error if $\psi$ is bounded. Furthermore,
+    \begin{equation*}
+        \sqrt{n}(\hat{\beta}_M - \beta) \overset{n\rightarrow\infty}{\sim} \mathcal{N}(0, V(\psi, F)L^{-1})
+    \end{equation*}
+    where $V(\psi, F)$ is matrix that depends on the influenced function $\psi$, and true error distribution $F$ with $L = (1/N)\lim X^TX $, which can be used to compute the test and confidence interval. 
+\end{remark}
+
+\begin{remark}
+    Under normality, covariance matrix of the lease square error is $C = \sigma^2(X^TX)^{-1}$. For $M$ estimators with many other $\rho$-functions, the covariance matrix is shown to be:
+    \begin{equation*}
+        V(\psi, F)L^{-1} = bC
+    \end{equation*}
+    for some constant as $1/b$ is called efficiency of the estimator compared to least square estimator. Assuming that the asymptotics holds approximately for finite sample, $b$ can be interpreted as the factor with which the number of observation has to be multiplied to arrive at same precision  (with efficiency $0.5$ we need $2$ as much observation)
+\end{remark}
+
+\begin{definition}{\textbf{(Bi-Square Objective Function)}}
+    $L_1$ isn't robust against leverage point as we have the alternative to be:
+    \begin{equation*}
+        \rho_B (u) = \begin{cases}
+            \cfrac{1}{6}\brackc{1 - \brackb{1 - \bracka{\cfrac{u}{c}}^2 }^3} & \text{ if } \abs{u} \le c \\
+            \cfrac{1}{6} & \text{ if } \abs{u} > c
+        \end{cases}
+    \end{equation*}
+    wherer $c$ is tuning constant, which we also have:
+    \begin{equation*}
+        \psi_B (u) = \begin{cases}
+            \cfrac{u}{c^2}\brackb{1 - \bracka{\cfrac{u}{c}}^2 }^2 & \text{ if } \abs{u} \le c \\ 
+            0 & \text{ if } \abs{u} > 0
+        \end{cases}
+    \end{equation*}
+    $c$ can be used to tune the robustness and efficiency. For small $\abs{u}$, $\psi_B(u)$ is like a line, which is propotional to $\psi$-function for the least square estimator. 
+    \begin{itemize}
+        \item If $c$ is large, most $u$ are small and most residual are treated in smaller way as LS-estimator. For $c\rightarrow\infty$, the efficiency of Bi-square $M$-estimator converges to $1$. 
+        \item If $c$ shouldn't too large to correct for extreme outlier. The suggested value $\sigma^2=1$ and $c=4.658$, the usually suggested value. 
+    \end{itemize}
+\end{definition}
+
+\section{Variable Selection}
+
+\begin{remark}{\textbf{(Variable Selection)}}
+    Consider the regression, as we have: 
+    \begin{equation*}
+        Y_i = \beta_0 + \beta_1x_{i1} + \cdots + \beta_mx_{im} + e_i
+    \end{equation*}
+    for we have $i=1,\dots,N$. Variable selection is where we select the variables that are relevant: This is the same as finding coefficient $\beta_i$ that are zero. Very small with almost zero contribution
+\end{remark}
+
+\begin{remark}{\textbf{Pros and Cons}}
+    There are various reasons to use variable selection as we have:
+    \begin{itemize}
+        \item If number of variable $p$ is large compared to number of observation $N$ as $X^TX$ are closed to collinearity and estimation can be unstable. 
+        \item Simple communication is better and same observation are expensive to get the data. 
+    \end{itemize}
+    However, there are various argument against using variable selection:
+    \begin{itemize}
+        \item As long as enough observation are avaliable, it is usually much worst to leave out, the variable that are important. 
+        \item As $\beta_i$ will be zero, it is better to leave out as it is unless there is a reason to do it. 
+        \item Some of variable are highly correlated, usually not all of these variables are needed, but the decision about which model should be kept can be arbitary. 
+        \item It is often unstable and have to be taken with care concerning explaination and causual inference. 
+        \item It can't be taken to granted that a variable left out is unimportant as it may be represented by another variable.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Reviewing Old Methods)}}
+    Let's consider some of the results presented in eariler parts:
+    \begin{itemize}
+        \item The $F$-test in anova table is for testing none of the explainatory variables affect the response. 
+        \item Another $F$-test is used to testing whether $j$-th explanatory variable $x_j$ doesn't affect the response given the other $m-1$ variables in the model, so that the regression coefficient is $0$. 
+        \item Computer output usually gives $t$-statistics and associated $p$-values against each of the regression coefficient. We shouldn't deduce that we can remove several variables. If any of them gives non-significant, we can only select one to drop with highest $p$-value (most non-significant)
+        \item Reason why not dropping several: If there are $2$ are highly correlated one of them is needed into model but every single pair can be dropped as non-significant. 
+        \item If we drop one of the coefficient, the others coefficient will change. Similarly as we added variable, the estimator remain unchanged is where there is another orthogonal columns in the $X$.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Best Subset Selection)}}
+    With $m$ explainatory, there are $2^m$ possible regression model:
+    \begin{itemize}
+        \item Starting with the best model for each explainatory variable $k=1,\dots,m$. For a fixed $k$, the best model it can be defined as model with smallest RSS or model that minimize $p$-value of $F$-test by the null hypothesis that $\beta_1=\cdots=\beta_m=0$ against at least one of the parameter of the choosen model to be non-zero. 
+        \item Adding more variable always decrease RSS implied that increases $R^2$.
+        \item The best model with $l>k$ variable doesn't necessary contain all $k$ variables of the best model with $k$-variables. $t$ and $F$-test can't be used to compare the best subset of difference size. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Akaike Information Criterior (AIC))}}
+    For quite general model by maximum likelihood as we have:
+    \begin{equation*}
+        \text{AIC} = -2\hat{l}(\text{model}) + 2p
+    \end{equation*}
+    as we have $\hat{l}$ is the maximum of likelihood, while $p$ is the number of parameter, where we have:
+    \begin{equation*}
+        \hat{l}(\text{model}) = -\frac{N}{2}\log(\sigma^2) - \frac{\text{RSS}}{2\sigma^2} + \text{ const }
+    \end{equation*}
+    Since $\sigma$ is usually unknown, we use $\hat{\sigma}^2_\text{ML} = \text{RSS}/N$ instead of:
+    \begin{equation*}
+        \text{AIC} = N\log\bracka{\frac{\text{RSS}}{N}} + 2p
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Other function of RSS)}}
+    Penalizing large models have been suggested such that mallow $C_p$ and so-called \correctquote{adjusted $R^2$}, which delivers number between $0$ and $1$ like $R^2$ but is maximized when $\hat{\sigma}^2$ is maximized. However, this is soft criterion. 
+\end{remark}
+
+\begin{remark}{\textbf{(Leave-One-Out Cross Validation)}}
+    General method is fitted on the remaining $N-1$ points. There are advantages and disadvantage of LOO-CV and we have:
+    \begin{itemize}
+        \item Advantages: It doesn't base on any model assuption. Even if the fitted model is wrong. 
+        \item Disadvantage: Model has to be fitted $N$-times which gives us computationally demanding if $N$ is large. 
+    \end{itemize}
+    This is the same as any Cross-Validation Scheme in ML. 
+\end{remark}
+
+\begin{remark}{\textbf{(Stepwise Methods - Backward Elimiation)}}
+    The best subset selection has major disadvantage but we had to fit all $2^m$ possible model. The stepwise selection is a general principle that can be applied to wide range of selection problem, where are $2$ basic approaches starting with Backward Elimiation: Start by fitting full model with all variables. Call this backward $m$-model as we set $k=m$
+    \begin{itemize}
+        \item Fit all $k$ models with $k-1$ variables. 
+        \item Choose best of these model with minimal RSS as backward $k-1$ model
+        \item Set $k=k-1$
+        \item Repeat 
+    \end{itemize}
+    The total number of models to be fitted is:
+    \begin{equation*}
+        m + (m-1) + \cdots + 1 = \frac{m(m+1)}{2}
+    \end{equation*}
+    Because backward elimiation procedure a nested sequence of models as we have the smaller models are always sub-models of the larger one, it is possible to use $t$ and $F$ test to compared models. 
+
+    $p$-value for the test comparing the backward $k$-models $(H_1)$ with backward $k-1$-models $(H_0)$ is computed and the algorithm is stopped with the backward $k-1$-models.
+\end{remark}
+
+\begin{remark}{\textbf{(Stepwise Methods - Forward Selection)}}
+    We can have the forward model with smaller procedure, which we have:
+    \begin{itemize}
+        \item Start with $k=0$, only fitting the mean to the data. 
+        \item Fit all $m-k$ models with $k+1$ variables. 
+        \item Choose one with best of these model, minimal RSS as the forward $k+1$-model. 
+        \item Set $k=k+1$ and go back unless $k>m$. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(General Notes on Stepwise Model)}}
+    \begin{itemize}
+        \item Backward/Forward model aren't guarantee to arrive at the same sequence of model nor the best model. 
+        \item In experiences, Backward model generally performs better. 
+        \item Steppwise methof can be unstable as a small change in the model causes the best model to change. 
+        \item For small observation, we usually use the forward model instead. 
+    \end{itemize}
+\end{remark}
+
+\section{LASSO}
+
+\begin{remark}
+    It deals with when there is too large data, and it is more stable than the methods mensioned. However, it introduces some biases (which are moderate) and can be out-performed in clear cut situation (if all regression are close to $0$ or all large).     
+\end{remark}
+
+\begin{remark}
+    For computing LASSO, the original explainatory variables $z_1,\dots,z_m$ are transformed to new explainatory variable:
+    \begin{equation*}
+        x_{ij} = \frac{z_{ij} - \bar{z}_j}{s_j} \qquad i = 1,\dots, N \quad j = 1,\dots,m
+    \end{equation*}
+    where we have:
+    \begin{equation*}
+        \bar{z}_j = \frac{1}{N}\sum^N_{i=1}z_{ij} \qquad S_j = \sqrt{\frac{1}{N-1}\sum^N_{i=1}(z_{ij} - \bar{z}_j)^2}
+    \end{equation*}
+    This is a general practice too as now the LASSO estimator $\hat{\boldsymbol \beta}_L$ of $\boldsymbol \beta$ is defined by minimizing the sum of square error:
+    \begin{equation*}
+        S(\boldsymbol \beta) = \sum^N_{i=1}e_i^2 = \sum^N_{i=1}(Y_i - \beta_0 - \beta_1x_{i1}-\cdots-\beta_mx_{im})^2 \quad \text{ such that } \quad \sum^m_{i=1} \abs{\beta_i} \le t
+    \end{equation*}
+    where $t$ is pre-choosen. It is recommended to choose $t$ by LOO-CV with $t = ct_0$ where $c=0.1,0.2,\cdots,1$.  It can be shown that in the model where the variables are much less important thant some other. The estimated LASSO regression parameter $\hat{\beta}_{L_i}$ are reduced to zero. 
+\end{remark}
+
+\begin{remark}
+    $\beta_0$ can be estimated by least-square independently of slope parameter due to the constraint In most cases, there is either no reason why $\beta_0$ should be estimated by $0$ or $\beta_0$ is known and doesn't have to be estimated. 
+\end{remark}
+
+\begin{remark}
+    LASSO is known as shrinkage method as it forces the parameter to be smaller than the unconstrainted least square. Furthermore:
+    \begin{itemize}
+        \item It can be shown that the stepwise and best subset tends to choose variable with models of which $\beta_i$ is estimate to have a large value.
+        \item There is no theoretical work on how to choose it the value $t$, however. 
+    \end{itemize}
+\end{remark}
+
+\section{ANOVA Model}
+
+\begin{remark}
+    Theory of linear model applied to situation in which response $Y_i$ is modelled as dependent on catagorical or a group member. These model are often called ANOVA model:
+\end{remark}
+
+\begin{remark}
+    The ANOVA model is often refer to breakdown of the corrected total sum of square (CTSS) into the sum of thE RSS of the full number + sum of square contribution explained by some of the regression parameter. 
+    \begin{itemize}
+        \item Sum of squares can be seen as quantifying variation and the usual variation and the usual variance estimators under normalizing are actually sum of square divided some cosntant. 
+        \item Such decomposition play a stronger role for ANOVA models with catagorical predictors.
+    \end{itemize} 
+\end{remark}
+
+\begin{definition}{\textbf{(One Way Layout)}}
+    We have the following model:
+    \begin{equation*}
+        Y_{ij} = \mu_i + e_{ij}
+    \end{equation*}
+    for $i=1,\dots,I$ as we have $j=1,\cdots,n_i$. It is the easiest ANOVA model. 
+\end{definition}
+
+\begin{remark}
+    It has been shown that this can be written down by the use of indicator variable as the explainatory variables. The indicator of the first group is $1$ for all observation in the first group and $0$ for all other observation. We have the following notation $\boldsymbol y = X\boldsymbol \beta + \boldsymbol e$ as we have:
+    \begin{equation*}
+        \boldsymbol y = \begin{pmatrix}
+            \boldsymbol y_{11} \\ \vdots \\ y_{In_I}
+        \end{pmatrix} \qquad X = \begin{pmatrix}
+            1 & 0 & \cdots & 0 \\
+            \vdots & \vdots & \ddots & \vdots \\
+            1 & 0 & \cdots & 0 \\
+            0 & 1 & \cdots & 0 \\
+            \vdots & \vdots & \ddots & \vdots \\
+            0 & 1 & \cdots & 0 \\
+            \vdots & \vdots & \vdots & \vdots \\
+            0 & 0 & \cdots & 1 \\
+            \vdots & \vdots & \ddots & \vdots \\
+            0 & 0 & \cdots & 1 \\
+        \end{pmatrix} \qquad \boldsymbol \beta = \begin{pmatrix}
+            \mu_1 \\ \vdots \\ \mu_I
+        \end{pmatrix} \qquad \boldsymbol e = \begin{pmatrix}
+            e_1 \\ \vdots \\ e_N
+        \end{pmatrix}
+    \end{equation*}
+    The column of $X$ denoting the $I$ indicator variable and the roes of the $n$-observation.
+    \begin{itemize}
+        \item This notaiton makes it possible to apply the theory above. 
+        \item It can be shown that the least square estimator above can be used to calculate the group means. 
+        \item The F-test in section above is usually applied to test the $H_0 : \mu_1=\mu_2=\cdots=\mu_I$ using $\text{RSS}_0 = \text{CTSS}$ against a model where at least $2$ of the group has differ mean.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(2-Way Layout)}}
+    The observation are classified according to $2$ factors. In this case, we have the notation:
+    \begin{equation*}
+        Y_{ijk} = \mu + \alpha_i + \beta_j + \gamma_{ij} + e_{ijk}
+    \end{equation*}
+    for $i=1,\cdots,I$ and $j=1,\dots,J$ and $k = 1,\cdots, n_{ij}$ where we have:
+    \begin{itemize}
+        \item $\mu$ is interpreted as the overall expected value. 
+        \item $\alpha_i$ is the effect of level $i$ of the first factor.
+        \item $\beta_j$ is the effect of level $j$ of the second factor. 
+        \item $\gamma_{ij}$ is the interaction effect.
+    \end{itemize}
+% non-zero if the effect of level $i$ of the first factor for particularly these observation having level of the second factor differ from the average over all effect of $2$ factors
+\end{definition}
+
+\begin{remark}
+    The simple model can be applied again. 
+    \begin{itemize}
+        \item The relationship suggest an $X$-matrix with the first column, which corresponds to the $\boldsymbol \mu$ contains only ones. 
+        \item $I$ columns corresponding to indicator variable for the level of the first factor. 
+        \item $J$ columns corresponding to level of second factor. 
+        \item $IJ$ columns for the interaction. 
+    \end{itemize}
+    And, so we have the following $1+I+J+IJ$ columns. This could be multiplied by the following vectors:
+    \begin{equation*}
+        \boldsymbol \beta = (\boldsymbol \mu, \alpha_1, \cdots, \alpha_I, \beta_1,\cdots,\beta_J,\gamma_{11},\cdots,\gamma_{IJ})^T
+    \end{equation*}
+    The simplest case $I = J = n_{ij} = 2$ for each $i$ and $j$ this giving us the following matrix:
+    \begin{equation*}
+        \boldsymbol y = \begin{pmatrix}
+            Y_{111} \\ 
+            Y_{112} \\ 
+            Y_{121} \\ 
+            Y_{122} \\ 
+            Y_{211} \\ 
+            Y_{212} \\ 
+            Y_{221} \\ 
+            Y_{222} \\ 
+        \end{pmatrix} \qquad X = \begin{pmatrix}
+            1 & 1 & 0 & 1 & 0 & 1 & 0 & 0 \\
+            1 & 1 & 0 & 1 & 0 & 1 & 0 & 0 \\
+            1 & 1 & 0 & 0 & 1 & 0 & 1 & 0 \\
+            1 & 1 & 0 & 0 & 1 & 0 & 1 & 0 \\
+            1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+            1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+            1 & 0 & 1 & 0 & 1 & 0 & 0 & 1 \\
+            1 & 0 & 1 & 0 & 1 & 0 & 0 & 1 \\
+        \end{pmatrix}
+    \end{equation*}
+    However, one can show that $X^TX$ isn't invertible as there are too many parameter. The problem where isn't too small of observation but the fact that there are only $IJ$ means. (this can be estimated and therefore more than $IJ$ parameter are not supported)
+\end{remark}
+
+\begin{remark}
+    This problem of non-singularity can be solved by using the contraints is given by:
+    \begin{itemize}
+        \item $\sum^I_{i=1}\alpha_i=0$ 
+        \item $\sum^J_{j=1}\beta_j=0$
+        \item $\sum^I_{i=1}\gamma_{ij} = 0$ for $j=1,\cdots,J$
+        \item $\sum^J_{j=1}\gamma_{ij} = 0$ for $i=1,\cdots,I$
+    \end{itemize}
+    as we have $I+J$ contraints of which one is redundance because if all but one of these sums are $0$, it can be shown that the last one has to be zero as well. 
+\end{remark}
+
+\begin{remark}{\textbf{(Matrix Algebra)}}
+    We will have consider the matrix algebra related to the problem:
+    \begin{itemize}
+        \item First constraints means that $\alpha_1 = -\sum^I_{i=2}\alpha_i$
+        \item The column belong to level $1$ is omitted from $X$ and $\alpha_1$ is omitted from $\boldsymbol \beta$ and for the observation of level $1$ of the first factor because it is replaced by $-\sum^I_{i=2}\alpha_i$
+        \item There are matrix entries $-1$ in the column corresponding to $\alpha_2,\cdots,\alpha_I$
+        \item With other constraints as $X$ matrix are no longer simple indicator vectors, while it could be achieved by contraining some parameter to be zero instead. 
+    \end{itemize}
+    The matrix with 
+    \begin{equation*}
+        1 + I + J + IJ - 2 - (I+J-1) = IJ
+    \end{equation*}
+    columns result so that $X^TX$ to invertible and the least square estimator, which can be computed:
+    \begin{equation*}
+        X = \begin{pmatrix}
+            1 & -1 & -1 & 1 \\
+            1 & -1 & -1 & 1 \\
+            1 & -1 & 1 & -1 \\
+            1 & -1 & 1 & -1 \\
+            1 & 1 & -1 & -1 \\
+            1 & 1 & -1 & -1 \\
+            1 & 1 & 1 & 1 \\
+            1 & 1 & 1 & 1 \\
+        \end{pmatrix} \qquad \boldsymbol \beta = \begin{pmatrix}
+            \mu \\ \alpha_2 \\ \beta_2 \\ \gamma_{22}
+        \end{pmatrix}
+    \end{equation*}
+    All other parameter can be obtained from the constraint. 
+\end{remark}
+
+\begin{remark}{\textbf{(ANOVA Table)}}
+    All the theories above can be obtained. F-test are particularly used in many application to find out whether:
+    \begin{itemize}
+        \item All interaction could be ignorned (with $\text{RSS}_0$ computed from a model when all $\gamma_{ij} = 0$)
+        \item All $\alpha_i=0$ is compatible with the data
+        \item All $\beta_j = 0$ is the compatible with the data
+    \end{itemize}
+    The ANOVA table decomposes the $\text{CTSS}$ (which is computed from a model in which any the overall mean $\mu$ is filled by $\bar{Y}$)
+    \begin{itemize}
+        \item into $\text{RSS}$, the full model puts the sum of square explained by the first factor, second factor, interactions. 
+        \item Unless all $n_{ij}$ are equal (balanced design), this depends on the order of factors. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    For variable selection, most methology can be applied, though in most application there is a particular order in which terms are removed in the stepwise backward fashion: It is reasonable to have the original factor in the model if there are interaction in the model involve these factors. For example, in $2$-ways layout with backward selection usually:
+    \begin{itemize}
+        \item It is checked whether removal if all interaction terms improves the mdodel. If not, the model isn't reduced. 
+        \item After removal of all interactions, it is checked removal of which of the $2$ factors (all parameter belonging to that factor) is better, and whether this improves the model. 
+        \item If so, after removal of this factor, it is checked whether removal of the other factor impress the model even further. 
+    \end{itemize}
+    This check can be done by using $F$-tests, AIC or LOO-CV. 
+\end{remark}
+
+\section{Generalized Linear Model}
+
+\begin{definition}{\textbf{(GLM)}}
+    It extends the idea underlying the linear model to situation when the reponse is binomial, poisson, gamma and other distribution that belong to exponential family of distribution. It consists of $3$ pairs of components:
+    \begin{itemize}
+        \item Random Component: Independent observation $Y_1,\dots,Y_N$
+        \item Systematic Component: Linear predictor by $\eta_i$ for $i$-th observation for $i=1,\dots,N$
+        \item Link Between Random Component and Systematic Component through the use of \emph{link function} $g$:
+        \begin{equation*}
+            g(\mu_i) = \eta_i \qquad \mu_i = \mathbb{E}[Y_i]
+        \end{equation*}
+    \end{itemize}
+    Using the eariler notation $\eta_i = \boldsymbol x_i^T\boldsymbol \beta$. The function $g$ is called the link function as it describes how the expected response is linked to explainatory variable off factors. The link function itself is assumed to be a monotonics and differentiable function.
+\end{definition}
+
+\begin{remark}
+    There are some special cases/examples of the link function related to the distribution:
+    \begin{itemize}
+        \item Linear Model: Linear Model discussed in previous section is the special case $g(\mu) = \mu$ calling identity link function. 
+        \item Binary data: We consider linear logistic model. Suppose, the $i$-th observation consists of a Bernoulli with outcome of $Y_i=1$ (success) or $Y_i=0$ (failure). If $\pi_i$ is the associated probability of success. then the under logistic regression model given by:
+        \begin{equation*}
+            \log \bracka{\frac{\pi_i}{1-\pi_i}} = \boldsymbol x_i^T\boldsymbol \beta
+        \end{equation*}
+        In this case: $\mu_i = \mathbb{E}[Y_i] = \pi_i$ and so the left-handside of the equation has the link function to be: $\log(1/(1-\pi))$ is called logit of $\pi$ and the link function in this case is called logit link. For $0 < \pi < 1$, then $-\infty < \log(1/(1-\pi)) < \infty$ with the consquence that there are no constant on the unknown parameter $\boldsymbol \beta$ (which simplify the estimation) 
+        \item Binomial Data: Suppose that the $i$-th observation corresponds to specified number of $n_i$ ($\ge1$) of independent Bernoulli trails with the same $x_i$. The distribution of the number of success $Y_i$ is $\operatorname{Bin}(n_i, \pi_i)$ where $\mu = n\pi_i$, then the linear logistic model given by equation is still appropriate. The link function:
+        \begin{equation*}
+            g(\mu) = \log\bracka{\frac{\mu}{n-\mu}}
+        \end{equation*}
+        \item Poisson data: Log-Linear Model: Now suppose the $i$-th observation consists of a Poisson counts $Y_i$. If $\mathbb{E}[Y_i] = \mu_i$ a log-linear regression model has:
+        \begin{equation*}
+            \log(\mu_i) = \boldsymbol x_i^T\boldsymbol \beta
+        \end{equation*}
+        where $g(\mu) = \log(\mu)$ is called log-link.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Exponential Families of Distribution)}}
+    We will assume that the response variable is a random $Y$ whose pdf or pmf depends on the parameter $\theta$ and $\phi$ has the form:
+    \begin{equation*}
+        f(y;\theta,\phi) = \exp\brackc{\frac{y\theta - b(\theta)}{a(\phi)} + c(y, \phi)}
+    \end{equation*}
+    where $a, b, c$ are known function, as we assume $a(\phi) = \phi/w$ where $w$ is known weight and $\phi$ is a dispersion parameter or scale parameter, which for some distribution is known and some other is unknown, and $a(\phi)>0$
+\end{remark}
+
+\begin{remark}
+    Let's consider the example: the common distribution, we have for $w=1$ and $a(\phi) = \phi$, and so the following distributions are:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Distribution}   & $\theta$  & $\phi$ &  $b(\theta)$  & $c(y, \phi)$ \\
+        \midrule
+        $\text{Poisson}(\mu)$ & $\log(\mu)$ & $1$ & $\exp(\theta)$ & $-\log y !$ \\
+        $\text{Bin}(n, \pi)$ & $\log\bracka{\frac{\pi}{1-\pi}}$ & 1 & $n\log(1+\exp(\theta))$ & $\log\begin{pmatrix}
+            n \\ y
+        \end{pmatrix}$ \\
+        $\mathcal{N}(\mu, \sigma^2)$ & $\mu$ & $\sigma^2$ & $\frac{1}{2}\theta^2$ & $-\frac{1}{2}\brackb{\frac{y^2}{\phi} + \log(2\pi\phi)}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+\end{remark}
+
+\begin{proposition}{\textbf{(Mean of Exponential Family)}}
+    The mean of the expectation is $\mathbb{E}[Y] = b'(\theta)$
+\end{proposition}
+\begin{proof}
+    In the following $f(y;\theta,\phi)$ is abbreviated to $f(y)$. As we have $1=\int^\infty_{-\infty}f(y)\dby y$ and we have:
+    \begin{equation*}
+        0 = \frac{\partial}{\partial \theta} \int^\infty_{-\infty}f(y)\dby y = \int^\infty_{-\infty}\frac{\partial f(y)}{\partial \theta}\dby y = \int^\infty_{-\infty} \frac{y-b'(\theta)}{a(\phi)} f(y)\dby y
+    \end{equation*}
+    Assuming $a(\phi)\ne0$, then we have:
+    \begin{equation*}
+        0 = \int^\infty_{-\infty}yf(y)\dby - b'(\theta) = \mathbb{E} - b'(\theta)
+    \end{equation*}
+    Gives the result. 
+\end{proof}
+
+\begin{proposition}{\textbf{(Variance)}}
+    Given the variance $\operatorname{var}(Y) = b''(\theta)a(\phi)$ 
+\end{proposition}
+\begin{proof}
+    We consider the derivative of the above again and we have:
+    \begin{equation*}
+        0 = \int^\infty_{-\infty}\brackc{\frac{[y - b'(\theta)]^2}{a(\phi)}f(y) - b''(\theta)f(y) }\dby y = \frac{\operatorname{var}(Y)}{a(\phi)} - b''(\theta)
+    \end{equation*}
+\end{proof}
+
+\begin{definition}{\textbf{(Variance Function)}}
+    From the previous result, the variance of $Y$ can be written as:
+    \begin{equation*}
+        V(\mu)a(\phi) \qquad \text{ and } \qquad V(\mu)\frac{\phi}{w}
+    \end{equation*}
+    where $V(\mu)$ is called variance function. $a$ can be any function of $\phi$, and there would not be any difficulty in dealing with any form of $a$, when $\phi$ is known. On the other hand, when $\phi$ is unknown matter are awkward, unless we write $a(\phi) = \phi/w$ where $w=1$. As we have the following variance:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Distribution}   & $V(\mu)$  \\
+        \midrule
+        $\text{Poisson}(\mu)$ & $\mu$ \\
+        $\text{Bin}(n,\pi)$ & $\mu(n-\mu)/n$ \\
+        $\mathcal{N}(n,\sigma^2)$ & $1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+\end{definition}
+
+\section{Some GLM Theory}
+
+\begin{remark}
+    Assume that the response $Y_1,\dots,Y_N$ are independent from distribution with pdf given by:
+    \begin{equation*}
+        f(y_i ; \theta_i, \phi) = \exp\brackc{\frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)}+ c(y_i, \phi)}
+    \end{equation*}
+    We are assuming a common parameter $\phi$ for all observation. 
+    % Let $\mathbb{E}[Y_i]=\mu_i$ as we have $\boldsymbol \beta = (\boldsymbol \beta_1,\cdots,\boldsymbol \beta_p)^T$ and $x_{ij}$ be the $j$-th element of $\boldsymbol x_i^T$. THe linear predictor for the $i$-th observation is $\eta_i = \sum^P_{j=1}\beta_ix_{ij}$
+\end{remark}
+
+\begin{proposition}
+    If $l$ denotes the log-likelihood function given the data $Y_1,\cdots,Y_N$ then the likelihood equation are:
+    \begin{equation*}
+        \frac{\partial l}{\partial \beta_j} = \sum^N_{i=1}\frac{y_i-\mu_i}{V(\mu_i)}\frac{d\mu_i}{d\eta_i}x_{ij} = 0
+    \end{equation*}
+    for $j \in [p]$. Note that absent of $\phi$ in the likelihood equation. 
+\end{proposition}
+\begin{proof}
+    The unknown parameter $\boldsymbol \beta$ and $\phi$. Let $l$ denotes the resulting likelihood function given the data $Y_1,\cdots,Y_N$ as we have:
+    \begin{equation*}
+        l = \sum^N_{i=1}l_i \qquad \text{ where } \qquad l_i = \log f(y_i;\theta_i, \phi) = \frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)} + c(y_i, \phi)
+    \end{equation*}
+    The following shows the step in obey the the likelihood equation:
+    \begin{equation*}
+        \frac{\partial l}{\partial \beta_j} = \sum^N_{i=1}\frac{\partial l_i}{\partial \beta_j} = 0 \qquad \text{ for } \qquad j = 1,\cdots,p
+    \end{equation*}
+    Firstly, for $i=1,\cdots,N$ and we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial l_i}{\partial \theta_i} = \frac{y_i - b'(\theta_i)}{a_i(\phi)} = \frac{y_i-\mu_i}{a_i(\phi)} \\ 
+        &\frac{\partial l_i}{\partial \mu_i} = \frac{\partial l}{\partial \theta_i}\frac{d \theta_i}{d\mu_i} = \frac{y_i-\mu_i}{a_i(\phi)}\frac{1}{b''(\theta_i)} = \frac{y_i-\mu_i}{\text{var}(y_i)} \\
+        &\frac{\partial l_i}{\partial \eta_i} = \frac{\partial l}{\partial\mu_i}\frac{d\mu_i}{d\eta_i} = \frac{y_i-\mu_i}{\text{var}(y_i)} \frac{d\mu_i}{d\eta_i}
+    \end{aligned}
+    \end{equation*}
+    Putting back to the likelihood function, and we have:
+    \begin{equation*}
+        \sum^N_{i=1}\frac{\partial l}{\partial \eta_i}\frac{\partial \eta_i}{\partial \beta_j} = \frac{1}{\phi}\sum^N_{i=1}\frac{y_i-\mu_i}{V(\mu_i)}\frac{d\mu_i}{d\eta_i}x_{ij}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}
+    We can't solve the $\beta$ algebratically. If the weight $V(\mu_i)$ where known and independent $\boldsymbol \beta$, then we can solve the non-linear equation to find $\boldsymbol \beta$:
+    \begin{itemize}
+        \item Starting with $\hat{\boldsymbol \beta}_0$ at the MLE $\hat{\boldsymbol \beta}$ and then we repleat the process until the convergence. The iteration can be shown as:
+        \begin{equation*}
+            (X^TWX)^{(s-1)}\hat{\boldsymbol \beta}^{(s)} = (X^TW\boldsymbol z)^{(s-1)}
+        \end{equation*}
+        where $W \in\mathbb{R}^{N\times N}$ diagonal matrix with $(i,i)$-th claims:
+        \begin{equation*}
+            W_{ii} = \frac{1}{V(\mu_i)}\bracka{\frac{d\mu_i}{d\eta_i}}^2
+        \end{equation*}
+        and $z$ that the $i$-th element as we have $z_i = \eta_i + (y_i-\mu_i)\bracka{\frac{d\eta_i}{d\mu_i}}$. 
+        \item The equation looks like the equation above for weighted least square estimation but with weights is given by $w_{ii}$ and an adjusted response variable by $z_i$ for the $i$-th observation. 
+        \item The iterative procedure can start with setting $\mu^{(0)}_i = y_i$ instead of random guess $\hat{\boldsymbol \beta}^{(0)}$. 
+        \item This is known as Iteratively Re-Weighted Least Square. At convergence, $\hat{\boldsymbol \beta} = (X^TWX)^{-1}X^TW\boldsymbol z$ as a minimizer of $\norm{\sqrt{W}(\boldsymbol z - X\boldsymbol \beta)}^2$
+        \item In this case of normal distributed errp,  we have the link function to be:
+        \begin{equation*}
+            \frac{d\eta_i}{d\mu_i} = 1 \qquad z_i=y_i
+        \end{equation*}
+        and the above procedure reduces to non-iterative normal equation. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    The ML estimator of $\phi$ is biased. The value itself can be obtained from the Peason's statistics as we have:
+    \begin{equation*}
+        X^2 = \sum^N_{i=1} \frac{(y_i-\hat{\mu}_i)^2}{V(\hat{\mu}_i)}
+    \end{equation*}
+    The quantity $X^2/\phi$ is the sume of square of zero mean and unit variance of random variable with $N-p$ degree of freedom. If the model is adequate, then approximately $X^2/\phi\sim\mathcal{X}^2_{N-p}$ and so we have:
+    \begin{equation*}
+        \hat{\phi} = \frac{\hat{X}^2}{N-p}
+    \end{equation*}
+    Please note that $X^2 = \norm{\sqrt{W}(\boldsymbol z- X\hat{\boldsymbol \beta})}^2$ at convergence of $W$ and $\boldsymbol z$. 
+\end{remark}
+
+\begin{remark}{\textbf{(Large Sample Distribution of $\hat{\boldsymbol \beta}$)}}
+    To obtain the large sample Distribution of $\hat{\boldsymbol \beta}$, we use a Taylor expansion of the log-likelihood around the parameter $\boldsymbol \beta_0$ and evaluate this at $\hat{\boldsymbol \beta}$:
+    \begin{equation*}
+        \left.\frac{\partial l}{\partial \boldsymbol \beta}\right|_{\hat{\boldsymbol \beta}} \approx \left.\frac{\partial l}{\partial \boldsymbol \beta}\right|_{\boldsymbol \beta_0} + \left.(\hat{\boldsymbol \beta} - \boldsymbol \beta_0) \frac{\partial^2 l}{\partial\boldsymbol \beta^2}\right|_{\boldsymbol \beta_0}
+    \end{equation*}
+    We reduce to the following ratio:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} - \boldsymbol \beta_0 \approx \left.\frac{\partial l}{\partial \boldsymbol \beta}\right|_{\boldsymbol \beta_0} \left/ \frac{\partial l}{\partial \boldsymbol \beta^2} \right|_{\beta_0}
+    \end{equation*}
+    with equality in the large sample limit. The numerator has expeced value equal to zero and variance $\mathcal{I}$ is made up of the sum iid random variable $l_i$. The large sample limit $(\hat{\boldsymbol \beta} - \boldsymbol \beta_0)$ follows a $\mathcal{N}(\boldsymbol 0, \mathcal{I})$ random variable divided by $\mathcal{I}$. This implies that as $n\rightarrow\infty$:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} - \boldsymbol \beta_0 \sim \mathcal{N}(\boldsymbol 0, \mathcal{I}^{-1})
+    \end{equation*}
+    Generated to parameter vectors $\hat{\boldsymbol \beta}\sim\mathcal{N}_p(\boldsymbol \beta, \mathcal{I}^{-1})$. This result is exact in case of normally distributed error. 
+\end{remark}
+
+\begin{remark}{\textbf{(Covariance of $\hat{\boldsymbol \beta}$)}}
+    The fisher information matrix is used to calculate the covariance matrix associated with ML-estimates. The $(j, k)$-th element of information matrix can be written as:
+    \begin{equation*}
+        \mathbb{E}\bracka{\frac{\partial l}{\partial \beta_j}\frac{\partial l}{\partial \boldsymbol \beta_k}} = \sum^N_{i=1}\sum^N_{j=1} \bracka{\frac{ \mathbb{E}[(Y_i - \mu_i)(Y_{i'} - \mu_{i'})] }{V_iV_{i'}}}\frac{d\mu_i}{d\eta_i}\frac{d\mu_{i'}}{d\eta_{i'}}x_{ij}x_{i'k}
+    \end{equation*}
+    where $V_i = \operatorname{var}(Y_i)$. Let's consider the fact that we have:
+    \begin{equation*}
+        \mathbb{E}[(Y_i - \mu_i)(Y_{i'} - \mu_{i'})] = \begin{cases}
+            \operatorname{var}(Y_i) = V_i & \text{ for } i = i' \\
+            \operatorname{cov}(Y_i, Y_{i'}) & \text{ otherwise }
+        \end{cases}
+    \end{equation*}
+    and, so we have 
+    \begin{equation*}
+        \mathbb{E}\bracka{\frac{\partial l}{\partial \beta_j}\frac{\partial l}{\partial \boldsymbol \beta_k}} = \sum^N_{i=1}\frac{x_{ij}x_{ik}}{V_i}\bracka{\frac{\partial \mu_i}{\partial \eta_i}}^2
+    \end{equation*}
+    which follows that $\mathcal{I} = X^TWX/\phi$. As this value $\mathcal{I}$ is defined as the negative of the expected value of Hessian, it can be seen as a measure of the curvature of log-likelihood near the ML estimate of $\boldsymbol \beta$:
+    \begin{itemize}
+        \item Flat likelihood: Low negative expected second derivative implies a low information. 
+        \item Sharp likelihood: High negative expected second derivative implies a high information. 
+    \end{itemize}
+\end{remark}
+
+\section{Confidence Interval For Model Parameter}
+
+\begin{remark}
+    In the case of unknown $\phi$, we follows the same construction as before but when we want to estimate $\phi$, we will have to use appropriate T-test.  
+\end{remark}
+
+\begin{remark}{\textbf{(CI of Parameter)}}
+    We have the following distribution:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} \sim \mathcal{N}(\boldsymbol \beta, \mathcal{I}^{-1})
+    \end{equation*}
+    Now, the standard deviation of $\beta_j$ is the $(j,j)$-th element of $\mathcal{I}^{-1}$ and, we can approximate the $100(1-\alpha)$ percent confidence interval for $\beta_j$ is given as:
+    \begin{equation*}
+        \hat{\beta}_j \pm z_{\alpha/2}\operatorname{se}(\hat{\beta}_j)
+    \end{equation*}
+    The result can be exact if $\sigma^2$ can be known. 
+\end{remark}
+
+\begin{remark}
+    Let $\hat{\psi} = \boldsymbol c^T\hat{\boldsymbol \beta}$, then we have $\hat{\psi} \sim \mathcal{N}(\psi, \boldsymbol c^T\mathcal{I}^{-1}\boldsymbol c)$, and we can construct the $100(1-\alpha)$ percent confidence interval of $\psi$. 
+\end{remark}
+
+\begin{remark}
+    To test the Null hypothesis, i.e $H_0 : \beta_j = 0$ for some $j$. We can the fact that:
+    \begin{equation*}
+        \frac{\hat{\beta}_j}{\operatorname{se}(\hat{\beta}_j)} \sim \mathcal{N}(0, 1) \qquad \text{ under } H_0
+    \end{equation*}
+    we now obtai nthe $p$-value the usual way. with the usually way of applying when the $\phi$ is unknown
+\end{remark}
+
+\begin{remark}{\textbf{(Model Comparision)}}
+    We want to compare $2$ models: $M_0$ and $M$ where $M_0$ is a special case of $M$ and let $l(\hat{\boldsymbol \beta}_0)$ and $l(\hat{\boldsymbol \beta})$ be maximum likelihood of the $2$ models. 
+    \begin{itemize}
+        \item Null Hypothesis: The subset of $p-q$ parameter out of $p$-parameter in linear predictor are all $0$, while $H_1$ being an alternative hypothesis that all $p$ are not $0$. 
+        \item $H_0$ can be tested using a likelihood ratio test. If $H_0$ is true then in lage sample limit we have:
+        \begin{equation*}
+            2[l(\hat{\boldsymbol \beta}) - l(\hat{\boldsymbol \beta}_0)] \sim \chi^2_{p-q}
+        \end{equation*}
+        If $H_0$ is false then $M$ will mostly likely have higher likelihood than $M_0$, hence the log-likelihood ratio would be too large to be consistent with $\chi^2$ distribution.
+    \end{itemize}
+\end{remark}
+
+\begin{definition}{\textbf{(Deviance)}}
+    Fitting GLMs, it is useful to have a quantity that is smaller to the residual sum of squares in a linear model context. This is the deviate and defined as:
+    \begin{equation*}
+        D = 2[l(\hat{\boldsymbol \beta}_\text{sat}) - l(\hat{\boldsymbol \beta})]/\phi
+    \end{equation*}
+    where $l(\hat{\boldsymbol \beta}_\text{sat})$ denotes the maximum likelihood of saturated model as we have $1$ parameter per datum, which is based on setting $\hat{\mu}_i = y_i$, which is the highest value of likelihood that can possibility have. 
+\end{definition}
+
+\begin{definition}{\textbf{(Scaled Deviance)}}
+    The scaled variance is defined as $D^* = D/\phi$, which depends on the dispersion parameter. For binomial and poisson distributions the scale deviance and the deviance are the same, and we have $D^* \sim \chi^2_{N-p}$.
+\end{definition}
+
+\begin{remark}
+    There are difference value of deviances for each kind of distribution, which are denoted as:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Distribution}   & \textbf{Deviance}  \\
+        \midrule
+        Normal & $\frac{1}{\sigma^2}\sum^N_{i=1}(Y_i-\hat{\mu}_i)^2$ \\
+        Poisson & $2\sum^N_{i=1}\brackb{Y_i\log(Y_i/\hat{\mu}_i) - (Y_i - \hat{\mu}_i)}$ \\
+        Poisson (Constant included) & $2\sum^N_{i=1}Y_i\log(Y_i/\hat{\mu}_i) $ \\
+        Binomial & $2\sum^N_{i=1}\brackb{Y_i\log(Y_i/\hat{\mu}_i) + (n_i-Y_i)\log\brackb{\bracka{n_i - Y_i}/\bracka{n_i-\hat{\mu}_i} }}$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+\end{remark}
+
+\begin{remark} 
+    In the Binomial and Poisson case, the scaled deviance may be used to test the goodness-of-fit as we have: $D^*\sim\chi^2_{N-p}$ under proposed model. Given the definition of deviance, under $H_0$, likelihood ratio test can be express as:
+    \begin{equation*}
+        D_0^* - D^* \sim \chi^2_{p-q}
+    \end{equation*}
+    The dispersion parameter has to be known so that the deviance can be calculated. 
+\end{remark}
+
+\begin{remark}{\textbf{(Model Comparision with $\boldsymbol\phi$)}}
+    Under $H_0$ we knew that $D_0^* - D^* \sim \chi^2_{p-q}$ and $D^* \sim \chi^2_{N-p}$. If $D^*_0 - D^*$ and $D^*$ are treated as asymptotics independent. Under null and in the large sample limit, we have:
+    \begin{equation*}
+        F = \frac{(D_0^* - D^*)/p-q}{D^*/(N-p)} \sim F_{p-q, N-p}
+    \end{equation*}
+    This is equivalent to:
+    \begin{equation*}
+        F = \frac{(D_0 - D)/p-q}{D/(N-p)} \sim F_{p-q, N-p}
+    \end{equation*}
+    Hence allow for model comparison, when $\phi$ is unknown.
+\end{remark}
+
+\begin{remark}{\textbf{(Other Statistics)}}
+    The scores statistic $U_1,\cdots,U_p$ are defined as:
+    \begin{equation*}
+        U_j = \frac{\partial l}{\partial \beta_j}
+    \end{equation*}
+    for $j=1,\cdots,p$ where $l$ is the log-likelihood function. Let $\boldsymbol U = (U_1,\cdots,U_p)^T$, where we have the following properties of the vectors:
+    \begin{itemize}
+        \item Expectation: $\mathbb{E}[\boldsymbol U] = 0$
+        \item Covariance Matrix: $V(\boldsymbol U) = \mathcal{I}$
+        \item Asymptotics Sampling Distribution: $\boldsymbol U \sim \mathcal{N}(\boldsymbol 0, \mathcal{I})$ and $\boldsymbol U^T\mathcal{I}^{-1}\boldsymbol U \sim \chi^2_p$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Wald Statistics)}}
+    If $\hat{\boldsymbol \beta}$ is maximum likelihood estimator of $\boldsymbol \beta$ that it can be shown asymptotically as:
+    \begin{equation*}
+        (\hat{\boldsymbol \beta} - \boldsymbol \beta)^T\mathcal{I}(\hat{\boldsymbol \beta})(\hat{\boldsymbol \beta} - \boldsymbol \beta) \sim \chi^2_p
+    \end{equation*}
+    where $\mathcal{I}(\hat{\boldsymbol \beta})$ is the information matrix evaluate at $\hat{\boldsymbol \beta} = \boldsymbol \beta$. Since result holds for subset of parameter, which can be done using the submatrix. Score statistics can be used as alternative to likelihood ratio test for multiple parameter hypothesis testing. 
+\end{remark}
+
+\section{Binomial Data and Logistic Regression}
+
+\begin{remark}
+    Suppose there are $N$ response $Y_1,\cdots,Y_N$ are independent such that $Y_i \sim \operatorname{Bin}(n_i, \pi_i)$ where we have $g(\mu_i) = \boldsymbol x_i^T\boldsymbol \beta$ for some link function $g$ and $\mu_i = \mathbb{E}[Y_i] = n_i\pi_i$ for $i=1,\cdots,N$. This includes binary case for $n_i=1$ for all $i$. The link function is logit link, which gives the logistic model:
+    \begin{equation*}
+        \log\bracka{\frac{\pi_i}{1-\pi_i}} = \boldsymbol x_i^T\boldsymbol \beta
+    \end{equation*} 
+    Other models can be used such as:
+    \begin{itemize}
+        \item Probit: $\Phi^{-1}(\pi_i) = \boldsymbol x_i^T\boldsymbol \beta$ where it links cumulative normal distribution from $\mathcal{N}(0, 1)$. 
+        \item Complementary Log-Log: As we have $\log[-\log(1-\pi_i)] = \boldsymbol x_i^T\boldsymbol \beta$
+    \end{itemize}
+    The expression for the probability of success $\pi$ is obtained by inverting the equation for the model, which are given as:
+    \begin{itemize}
+        \item Logistic: $\pi = 1/(1 + \exp(-\eta))$ which is a cdf of logistic distribution. 
+        \item Probit: $\pi = \Phi(\eta)$ which is a cdf of standard deviation. 
+        \item Complementary Log-Log: $\pi = 1 - \exp[-\exp(\eta)]$, which is extream value distribution.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}
+    In the current contex, $\eta = \boldsymbol x^T\boldsymbol \beta$ denotes the linear predictor for any observation: 
+    \begin{itemize}
+        \item After $\boldsymbol \beta$ has been estimated by $\hat{\boldsymbol \beta}$ plugging it in to $\hat{\eta} = \boldsymbol x^T\hat{\boldsymbol \beta}$ giving the estimated probability that a new observation of $Y_{N+1}$ is $1$ given $X_{N+1}$.
+        \item The choices ensure that $0\le\pi\le1$ as required. This results in the function that has properties that $-\infty<g(y)<\infty$ with the consquence that there are no constraints on the unknown parameter in the linear predictor. 
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Interpretation of Logistic Regression Parameter)}}
+    If $\pi$ denotes the probability of success, when the logit link function given by $\log(\pi/(1-\pi))$ is the log of odds on success. So the coefficient $\beta_j$ of the explaination variable $x_j$ in the logistic regression model means that the rate of change of odd with $x_j$ given the other explainatory variable to be cosntant. 
+\end{remark}
+
+\begin{remark}
+    Suppose that $x_i$ is indicator variable with just $2$ levels: $0$ and $1$ then at $x_1 = 0$, we have:
+    \begin{equation*}
+        \operatorname{logit}(\pi) = \beta_0 + \beta_2x_2 + \cdots + \beta_mx_m
+    \end{equation*}
+    On the other hand at $x_1 = 1$, we have
+    \begin{equation*}
+        \operatorname{logit}(\pi') = \beta_0 + \beta_1 + \beta_2x_2 + \cdots + \beta_mx_m
+    \end{equation*}
+    Let's subtract both and we have:
+    \begin{equation*}
+    \begin{aligned}
+        \beta_i &= \operatorname{logit}(\pi') - \operatorname{logit}(\pi) \\
+        &= \log\brackc{\frac{\pi'}{1-\pi'}} - \log\brackc{\frac{\pi}{1-\pi}} \\
+        &= \log\brackc{\frac{\pi'/(1-\pi')}{\pi/(1-\pi)}}
+    \end{aligned}
+    \end{equation*}
+    The log of ratio of the odds on the success of $2$ values of $x_1$ or the log-odd-ratio. The odd on a success when $x_1=1$ is $\exp(\beta_1)$ times the odd on success when $x_1=0$ given other values being constant. 
+\end{remark}
+
+\begin{remark}{\textbf{(Likelihood Equation)}}
+    We have the general equation, which our setting follows, but for logistic model, they reduced to:
+    \begin{equation*}
+        \sum^N_{i=1}(y_i - \hat{\mu}_i)x_{ij} = 0
+    \end{equation*}
+    for $j=1,\cdots,p$
+\end{remark}
+
+\begin{remark}{\textbf{(Maximum Likelihood Estimate)}}
+    For the iterative procedure, we have:
+    \begin{equation*}
+        (X^TWX)^{(s-1)}\hat{\boldsymbol \beta}^{(s)} = (X^TWZ)^{(s-1)}
+    \end{equation*}
+    For the logistic model the $(i,i)$-th element of the diagonal matrix is given by:
+    \begin{equation*}
+        w_{ii} = \frac{1}{V_i}\bracka{\frac{d\mu_i}{d\eta_i}}^2
+    \end{equation*}
+    where $V_i = \operatorname{var}(Y_i) = V(\mu_i) = n_i\pi_i(1-\pi_i)$, which we also have:
+    \begin{equation*}
+        \frac{d\mu_i}{d\eta_i} = n_i\pi_i(1-\pi_i)
+    \end{equation*}
+    Hence, we have $w_{ii} = n_i\pi_i(1-\pi_i)$. For the $\boldsymbol z$, we have its $i$-th element to be 
+    \begin{equation*}
+        z_i = \eta_i + (y_i - \mu_i)\frac{d\eta_i}{d\mu_i} \qquad \text{ where } \qquad \frac{d\eta_i}{d\mu_i} = \frac{1}{n_i\pi_i(1-\pi_i)}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Sampling Distribution)}}
+    We have the following sampling distribution of $\hat{\boldsymbol \beta}$ as we have:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} \sim\mathcal{N}_p(\boldsymbol \beta, (\boldsymbol x^TW\boldsymbol x)^{-1})
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Deviance)}}
+    For testing goodness of fit of a particular model is given by:
+    \begin{equation*}
+        D = 2\sum^N_{i=1}\brackb{y_i\log\bracka{\frac{Y_i}{\hat{\mu}_i}} + (n_i-y_i)\log\bracka{\frac{n_i-y_i}{n_i-\hat{\mu}_i}} }
+    \end{equation*}
+    where $\hat{\mu}_i$ are the fitted $\hat{\mu}_i$ under the model. If model is true, then $D\sim\chi^2_{N-p}$ which depends provides a test statistics for goodness-of-fit test. 
+\end{remark}
+
+\begin{remark}
+    The test for $H_0 = \beta_j = 0$, which we have under $H_0$. 
+    \begin{equation*}
+        \frac{\hat{\beta}_j}{\operatorname{se}(\hat{\beta}_j)} \sim \mathcal{N}(0, 1)
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Testing)}}
+    The test for omission of the $j$-th explainatory variable, given other explainatory variable in the model. 
+    \begin{itemize}
+        \item Given the test set $H_0$ as $\nu$ of regression parameter $\beta_1,\cdots,\beta_m$ are $0$. We are assuming that the linear predictor consists of cosntant terms and terms from $m$ explainatory variable and $H_0$ test for the omission of $\nu$ variable where $\nu\le m$.
+        \item Let $D_0$ and $D$ denotes the deviate under $H_0$ and the full model, respectively. The likelihood ratio test is: under $H_0$
+        \begin{equation*}
+            D-D_0 \sim \chi^2_\nu 
+        \end{equation*}
+        \item In the special case, we have $H_0 : \beta_0=\beta_1=\cdots=\beta_m=0$. Under $H_0$ the $\beta_i$'s are all equal to and the MLE of the common probability of an success is the observed propotion of success. 
+    \end{itemize}
+    This resulting deviate be denoted by $C$, as the analysis of deviance table as we have:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Source of Variation}   & \textbf{Deviance} & \textbf{Df}  \\
+        \midrule
+        Regression & $C-D$ & $m$ \\
+        Residual & $D$ & $N-m-1$ \\
+        \midrule
+        Total & $C$ & $N-1$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}
+\end{remark}
+
+\begin{remark}{\textbf{(Peason Chi-Squared Statistics)}}
+    Given the alternative test of goodness of it. The statistic is denoted by $X^2$, which is based on the following table of observed and fitting frequences:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lllll}
+        \toprule
+        \textbf{Observation}   & $1$ & $2$ & $\cdots$ & $N$  \\
+        \midrule
+        Num of Success  & $Y_1$ & $Y_2$ & $\cdots$ & $Y_N$ \\
+        Num of Failure  & $n_1-Y_1$ & $n_2-Y_2$ & $\cdots$ & $n_N-Y_N$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}    
+    with the similar table of fitted value in which $Y_i$ is replaced by $\hat{\mu}_i = n_i\hat{\pi}_i$. Using a common relation $o$ for observed frequency and $e$ for fitted (expected) frequency. $D$ and $X^2$ has the form:
+    \begin{equation*}
+        D = 2 \sum o \log\bracka{\frac{o}{e}} \qquad X^2 = \sum\frac{(o-e)^2}{e}
+    \end{equation*}
+    This for of deviance $D$ is denoted by $G^2$. The Peason chi-square statistic is after some algebra given by:
+    \begin{equation*}
+        X^2 = \sum^N_{i=1}\frac{(Y_i - n_i\hat{\pi}_i)^2}{n_i\hat{\pi}_i(1-\hat{\pi}_i)}
+    \end{equation*}
+    (if the model is true) has same large sample distribution and the deviance $D$, which is $\chi^2_{N-p}$. Using Taylor series expansion of $s\log(s/t)$ about $s=t$ up to quadratic term, it can be shown that $D\sim\chi^2$. (It likely to be poor if any of fitted values in $2N$ are small).
+\end{remark}
+
+\begin{remark}{\textbf{(Binary Data)}}
+    If each observation has difference pattern of the explainatory variable. The result for the estimation still holds. The deviance can be shown to be depend on the binary observation through the fitted value and so isn't for assessting goodness of fit. 
+\end{remark}
+
+\begin{remark}{\textbf{(Hosmer and Lemeshow)}}
+   They proposed a test obtained by groupping observations into about $g\approx10$ groups of observation with some number per group according to their predicted probability. 
+   \begin{itemize}
+       \item We are given $2\times g$ table for which $\chi^2$ is calculated. 
+       \item Large sample distribution of resulting statistic if the model is the suggested to approximately be $\chi^2_{g-2}$. 
+       \item This is the same for binomial but it doesn't relative in the certain cases. 
+   \end{itemize} 
+\end{remark}
+
+\begin{remark}{\textbf{(Checking Model Adequecy)}}
+   \begin{itemize}
+       \item Raw Residual: 
+       \begin{equation*} 
+           \hat{e}_i = Y_i - n_i\hat{\pi}_i
+       \end{equation*}
+        How well the raw data is fitted
+       \item Peason Chi-Square: 
+       \begin{equation*}
+           X_i = \frac{\hat{e}_i}{\sqrt{n_i\hat{\pi}_i(1-\hat{\pi}_i)}}
+       \end{equation*}
+       So that the chi-square statistics $X^2 = \sum^N_{i=1}X_i^2$. These standardized by estimated standard deviation of $Y_i$ making them the compatible in size. 
+       \item Standardized Peason Residual: 
+       \begin{equation*}
+           r_{p_i} = \frac{X_i}{\sqrt{1-h_{ii}}}
+       \end{equation*}
+       where $h_{ii}$ is the diagonal of the hat matrix given by $H = W^{1/2}X(X^TWX)^{-1}X^TW^{1/2}$. The variance of this is $1$ and comparable in size of $X$-space. For the mathematical comparison, these are better than $X_i$. However, $X_i$ is more naturally interpreted in terms of which points are welled-fitted. 
+       \item Deviance Residual: And, we have:
+       \begin{equation*}
+           d_i = \operatorname{sign}(\hat{e}_i)\brackc{2\brackb{y_i\log\bracka{\frac{y_i}{\hat{\mu}_i}} + (n_i-y_i)\log\bracka{\frac{n_i - y_i}{n_i - \hat{\mu}_i}} }}^{1/2}
+       \end{equation*}
+       so that the deviance is $\sum^N_{i=1}d_i^2$, the $\operatorname{sign}(\hat{e}_i)$ gives $d_i$ same sign as $\hat{e}_i$. 
+       \begin{itemize}
+           \item The interpretation is formalized how strongly observation contribute to the deviance (The standard way of measuring the quality of the overfit). 
+           \item They show to what extent the observation indicates that the model is violated and rather saturated model is needed.
+       \end{itemize}
+       \item Standardized Deviance Residual: 
+       \begin{equation*}
+           r_{D_i} = \frac{d_i}{\sqrt{1-h_{ii}}}
+       \end{equation*}
+       Interpretation: This make the $d_i$ directly naturally comparable by unifying their variance and adjust for location in $x$-space. 
+       \item Cook Statistics:
+       \begin{equation*}
+           D_i = \frac{1}{p}(\hat{\boldsymbol \beta} - \hat{\boldsymbol \beta}_{(i)})^TX^TWX(\hat{\boldsymbol \beta} - \hat{\boldsymbol \beta}_{(i)})
+       \end{equation*}
+       The numerator of $D_i$ is the weighted sum of the square difference of the fitted logic of the $\pi_i$'s with and without $i$-th observation with $w_{ii}$ as weight. The alternative $D_i$'s are calculate in the following form:
+       \begin{equation*}
+           D_i = \frac{1}{p} \bracka{\frac{h_{ii}}{1-h_{ii}}}r^2_{P_i}
+       \end{equation*}
+       This quantity the effect on $\hat{\boldsymbol \beta}$ of omitting observation of the $i$-th. 
+   \end{itemize} 
+\end{remark}
+
+\begin{remark}{\textbf{(Model Selection)}}
+   There are many kinds of model selection as we have:
+   \begin{itemize}
+       \item Akaike Information Criterion: 
+       \begin{equation*}
+           \text{AIC} = D + 2p + \text{const}
+       \end{equation*}
+       where $D$ is deviance statistic and $p$ is number of parameter in linear predictor as LOO-CV and we can be used as well. 
+       \item $2$ models are compared by the difference of deviance: Suppose model $M_1$ with $p_1$ regression parameter is submodel of $M_2$ with $p_2$ parameter. Let $l(\hat{\beta}_j)$ be maximum value of the log likelihood under $M_j$ and $D_j$ denotes the deviate of model $M_j$. We want to test:
+       \begin{equation*}
+           H_0 : M_1 \qquad \text{ vs } \qquad H_1 : M_2
+       \end{equation*}
+       Then the likelihood test statistic of $-2\log$ likelihood ratio is:
+       \begin{equation*}
+           2[l(\hat{\beta}_2) - l(\hat{\beta}_1)] = D_1 - D_2
+       \end{equation*}
+       Under null hypothesis has approximate $\chi^2_{p_2-p_1}$ distribution. 
+   \end{itemize} 
+\end{remark}
+
+\begin{remark}{\textbf{(Analysis of Variance)}}
+    The regression deviance $C-D$ can be partitioned in same way as for normal linear model, where RSS is replaced by deviance $D$. 
+\end{remark}
+
+\section{Contingency Tables}
+
+\begin{remark}
+    We have the following construction of table:
+    \begin{itemize}
+        \item Let's the row variable called $A$ with $I$ possible categories and the column variable be called $B$ with $J$ possible categories. 
+        \item Now we consider $I\times J$ contingency table that has been obtained by allocating a random sample of $N$ observation on the pair of variable $A$ and $B$ to $IJ$ possible combination.
+        \item For cell $(i,j)$ of contingency table as we have $i\in[I]$ and $j\in[J]$ as we let:
+        \begin{itemize}
+            \item $\pi_{ij}$ is the probability that an observation being to the cell.
+            \item $\mu_{ij}$ is the expeced frequency. 
+        \end{itemize}
+        \item Please Recall that $\mu_{ij} = N\pi_{ij}$. If the row variable $A$ is independent of column variable $B$ then 
+        \begin{equation*}
+            \pi_{ij} = \pi_{i+}\pi_{j+}
+        \end{equation*}
+        where we have $\pi_{i+}$ is the probability observation belong to row $i$ and the sub-script indicates summation over the corresponding subscript. Similar for column $j$.
+        \item If $A$ is independent of $B$, we have 
+        \begin{equation*}
+            \mu_{ij} = \frac{\mu_{i+}\mu_{+j}}{N}
+        \end{equation*}
+        where $\mu_{i+} = N\pi_{i+}$ and its expected frequency of the row $i$. Similar for the row $j$.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Model Under Null-Hypothesis)}}
+    Typical null hypothesis is $H_0$ assuming that $A$ and $B$ are independent. Taking the logarithm to get:
+    \begin{equation*}
+        \log \mu_{ij} = \log \mu_{i+} + \log \mu_{+j} - \log N
+    \end{equation*}
+    We rewite as the sum of $3$ terms, one depending on $i$ and on $j$ and a constant. If the variable $A$ and $B$ aren't independent then the equality doesn't hold. Let $\phi_{ij}$ then denote the difference between LHS and RHS, then the alternative is:
+    \begin{equation*}
+        \log \mu_{ij} = \lambda + \alpha_i + \beta_j + \phi_{ij}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Constriants on Parameter)}}
+    The linear predictor in alternative hypothesis contains more parameter than cell in the contingency table. So we need to have a constraint, which can be set by either:
+    \begin{itemize}
+        \item Set the parameter for one specific outcome to zero:
+        \begin{equation*}
+            \alpha_1 = 0 \qquad \beta_1 = 0 \qquad \phi_{1j} = 0 \qquad \phi_{i1} = 0
+        \end{equation*}
+        This means that for every variable categories $1$ is regared as reference category. 
+        \item Make parameter sum to zero as we have:
+        \begin{equation*}
+            \sum_i\alpha_i = 0 \qquad \text{ and } \qquad \sum_j\phi_{ij} = \sum_i\phi_{ij} = 0
+        \end{equation*}
+    \end{itemize}
+    The model of alternative hypothesis is a saturated log-linear model for $2$-ways contingency table. There are $IJ$ effective parameter (number of parameter - number of effective constraints). This is equal to the number of frequency in the table so every frequency can be fitted perfectly:
+    \begin{itemize}
+        \item The submodel (null hypothesis) is unsatuarated. 
+        \item The estimation of alternative hypothesis gives $\hat{\mu}_{ij} = n_{ij}$, which is a perfect fit and $G^2 = 0$
+    \end{itemize}
+    Compare the alternative hypothesis with model of ANOVA $2$-ways, there are similar in character with logarithm of expected response on the LHS instead of expected response. So the model is log-linear model. 
+\end{remark}
+
+\begin{remark}{\textbf{(Parameter)}}
+    The parameter in log-linear model $(\lambda, \alpha_i, \beta_j, \phi_{ij})$ doesn't have straightfoward interpretation. It is mainly of interest whether certain parameter vanishes or not as this will imply certain independent. 
+\end{remark}
+
+\begin{remark}{\textbf{(Interaction)}}
+    The extra term introduced is called interaction term. For testing hypothesis is based on goodness-of-fit statistic as we have:
+    \begin{equation*}
+        G^2 = 2\sum o \log \bracka{\frac{o}{e}}
+    \end{equation*}
+    where $o$ and $e$ denote observed and fitted expected frequency. We use it rather Pearson Chi-Square statistics. 
+\end{remark}
+
+\begin{remark}{\textbf{(Fitting Model)}}
+    The models are fitting using maximum likelihood which requires the specification of the joint distribution of the observation (observation frequency) as the joint distribution is multinomial distribution.
+    \begin{itemize}
+        \item It can be shown that joint distribution of independent Poisson random variable conditioned on their sum is a multinomial distribution. 
+        \item In practice log-linear model for contingency table data are fitted as if the observed frequency are independent Poisson.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Goodness-of-Fit and Model Checking)}}
+   \begin{itemize}
+       \item Goodness of fit is done as for the Poisson data with $G^2$
+       \item Nested model compared by difference of their $G^2$ values. 
+       \item Standardized Residual: Similar to case of logistic regression for $2$-ways contingency table as we have:
+       \begin{itemize}
+           \item Raw-Residual as we have $\hat{e}_{ij} = n_{ij} - \hat{\mu}_{ij}$
+           \item Peason or $\chi^2$-residual:
+           \begin{equation*}
+               X_{ij} = \frac{\hat{e}_{ij}}{\sqrt{\hat{\mu}_{ij}}}
+           \end{equation*}
+           So that chi-squared statistics $X^2 = \sum_i\sum_jX_{ij}^2$
+           \item Standardized Peason Residual:
+           \begin{equation*}
+               r_{P_{ij}} = \frac{X_{ij}}{\sqrt{1-h_{(ij)}}}
+           \end{equation*}
+           where $h_{(ij)}$ is the leverage for the other with combination $(ij)$ of $2$ factors. 
+           \item Deviate residual can be found:
+           \begin{equation*}
+               d_{ij} = \operatorname{sign}(\hat{e}_{ij})\brackc{2\brackb{y_{ij} \log \bracka{\frac{y_{ij}}{\hat{\mu}_{ij}}} - (y_{ij} - \hat{\mu}_{ij}) }}^{1/2}
+           \end{equation*}
+           note that $D = \sum_i\sum_jd_{ij}^2$
+           \item Standardized Deviance Residual:
+           \begin{equation*}
+               r_{D_{ij}} = \frac{d_{ij}}{\sqrt{1-h_{(ij)}}}
+           \end{equation*}
+       \end{itemize}
+   \end{itemize} 
+\end{remark}
+
+\section{Generalized Additive Model}
+
+\begin{definition}{\textbf{GAM}}
+   The generalized additive model as we have:
+   \begin{equation*}
+       g\brackc{\mathbb{E}[Y_i]} = \eta_i = X_i^*\theta + f_1(x_{i1}) + f_2(x_{i2}) + f_3(x_{i3}, x_{i4}) + \cdots
+   \end{equation*}
+   where $X^*_i$ is the $i$-th row of $X^*$, which is the model matrix for any parameter model components with parameter vector $\theta$ and $f_i$ is smooth function over covariate $x_{ij}$. It is subjected to a constraint that $\sum_if_j(x_{ij}) = 0$ for each $j$.
+\end{definition}
+
+\begin{remark}
+    The model GAM can flexibly determine the function value of the relationship between response and some explainatory variable avoid the drawnback of modeling using parameter relationship. One can model the discrete and continuous variable. 
+\end{remark}
+
+\begin{remark}
+    Smooth term can be represented by regression spine. Linear combination of basis function $b_{jk(x_j)}$ and regression parameter $\beta_{jk}$ as we have:
+    \begin{equation*}
+        f_j(\boldsymbol x_j) = \sum^{q_j}_{k=1}\beta_{jk}b_{jk}(\boldsymbol x_j)
+    \end{equation*}
+    as we have $j$ is smooth term for $j$-th explainatory variable. The regression spline of $2$ covariance, which can be written as:
+    \begin{equation*}
+        f_{jp}(\boldsymbol x_j, \boldsymbol x_p) = \sum^{q_j}_{k=1} \beta_{jp,k}b_{ip,k}(\boldsymbol x_j, \boldsymbol x_p)
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Problem With Polynomial Basis)}}
+    \begin{itemize}
+        \item As the number of polynomial above, the increasingly colinear. 
+        \item Highly correlated parameter estimator leads to high estimator variance and numerical problem. 
+        \item We can use orthogonal basis as we still give the problem over a domain (but useful in a single point). 
+        \item Practical solution is the use the continuous variable can be categorized into groups based on interval and frequency. 
+        \item Another problem comes from the cut points, in which the relationship between a response variable and set of covariates is flat in the interval (by the assumptions).
+        \item To overcome all issue, we can use the spine bound are typically used to determine flexibly the relationship between the continuous predictor and the outcome of interest, which avoid the disadvantage of categorization, which are not as correlated as polynomial basis function. 
+        \item Common choices for responsibility smooth function includes smoothing spine as we can place the knots at every data point, and referred to as full rank smoother because the size of spine basis is equal to number of observation. 
+        \item However, this leads to as many parameter as there are data which result in expensive computation regression.
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Parameter Estimation)}}
+    The regerssion can overfit which we can consider the model to maximize the following function:
+    \begin{equation*}
+        l(\beta) - \frac{1}{2}\sum_j\lambda_j\int \brackc{f^{d_j}_j(x_j)}^2 \dby x_j
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Regularization)}}
+    This can be written as the quadratic form $\boldsymbol \beta$ with known coefficient matrix $S_j$. Let's consider $d_j=2$ and for regression spine basis in one 1D as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \int \brackc{f^{d_j}_j(x_j)}^2 \dby x_j &= \int \brackc{\frac{\partial^2 f_j(x_j)}{\partial x_j^2}}^2\dby x_j \\
+        &= \int \brackc{\frac{\partial^2 \sum^{q_j}_{k=1} \beta_{jk}b_{jk}(x_k) }{\partial^2 x_j}}^2\dby x_j \\
+        &= \int \brackc{\boldsymbol \beta^Tb_j''(x_j)}^2\dby x_j \\
+        &= \int \boldsymbol \beta^Tb_j''(x_j)b_j''(x_j)^T\boldsymbol \beta \dby x_j \\
+        &= \beta^T\brackc{\int \boldsymbol b_j''(x_j)b_j''(x_j)^T \dby x_j} \boldsymbol \beta \\
+        &= \boldsymbol \beta^TS_j\boldsymbol \beta
+    \end{aligned}
+    \end{equation*}
+    The estimator of $\boldsymbol \beta$ is given by:
+    \begin{equation*}
+        \hat{\boldsymbol \beta} = (X^TWX + S)^{-1}X^TW\boldsymbol z
+    \end{equation*}
+    where $S = \sum_j\lambda_jS_j$ as $\boldsymbol \beta$ is bias due to the penalty. The value of $\lambda_j$ is done using Cross-Validation or generalized AIC. 
+\end{remark}
+
+\begin{remark}{\textbf{(Inference)}}
+   Let's consider the genertic smooth model component $f(x_j)$ as the interval can be constructed by seeking some constant $C_i$ and $A$ such that 
+   \begin{equation*}
+       \operatorname{ACP} = \frac{1}{2}\mathbb{E}\brackc{\sum_i \mathbb{I}\bracka{\abs{\hat{f}(x_i) - f(x_i)} \le q_{\alpha/2}A/\sqrt{C_i} }} = 1-\alpha
+   \end{equation*}
+   As we have $\alpha\in(0, 1)$ and $q_{\alpha/2}$ is the $\alpha/2$ critical point from standard normalize distribution. 
+\end{remark}
+
+\begin{remark}
+    Defining $b(x) = \mathbb{E}[\hat{f}(x)] - f(x)$ and $v(x) = \hat{f}(x) - \mathbb{E}[\hat{f}(x)]$ and so $\hat{f}-f = b + v$, and having $I$ be random variable unifying distribution on $\brackc{1,2,\cdots,n}$ as we have:
+    \begin{equation*}
+        \mathbb{P}\bracka{\abs{B + V} \le q_{\alpha/2}A}
+    \end{equation*}
+    as we have $B = \sqrt{C_I} b(x_I)$ and $V = \sqrt{C_I}v(x_I)$. It is necessary to find a distribution of $B + V$ and value of $C_i$ and $A$ so that the requirement is met. 
+\end{remark}
+
+\begin{remark}
+    The condition above the approximately met with posterior distribution:
+    \begin{equation*}
+        \boldsymbol \beta | \boldsymbol y \sim \mathcal{N}(\hat{\boldsymbol \beta}, (\mathcal{I} + \mathcal{S})^{-1})
+    \end{equation*}
+    Confidence Interval can be easily obtained. Any strictly parameter model component to obtain confidence interval is equivalent to using classical likelihood results. This is because it isn't penalized.
+\end{remark}

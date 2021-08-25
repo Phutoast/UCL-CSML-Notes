@@ -1,0 +1,1041 @@
+\section{Probability Basis}
+
+\subsection{Statistics Introduction}
+
+\begin{remark}
+    Before we start anything, let's recall the definition of all distributions (that would be used):
+    \medskip
+    \begin{table}[H]
+    \begin{adjustwidth}{-1in}{-1in}
+    \begin{tabular}{llllll}
+        \toprule
+        \textbf{Distribution} & Sample Space & Probability Density Function & $\mathbb{E}[\boldsymbol x]$ & $\operatorname{var}(\boldsymbol x)$ & Parameter \\
+        \midrule
+        Bernoulli & $\brackc{0, 1}$ & $\theta^x(1-\theta)^{1-x}$ & $\theta$ & $\theta(1-\theta)$ & $\theta \in [0, 1]$  \\
+        \addlinespace[0.75em]
+        Bernoulli(+) & $\begin{cases}
+            \boldsymbol x \in \brackc{0,1}^D \\
+            \sum^D_{i=1}x_i = 1
+        \end{cases}$ & $\prod^D_{i=1} \theta_i^{x_i} $ & $\theta_i$ & $\operatorname{var}[x_i] = \theta_i(1-\theta_i)$ & $\begin{cases}
+            0\le\boldsymbol\theta\le1 \\
+            \sum^D_{i=1}\theta_i=1 \\
+        \end{cases}$ \\
+        \addlinespace[0.75em]
+        Binomial & $[N]$ & $\begin{pmatrix} N \\ x \end{pmatrix} \theta^x(1-\theta)^{1-x}$ & $N\theta$ & $N\theta(1-\theta)$ & $\theta\in[0, 1]$ \\
+        \addlinespace[0.75em]
+        Multinormal & $\begin{cases}
+            \boldsymbol x \in [N]^D \\
+            \sum^D_{i=1}x_i = N
+        \end{cases}$ & $\cfrac{N!}{x_1x_2\cdots x_K} \prod^D_{i=1}\theta_i^{x_i}$ & $N\theta_i$ & $N\theta_i(1-\theta_i)$ & $\begin{cases}
+            0\le\boldsymbol\theta\le1 \\
+            \sum^D_{i=1}\theta_i=1 \\
+        \end{cases}$ \\
+        \addlinespace[0.75em]
+        Gaussian & $\mathbb{R}$ & $\cfrac{1}{\sqrt{2\pi\sigma^2}} \exp\brackc{-\cfrac{1}{2\sigma^2}(x-\mu)^2} $ & $\mu$ & $\sigma^2$ & $\begin{cases}
+            \mu \in \mathbb{R} \\
+            \sigma \in \mathbb{R}_{\ge0} \\
+        \end{cases}$  \\
+        \addlinespace[0.75em]
+        Multinormal & $\mathbb{R}^D$ & $\cfrac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\cfrac{1}{2}(\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu)}$ & $\boldsymbol \mu$ & $\boldsymbol \Sigma$ & $\begin{cases}
+            \boldsymbol \mu \in \mathbb{R}^D \\
+            \boldsymbol \Sigma \in \mathbb{S}_{+}^{D\times D}
+        \end{cases}$  \\
+        \addlinespace[0.75em]
+        Beta & $[0, 1]$ & $\cfrac{\Gamma}{\Gamma(a) + \Gamma(b)} x^{a-1}(1-x)^{b-1}$ & $\cfrac{a}{a+b}$ & $\cfrac{ab}{(a + b)^2(a+b+1)}$ & $\begin{cases}
+            a > 0 \\
+            b > 0
+        \end{cases}$ \\
+        \addlinespace[0.75em]
+        Dirichlet & $\begin{aligned}
+            &\begin{cases}
+                \boldsymbol x \in \mathbb{R}^D \\
+                0\le\boldsymbol x\le1  \\
+                \sum^D_{i=1} x_i = 1 \\
+            \end{cases} 
+        \end{aligned}$ & $\cfrac{\Gamma(\hat{\theta})}{\Gamma(\theta_1)\cdots\Gamma(\theta_D)} \prod^D_{i=1}x_i^{\theta_i-1}$ & $\theta_i/\hat{\theta}$ & $\begin{cases}
+            \operatorname{var}[x_i] = \cfrac{\theta_i(\hat{\theta} - \theta_i)}{\hat{\theta}^2(\hat{\theta}+1)} \\
+            \operatorname{cov}[x_ix_j] = \cfrac{-\theta_i\theta_j}{\hat{\theta}^2(\hat{\theta}+1)} \\
+        \end{cases}$ & $\theta_i > 0$ \\
+        \addlinespace[0.75em]
+        Gamma & $x > 0$ & $\cfrac{1}{\Gamma(a)} b^ax^{a-1}\exp(-bx)$ & $\cfrac{a}{b}$ & $\cfrac{a}{b^2}$ & $\begin{cases}
+            a > 0 \\ b > 0
+        \end{cases}$ \\
+        \addlinespace[0.75em]
+        Wishart$^*$ & $\boldsymbol \Lambda^{-1}\in \mathbb{S}^{D\times D}_+$ & $B(\boldsymbol W, \nu)\abs{\boldsymbol \Lambda}^{(\nu-D-1)/2}\exp\bracka{-\cfrac{1}{2}\operatorname{Tr}(\boldsymbol W^{-1}\boldsymbol \Lambda)}$ & $\nu \boldsymbol W$ & $-$ & $\begin{cases}
+            \boldsymbol W \in \mathbb{S}^{D\times D}_{+} \\
+            \nu > D - 1 
+        \end{cases}$ \\
+        \addlinespace[0.75em]
+        Poisson & $\mathbb{N}_0$ & $\cfrac{\lambda^xe^{-\lambda}}{x!}$ & $\lambda$ & $\lambda$ & $\lambda>0$ \\
+        \bottomrule
+    \end{tabular}
+    \end{adjustwidth}
+    \caption{$^*$1D Wishart is Gamma with $a = \nu/2$ and $1/2W$}
+    \end{table}
+    \medskip
+    where $\mathbb{S}^{D\times D}_+$ is the set of positive definite matrix of size $D\times D$, also we have the following addition definitions: 
+    \begin{equation*}
+    \begin{aligned}
+        &\Gamma(z) = \int^\infty_0 x^{z-1}\exp(-x)\dby x \qquad  \hat{\theta} = \sum^D_{i=1}\theta_i \\
+        &B(\boldsymbol W, \nu) = \abs{\boldsymbol W}^{-\nu/2}\bracka{2^{\nu D/2}\pi^{D(D-1)/4}\prod^D_{i=1}\Gamma\bracka{\frac{\nu + 1 - i}{2} }}^{-1}  
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Basic Quantities)}}
+    Now we will consider the following probability facts, which would be useful in the future:
+    \begin{equation*}
+    \begin{aligned}
+        &\mathbb{E}[f(\boldsymbol x)] = \int p(\boldsymbol x)f(\boldsymbol x)\dby \boldsymbol x 
+        \qquad \begin{aligned}[t]
+            \operatorname{cov}(\boldsymbol x, \boldsymbol y) &= \mathbb{E}_{\boldsymbol x, \boldsymbol y}[(\boldsymbol x - \mathbb{E}[\boldsymbol x])(\boldsymbol y - \mathbb{E}[\boldsymbol y])^T] \\
+            &= \mathbb{E}_{\boldsymbol x\boldsymbol y}[\boldsymbol x\boldsymbol y^T] - \mathbb{E}[\boldsymbol x]\mathbb{E}[\boldsymbol y^T]    
+        \end{aligned} \\
+        &\begin{aligned}[t] 
+            \operatorname{var}[f(\boldsymbol x)] &= \mathbb{E}[(f(\boldsymbol x) - \mathbb{E}[f(\boldsymbol x)])^2] \\
+            &= \mathbb{E}[f(\boldsymbol x)^2] - \mathbb{E}[f(\boldsymbol x)]^2 \\
+        \end{aligned} 
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Additional Quantities)}}
+    We have the following equality:
+    \begin{equation*}
+        \mathbb{E}_{\boldsymbol x}[f(\boldsymbol x)] = \mathbb{E}_{\boldsymbol z}\brackb{\mathbb{E}_{\boldsymbol x|\boldsymbol z}[f(\boldsymbol x)]} \qquad \mathbb{V}_{\boldsymbol x}[\boldsymbol x] = \mathbb{E}_{\boldsymbol z}\brackb{\mathbb{V}[\boldsymbol x|\boldsymbol z]} + \mathbb{V}_{\boldsymbol z}[\mathbb{E}[\boldsymbol x|\boldsymbol z]]
+    \end{equation*}
+\end{remark}
+
+\subsection{Linear Algebra}
+
+\begin{proposition}{\textbf{(Woodbury Identity)}}
+    This following identity can helps the computation as follows:
+    \begin{equation*}
+    \begin{aligned}
+        &(\boldsymbol A+\boldsymbol B\boldsymbol D^{-1}\boldsymbol C)^{-1} = \boldsymbol A^{-1}-\boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}
+    \end{aligned}
+    \end{equation*}
+    This identity is useful when $\boldsymbol A \in \mathbb{R}^{a\times a}$ is large and diagonal (easy to invert), while $\boldsymbol B \in \mathbb{R}^{a \times b}$ has many rows but few columns ($a > b$) conversely for $\boldsymbol C \in \mathbb{R}^{b \times a}$. The RHS is simplier than LHS. 
+\end{proposition}
+\begin{proof}
+    This can be proven easily as:
+    \begin{equation*}
+    \begin{aligned}
+        \Big[\boldsymbol A^{-1}&-\boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}\Big](\boldsymbol A+\boldsymbol B\boldsymbol D^{-1}\boldsymbol C) \\
+        &= \boldsymbol A^{-1} (\boldsymbol A+\boldsymbol B\boldsymbol D^{-1}\boldsymbol C) -\boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1} (\boldsymbol A+\boldsymbol B\boldsymbol D^{-1}\boldsymbol C) \\
+        &= \boldsymbol A^{-1}\boldsymbol A+\boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \begin{aligned}[t]  
+            &- \boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}\boldsymbol A \\
+            &-\boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \\
+        \end{aligned} \\
+        &= \boldsymbol I + \boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \begin{aligned}[t] 
+            &- \boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol D\boldsymbol D^{-1}\boldsymbol C \\
+            &-\boldsymbol A^{-1}\boldsymbol B(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \\
+        \end{aligned} \\
+        &= \boldsymbol I + \boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \begin{aligned}[t] 
+            &-\boldsymbol A^{-1}\boldsymbol B\Big[(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol D +(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1}\boldsymbol C\boldsymbol A^{-1}\boldsymbol B \Big]\boldsymbol D^{-1}\boldsymbol C\\
+        \end{aligned} \\
+        &= \boldsymbol I + \boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \begin{aligned}[t] 
+            &-\boldsymbol A^{-1}\boldsymbol B\Big[(\boldsymbol D+\boldsymbol C\boldsymbol A^{-1}\boldsymbol B)^{-1} (\boldsymbol D + \boldsymbol C\boldsymbol A^{-1}\boldsymbol B) \Big]\boldsymbol D^{-1}\boldsymbol C\\
+        \end{aligned} \\
+        &= \boldsymbol I + \boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C \begin{aligned}[t] 
+            &-\boldsymbol A^{-1}\boldsymbol B\boldsymbol D^{-1}\boldsymbol C\\
+        \end{aligned} = \boldsymbol I
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{proposition}{\textbf{(Another Identity)}}
+    Another useful identity can be stated as:
+    \begin{equation*}
+        (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T\boldsymbol R^{-1} = \boldsymbol P\boldsymbol B^T(\boldsymbol B\boldsymbol P\boldsymbol B^T + \boldsymbol R)^{-1}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    This can be proven easily as:
+    \begin{equation*}
+    \begin{aligned}
+        (\boldsymbol P^{-1} &+ \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T\boldsymbol R^{-1} (\boldsymbol B\boldsymbol P\boldsymbol B^T + \boldsymbol R) \\
+        &= (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B\boldsymbol P\boldsymbol B^T +  (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T\boldsymbol R^{-1}\boldsymbol R \\
+        &= (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B\boldsymbol P\boldsymbol B^T +  (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\boldsymbol B^T \\
+        &= (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\Big[\boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B\boldsymbol P + \boldsymbol P^{-1}\boldsymbol P\Big]\boldsymbol B^T \\
+        &= (\boldsymbol P^{-1} + \boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B)^{-1}\Big[\boldsymbol B^T\boldsymbol R^{-1}\boldsymbol B + \boldsymbol P^{-1}\Big]\boldsymbol P\boldsymbol B^T = \boldsymbol P \boldsymbol B^T
+    \end{aligned}
+    \end{equation*}
+\end{proof}
+
+\begin{remark}{\textbf{(More Matrix Identities)}}
+    We have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{Tr}(\boldsymbol A\boldsymbol B\boldsymbol C) = \operatorname{Tr}(\boldsymbol C\boldsymbol A\boldsymbol B) = \operatorname{Tr}(\boldsymbol B\boldsymbol C\boldsymbol A) 
+        \qquad \abs{\boldsymbol A^{-1}} = \frac{1}{\abs{\boldsymbol A}}
+        \qquad \abs{\boldsymbol A \boldsymbol B} = \abs{\boldsymbol A}\abs{\boldsymbol B}
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{remark}{\textbf{(Additional Identity)}}
+    \begin{equation*} 
+        \abs{\boldsymbol I_N + \boldsymbol A\boldsymbol B^T} = \abs{\boldsymbol I_M + \boldsymbol A^T\boldsymbol B} 
+    \end{equation*} 
+    This also implies that $\abs{\boldsymbol I_N + \boldsymbol a\boldsymbol b^T} = 1 + \boldsymbol a^T\boldsymbol b$
+\end{remark}
+
+\begin{remark}{\textbf{(Matrix Derivative - Basics)}}
+    We still use the following facts:
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial \boldsymbol x}(\boldsymbol x^T\boldsymbol a) = \frac{\partial}{\partial \boldsymbol x}(\boldsymbol a^T\boldsymbol x) = \boldsymbol a \qquad
+        \qquad \frac{\partial}{\partial x} \boldsymbol A\boldsymbol B = \frac{\partial\boldsymbol A}{\partial x}\boldsymbol B + \frac{\partial\boldsymbol B}{\partial x}\boldsymbol A \qquad \frac{\partial}{\partial \boldsymbol x} \boldsymbol x^T\boldsymbol A\boldsymbol x = (\boldsymbol A+\boldsymbol A^T)\boldsymbol x
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    The derivative of the inverse matrix is given by:
+    \begin{equation*}
+        \frac{\partial}{\partial x} (\boldsymbol A^{-1}) = -\boldsymbol A^{-1}\frac{\partial\boldsymbol A}{\partial x}\boldsymbol A^{-1}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider differetiate the following eqation $\boldsymbol A^{-1}\boldsymbol A = \boldsymbol I$ as we have:
+    \begin{equation*}
+    \begin{aligned}
+        \boldsymbol 0 = \bracka{\frac{\partial}{\partial x}\boldsymbol I}\boldsymbol A^{-1} = \bracka{\frac{\partial }{\partial x}\boldsymbol A^{-1}\boldsymbol A}\boldsymbol A^{-1} &= \bracka{\frac{\partial \boldsymbol A^{-1}}{\partial x}\boldsymbol A +\boldsymbol A^{-1} \frac{\partial \boldsymbol A}{\partial x}}\boldsymbol A^{-1} = \frac{\partial \boldsymbol A^{-1}}{\partial x} +\boldsymbol A^{-1} \frac{\partial \boldsymbol A}{\partial x}\boldsymbol A^{-1} \\
+    \end{aligned}
+    \end{equation*}
+    With algebraic manipulation the proposition is proven.
+\end{proof}
+
+\begin{remark}{\textbf{(Additional Matrix Derivative)}}
+    \begin{equation*}
+    \begin{aligned}
+        &\frac{\partial}{\partial \boldsymbol A} \operatorname{Tr}(\boldsymbol A\boldsymbol B) = \boldsymbol B^T \qquad
+        \frac{\partial}{\partial \boldsymbol A} \operatorname{Tr}(\boldsymbol A^T\boldsymbol B) = \boldsymbol B \\
+        &\frac{\partial}{\partial \boldsymbol A} \operatorname{Tr}(\boldsymbol A) = \boldsymbol I \qquad
+        \frac{\partial}{\partial \boldsymbol A} \operatorname{Tr}(\boldsymbol A\boldsymbol B\boldsymbol A^T) = \boldsymbol A(\boldsymbol B+\boldsymbol B^T) \\
+    \end{aligned}
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    The matrix can be diagonalization as:
+    \begin{equation*}
+        \boldsymbol A = \boldsymbol U\boldsymbol \Lambda\boldsymbol U^T = \sum^N_{i=1}\lambda_i\boldsymbol u_i\boldsymbol u_i^T
+    \end{equation*}
+    $\boldsymbol U$ to be the matrix constrcuted that has the column as the eigenvectors $\boldsymbol u_i$. The matrix $\boldsymbol \Lambda$ is the diagonal matrix, whose diagonal element is the eigenvalue $\lambda_i$.
+\end{proposition}
+\begin{proof}
+    Recall that the square matrix $\boldsymbol A\in \mathbb{R}^{M\times M}$'s eigenvalue and eigenvector, which are given by:
+    \begin{equation*}
+        \boldsymbol A \boldsymbol u_i = \lambda_i\boldsymbol u_i 
+    \end{equation*}
+    For $i=1,\dots,M$ where $\boldsymbol u_i$ is the eigenvector and $\lambda_i$ is the corresponding eigenvalue. This means that $\boldsymbol A\boldsymbol U = \boldsymbol U\boldsymbol \Lambda$; furthermore, $\boldsymbol U\boldsymbol U^T = \boldsymbol U^T\boldsymbol U = \boldsymbol I$ as we have $\abs{\boldsymbol U} = 1$. The identity follows by right multiplying with $\boldsymbol U^T$.
+\end{proof}
+
+\begin{proposition}
+    We can show that the determinant and trace of the matrix to be:
+    \begin{equation*}
+        \abs{\boldsymbol A} = \prod^M_{i=1} \lambda_i \qquad \operatorname{Tr}(\boldsymbol A) = \sum^M_{i=1}\lambda_i
+    \end{equation*}
+    This follows from the identity of determinant and the cyclic properties of trace. 
+\end{proposition}
+
+\begin{proposition}
+    We now going to show very useful identity
+    \begin{equation*}
+        \frac{\partial}{\partial x}\ln\abs{\boldsymbol A} = \operatorname{Tr}\bracka{\boldsymbol A^{-1}\frac{\partial \boldsymbol A}{\partial x}}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We consider the LHS first, as we have:
+    \begin{equation*}
+        \frac{\partial}{\partial x}\ln\abs{\boldsymbol A} = \frac{\partial}{\partial x} \ln\bracka{\prod^M_{i=1}\lambda_i} = \frac{\partial}{\partial x} \sum^M_{i=1}\ln\lambda_i = \sum^M_{i=1}\frac{1}{\lambda_i}\frac{\partial\lambda_i}{\partial x}  
+    \end{equation*}
+    Now, consider the RHS, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{Tr}\bracka{\brackb{\sum^M_{i=1}\frac{1}{\lambda_i}\boldsymbol u_i\boldsymbol u_i^T} \brackb{\sum^M_{i=1}\frac{\partial\lambda_i}{\partial x}\boldsymbol u_i\boldsymbol u_i^T} } &= \operatorname{Tr}\bracka{\sum^M_{i=1}\sum^M_{j=1}\frac{1}{\lambda_i}\boldsymbol u_i\boldsymbol u_i^T\frac{\partial\lambda_j}{\partial x}\boldsymbol u_j\boldsymbol u_j^T} \\
+        &= \sum^M_{i=1}\sum^M_{j=1}\frac{1}{\lambda_i}\frac{\partial \lambda_j}{\partial x}\operatorname{Tr}\bracka{\boldsymbol u_i\boldsymbol u_i^T\boldsymbol u_j\boldsymbol u_j^T} \\
+        &= \sum^M_{i=1}\sum^M_{j=1}\frac{1}{\lambda_i}\frac{\partial \lambda_j}{\partial x}\operatorname{Tr}\bracka{\boldsymbol u_i^T\boldsymbol u_j\boldsymbol u_j^T\boldsymbol u_i} = \sum^M_{i=1}\frac{1}{\lambda_i}\frac{\partial \lambda_i}{\partial x} \\
+    \end{aligned}
+    \end{equation*}
+    The equality is proven. 
+\end{proof}
+
+\begin{corollary}
+    The above proposition implies that:
+    \begin{equation*}
+        \frac{\partial}{\partial \boldsymbol A}\ln\abs{\boldsymbol A} = (\boldsymbol A^{-1})^T
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    Consider the following partial derivative, we have:
+    \begin{equation*}
+        \frac{\partial}{\partial a_{cd}} \ln\abs{\boldsymbol A} = \operatorname{Tr}\bracka{\boldsymbol A^{-1} \frac{\partial A}{\partial a_{cd}}} = a^{-1}_{dc} 
+    \end{equation*}
+    where we have $a^{-1}_{ij}$ be the $(i,j)$-th element of the matrix $\boldsymbol A^{-1}$. Thus we have proven the equality. 
+\end{proof}
+
+\begin{proposition}
+    We can show that:
+    \begin{equation*}
+        \frac{\partial}{\partial \boldsymbol A}\operatorname{Tr}[\boldsymbol A^T\boldsymbol B\boldsymbol A\boldsymbol C] = \boldsymbol B\boldsymbol A\boldsymbol C + \boldsymbol B^T\boldsymbol A\boldsymbol C^T
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We will use the identity mapping $F_1(\cdot)$ and $F_2(\cdot)$ to make the differetiation easier:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial}{\partial \boldsymbol A}\operatorname{Tr}[\boldsymbol A^T\boldsymbol B\boldsymbol A\boldsymbol C] &= \frac{\partial}{\partial \boldsymbol A}\operatorname{Tr}[F_1(\boldsymbol A)^T\boldsymbol BF_2(\boldsymbol A)\boldsymbol C]  \\
+        &= \frac{\partial}{\partial \boldsymbol F_1}\operatorname{Tr}[\boldsymbol F_1^T\boldsymbol B\boldsymbol F_2\boldsymbol C]\frac{\partial F_1}{\partial \boldsymbol A} + \frac{\partial}{\partial \boldsymbol F_2}\operatorname{Tr}[\boldsymbol F_1^T\boldsymbol B\boldsymbol F_2\boldsymbol C]\frac{\partial F_2}{\partial \boldsymbol A} \\
+        &= \frac{\partial}{\partial \boldsymbol F_1}\operatorname{Tr}[\boldsymbol F_1^T\boldsymbol B\boldsymbol F_2\boldsymbol C]\frac{\partial F_1}{\partial \boldsymbol A} + \frac{\partial}{\partial \boldsymbol F_2}\operatorname{Tr}[\boldsymbol C\boldsymbol F_1^T\boldsymbol B\boldsymbol F_2]\frac{\partial F_2}{\partial \boldsymbol A} \\
+        &= \frac{\partial}{\partial \boldsymbol F_1}\operatorname{Tr}[\boldsymbol F_1^T\boldsymbol B\boldsymbol F_2\boldsymbol C]\frac{\partial F_1}{\partial \boldsymbol A} + \frac{\partial}{\partial \boldsymbol F_2}\operatorname{Tr}[\boldsymbol F_2^T\boldsymbol B^T \boldsymbol F_1\boldsymbol C^T]\frac{\partial F_2}{\partial \boldsymbol A} \\
+        &= \boldsymbol B\boldsymbol F_2\boldsymbol C + \boldsymbol B^T\boldsymbol F_1\boldsymbol C^T = \boldsymbol B\boldsymbol A\boldsymbol C + \boldsymbol B^T\boldsymbol A\boldsymbol C^T \\
+    \end{aligned}
+    \end{equation*}
+    where we have $F_1(\boldsymbol A) = F_2(\boldsymbol A) = \boldsymbol F_1 = \boldsymbol F_2 = \boldsymbol A$
+\end{proof}
+
+\begin{remark}{\textbf{(Notes on Symmetric Matrix)}}
+    We can construct the symmetric matrix from any kind of matrix $\boldsymbol A$ using the following formula:
+    \begin{equation*}
+        \boldsymbol M = \frac{\boldsymbol A + \boldsymbol A^T}{2}
+    \end{equation*}
+    One can show that its eigenvalue is real (given real symmetric matrix), as we consider the complex of, assuning $\boldsymbol x$ is an eigenvector of $\boldsymbol M$ with its eigenvalue to be $\lambda$:
+    \begin{equation*}
+        \brackd{\boldsymbol M\boldsymbol x, \boldsymbol M\boldsymbol x} = \boldsymbol x^*\boldsymbol M^*\boldsymbol M\boldsymbol x = \boldsymbol x^*\boldsymbol M\boldsymbol M\boldsymbol x = \boldsymbol x^*\lambda^2\boldsymbol x = \lambda^2\norm{\boldsymbol x}^2
+    \end{equation*}
+    Where $\boldsymbol M^* = \bar{\boldsymbol M}^T$, and so $\lambda^2$ is real a non-negative, thus being a real number. 
+\end{remark}
+
+\begin{remark}{\textbf{(Notes on Square-Root of Matrix)}}
+    Given positive semi-definite matrix $\boldsymbol A$, one can show that there a matrix $\boldsymbol B$ such that $\boldsymbol A = \boldsymbol B\boldsymbol B$ (or $\boldsymbol B^T\boldsymbol B$ as $\boldsymbol B$ is symmetric as we will shown later). Given the eigendecomposition of $\boldsymbol A$ to be $\boldsymbol U\boldsymbol \Lambda\boldsymbol U^T$, matrix $\boldsymbol B$ is $\boldsymbol U\sqrt{\boldsymbol \Lambda}\boldsymbol U^T$, where $\sqrt{\boldsymbol \Lambda}$ is the matrix contains square root of the diagonal of $\boldsymbol \Lambda$:
+    \begin{equation*}
+        \boldsymbol B\boldsymbol B = (\boldsymbol U\sqrt{\boldsymbol \Lambda}\boldsymbol U^T)(\boldsymbol U\sqrt{\boldsymbol \Lambda}\boldsymbol U^T) = \boldsymbol U\sqrt{\boldsymbol \Lambda}\sqrt{\boldsymbol \Lambda}\boldsymbol U^T = \boldsymbol U\boldsymbol \Lambda\boldsymbol U^T = \boldsymbol A
+    \end{equation*}
+    Please note that, since $\boldsymbol A$ is positive semi-definite, the eigenvalue is non-negative implies that $\boldsymbol B$ has real value eigenvalue (and non-negative), and so $\boldsymbol B$ is symmetric. Finally, if $\boldsymbol A$ is positive define, then there is a \emph{unique} $\boldsymbol B$.
+\end{remark}
+
+\begin{proposition}{\textbf{(Partition Matrix)}}
+    The block matrix can be inversed as:
+    \begin{equation*}
+    \begin{pmatrix}
+        \boldsymbol A & \boldsymbol B \\
+        \boldsymbol C & \boldsymbol D \\
+    \end{pmatrix} = \begin{pmatrix}
+        \boldsymbol M & - \boldsymbol M\boldsymbol B\boldsymbol D^{-1} \\
+        -\boldsymbol D^{-1}\boldsymbol C\boldsymbol M & \boldsymbol D^{-1}+\boldsymbol D^{-1}\boldsymbol C\boldsymbol M\boldsymbol B\boldsymbol D^{-1}
+    \end{pmatrix}
+    \end{equation*}
+    where $\boldsymbol M = (\boldsymbol A-\boldsymbol B\boldsymbol D^{-1}\boldsymbol C)^{-1}$
+\end{proposition}
+
+\subsection{Optimization}
+
+\begin{definition}{\textbf{(Constraint Optimization)}}
+   The constraint optimization is the optimization problem is in the form of:
+   \begin{equation*}
+    \begin{aligned}
+        \min_{\boldsymbol x} \quad & f_0(\boldsymbol x) \\
+        \text{ s.t } \quad & \begin{aligned}[t] 
+            &f_i(\boldsymbol x) \le 0 \quad i \in \mathcal{I} = [m] \\
+            &h_i(\boldsymbol x) = 0 \quad i \in \mathcal{E} = [p] \\
+        \end{aligned}
+    \end{aligned}
+   \end{equation*}
+\end{definition}
+\begin{definition}{\textbf{(KKT Condition)}}
+    The constraint optimization problem given above can be solved using the KKT condition. Before that, we consider the Lagragian to be defined as:
+    \begin{equation*}
+        \mathcal{L}(\boldsymbol x, \boldsymbol \lambda, \boldsymbol \mu) = f_0(\boldsymbol x) + \sum_{i\in\mathcal{I}}\lambda_i f_i(\boldsymbol x) + \sum_{i\in\mathcal{E}}\mu_i h_i(\boldsymbol x)
+    \end{equation*}
+    The KKT condition is given by:
+    \begin{equation*}
+    \begin{aligned}
+        &\nabla \mathcal{L}(\boldsymbol x, \boldsymbol \lambda, \boldsymbol \mu) = 0 \\
+        &f_i(\boldsymbol x) \le 0 \quad \text{ for } \quad i \in \mathcal{I} \\
+        &h_i(\boldsymbol x) = 0 \quad \text{ for } \quad i \in \mathcal{E} \\
+        &\lambda_i \ge 0 \quad \text{ for } \quad i \in \mathcal{I} \\
+        &\lambda_if_i(\boldsymbol x) = 0 \quad \text{ for } \quad i \in \mathcal{I} \\
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\subsection{What are we going to do ?}
+
+\begin{theorem}{\textbf{(Bayes' Theorem)}}
+    One can show that:
+    \begin{equation*}
+        p(A|B) = \frac{p(B|A)p(A)}{p(B)}
+    \end{equation*}
+\end{theorem}
+
+\begin{remark}
+    There are many ways to learn the parameter given the dataset $\mathcal{D} = \brackc{\boldsymbol x_i}^N_{i=1}$, as we have:
+    \begin{itemize}
+        \item \emph{Maximum Likelihood:} Find the parameter $\boldsymbol \theta_\text{ML}$ such that it maximizes the log-likelihood as we have:
+        \begin{equation*}
+            \boldsymbol \theta_\text{ML} = \argmax{\boldsymbol \theta} \log p(\mathcal{D} | \boldsymbol \theta)
+        \end{equation*}
+        \item \emph{Bayesian Inference}: Find the distribution over the parameter $\boldsymbol \theta$ using Bayes' Theorem:
+        \begin{equation*}
+            p(\boldsymbol \theta | \mathcal{D}) = \frac{p(\boldsymbol \theta)p(\mathcal{D}|\boldsymbol \theta)}{p(\mathcal{D})}
+        \end{equation*}
+        \item \emph{Maximum A Posteriori}: Find the mode of the posterior distribution over parameter
+        \begin{equation*}
+            \boldsymbol \theta_\text{MAP} = \argmax{\boldsymbol \theta} \log P(\boldsymbol \theta | \mathcal{D})
+        \end{equation*}
+    \end{itemize}
+    The main problems/solutions of this works is simply trying to get better estimate of $p(\boldsymbol \theta|\mathcal{D})$ as it maybe intractable to calculate. 
+\end{remark}
+
+\begin{definition}{\textbf{(Bayesian Model)}}
+    The model is $\mathcal{M} = \brackc{P(\cdot|\theta) : \theta \in \mathcal{T}}$, where they are the distribution of a single random variable $X \sim P(\cdot|\theta)$. Given the prior, we also have a prior $\pi$ on parameter space $\mathcal{T}$. The data is generated by the following process:
+    \begin{equation*}
+        \Theta \sim \pi \qquad X_1,\dots,X_n | \Theta \sim_\text{iid} p(\cdot|\Theta)
+    \end{equation*}
+    The tuple $(\mathcal{M}, \pi)$ is the Bayesian model.
+\end{definition}
+
+\begin{remark}{\textbf{(Model Selection)}}
+    Given various kinds of model $\mathcal{M}_1,\mathcal{M}_2,\dots$. The following set of likelihood associated with $\mathcal{M}_i$ is
+    \begin{equation*}
+        \brackc{p(\boldsymbol x | \boldsymbol \theta_i, \mathcal{M}_i) : \boldsymbol \theta_i\in\mathcal{T}_i}
+    \end{equation*}
+    We are interested in selecting the $\mathcal{M}_i$. Starting with the prior $p(\mathcal{M}_i)$ and the prior probability of parameter, given the model $\mathcal{M}_i$, is $p(\boldsymbol \theta_i|\mathcal{M}_i)$. Finally, the data probability is, where we assume the iid of the dataset:
+    \begin{equation*}
+        p(\mathcal{D}|\boldsymbol \theta_i, \mathcal{M}_i) = \prod^N_{i=1} p(\boldsymbol x_i | \boldsymbol \theta_i, \mathcal{M}_i) 
+    \end{equation*}
+    Now, we can find the posterior of the parameter given the model $\mathcal{M}_i$ together with dataset evidence:
+    \begin{equation*}
+       p(\boldsymbol \theta_i | \mathcal{D}, \mathcal{M}_i) = \frac{p(\mathcal{D} | \boldsymbol \theta_i, \mathcal{M}_i)P(\boldsymbol \theta_i|\mathcal{M}_i)}{p(\mathcal{D}|\mathcal{M}_i)} \qquad p(\mathcal{D}|\mathcal{M}_i) = \int p(\mathcal{D}|\boldsymbol \theta_i,\mathcal{M})p(\boldsymbol \theta_i | \mathcal{M}_i)\dby\boldsymbol \theta_i
+    \end{equation*}
+    We can perform Bayesian inference over the model $\mathcal{M}_i$
+    \begin{equation*}
+        p(\mathcal{M}_i|\mathcal{D}) = \frac{p(\mathcal{D} | \mathcal{M}_i)p(\mathcal{M}_i)}{p(\mathcal{D})}
+    \end{equation*}
+    Now, we have the distribution over possible models. 
+\end{remark}
+
+\subsection{Exponential Family and Friends}
+
+\begin{definition}{\textbf{(Exponential Family)}}
+    The set of probability distribution $\brackc{p(\cdot|\theta) : \theta \in \mathcal{T}}$, where $\mathcal{T}$ is the parameter space, is exponential family if we have the distribution of the form:
+    \begin{equation*}
+        p(\boldsymbol x | \boldsymbol \theta) = f(\boldsymbol x)g(\boldsymbol \theta)\exp\Big( \boldsymbol \phi(\boldsymbol \theta)^T\boldsymbol T(\boldsymbol x) \Big) 
+    \end{equation*}
+    where each components are given (and named) as:
+    \begin{itemize}
+        \item Sufficient Statistics: $\boldsymbol T : \mathcal{X} \rightarrow \mathbb{R}^m$
+        \item Natural Parameter: $\phi : \mathcal{T}\rightarrow \mathbb{R}^m$
+        \item Auxilliary Functions $f: \mathcal{X} \rightarrow \mathbb{R}_{\ge0}$ and $g : \mathcal{T}\rightarrow \mathbb{R}_{>0}$ (normalizing factor)
+    \end{itemize}
+    Please note that the function $g$ has the following properties:
+    \begin{equation*}
+        g(\boldsymbol \theta)\int f(\boldsymbol x)\exp\Big( \boldsymbol \phi(\boldsymbol \theta)^T\boldsymbol T(\boldsymbol x) \Big) \dby \boldsymbol x = 1
+    \end{equation*}
+\end{definition}
+
+\begin{remark}
+    Let's consider the example of exponential families as:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Distribution}   & $\boldsymbol \phi(\boldsymbol \theta)$  & $\boldsymbol T(\boldsymbol x)$ \\
+        \midrule
+        Bernoulli/Binomial & $\ln \bracka{\cfrac{\theta}{1-\theta}}$ & $x$ \\
+        \addlinespace[0.25em]
+        Bernoulli(+)/Multinormal & $\brackb{\ln \theta_1, \ln \theta_2, \dots, \ln\theta_D}$ & $\brackb{x_1, x_2, \dots, x_D}$ \\
+        \addlinespace[0.25em]
+        Gaussian & $[\mu/\sigma^2, -1/2\sigma^2]$ & $[x, x^2]$ \\
+        \addlinespace[0.25em]
+        Multinormal & $\brackb{-\cfrac{1}{2}\operatorname{Vec}(\boldsymbol \Sigma^{-1}), \ \boldsymbol \Sigma^{-1}\boldsymbol \mu}$ & $\brackb{\operatorname{Vec}(\boldsymbol x\boldsymbol x^T), \ \boldsymbol x}$\\ 
+        \addlinespace[0.25em]
+        Beta & $[a-1, b-1]$ & $[\ln x, \ln (1-x)]$ \\
+        \addlinespace[0.25em]
+        Dirichlet & $[a_1-1, a_2-1, \dots, a_D-1]$ & $[\ln x_1, \ln x_2, \dots, \ln x_D]$ \\
+        \addlinespace[0.25em]
+        Gamma & $[a-1, -b]$ & $[\ln x, x]$ \\
+        \addlinespace[0.25em]
+        Poisson & $\ln\lambda$ & $x$ \\
+        \bottomrule
+    \end{tabular}
+    \end{table}    
+    where we have the following opeartion $\operatorname{Vec} : \mathbb{R}^{n\times m}\rightarrow \mathbb{R}^{n\cdot n \times 1}$ is defined as:
+    \begin{equation*}
+        \operatorname{Vec}(\boldsymbol X) = [X_{11},\dots,X_{n1},\dots,X_{1m},\dots,X_{nm}]^T
+    \end{equation*}
+\end{remark}
+
+\begin{proposition}
+    The normal distribution can be written as:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}&\exp\brackc{-\cfrac{1}{2}(\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu)} \\
+        &= \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\frac{1}{2}\boldsymbol \mu^T\Sigma^{-1}\boldsymbol \mu}\exp \brackc{\brackb{-\frac{1}{2} \operatorname{Vec}\left(\Sigma^{-1}\right), \Sigma^{-1} \boldsymbol{\mu}}^{T}\left[\operatorname{Vec}\left(\boldsymbol{x} \boldsymbol{x}^{T}\right), \boldsymbol{x}\right]}
+    \end{aligned}
+    \end{equation*}
+    Please note that $\operatorname{Tr}(\boldsymbol A\boldsymbol B) = \operatorname{vec}(\boldsymbol A)^T\operatorname{vec}(\boldsymbol B)$, which is proven by the expanding the equation. 
+\end{proposition}
+\begin{proof}
+    Now, we expand the normal distribution:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}&\exp\brackc{-\cfrac{1}{2}(\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu)} \\
+        &= \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\cfrac{1}{2}(\boldsymbol x^T\boldsymbol \Sigma^{-1}-\boldsymbol \mu^T\boldsymbol \Sigma^{-1})(\boldsymbol x-\boldsymbol \mu)} \\
+        &= \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\cfrac{1}{2}\Big(\boldsymbol x^T\boldsymbol \Sigma^{-1}\boldsymbol x-2\boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol x + \boldsymbol \mu^T\Sigma^{-1}\boldsymbol \mu \Big) } \\
+        &= \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\frac{1}{2}\boldsymbol \mu^T\Sigma^{-1}\boldsymbol \mu}\exp\brackc{-\frac{1}{2}\boldsymbol x^T\boldsymbol \Sigma^{-1}\boldsymbol x+\boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol x } \\
+    \end{aligned}
+    \end{equation*}
+    Now, we consider the quadratic $\boldsymbol x^T\Sigma^{-1}\boldsymbol x$, as we have:
+    \begin{equation*}
+        \operatorname{Tr}(\boldsymbol x^T\boldsymbol \Sigma^{-1}\boldsymbol x) = \operatorname{Tr}(\boldsymbol \Sigma^{-1}\boldsymbol x\boldsymbol x^T) = \operatorname{Vec}(\boldsymbol \Sigma^{-1})^T\operatorname{Vec}(\boldsymbol x\boldsymbol x^T)
+    \end{equation*}
+    And, so we have the following:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}&\exp\brackc{-\frac{1}{2}\boldsymbol \mu^T\Sigma^{-1}\boldsymbol \mu}\exp\brackc{-\frac{1}{2}\boldsymbol x^T\boldsymbol \Sigma^{-1}\boldsymbol x+\boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol x } \\
+        &= \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\frac{1}{2}\boldsymbol \mu^T\Sigma^{-1}\boldsymbol \mu}\exp\brackc{-\frac{1}{2}\operatorname{Vec}(\boldsymbol \Sigma^{-1})^T\operatorname{Vec}(\boldsymbol x\boldsymbol x^T) + \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol x} \\
+    \end{aligned}
+    \end{equation*}
+    and so we have proven the proposition. 
+\end{proof}
+
+\begin{remark}
+    Now, we can consider the iid observations $\brackc{\boldsymbol x_i}^N_{i=1}$ of exponential family and we have:
+    \begin{equation*}
+        \prod_{i=1}^N \brackb{f(\boldsymbol x_i)g(\boldsymbol \theta) \exp\Big( \boldsymbol \phi(\boldsymbol \theta)^T\boldsymbol T(\boldsymbol x_i) \Big)} = g(\boldsymbol \theta)^N\bracka{\prod^N_{i=1}f(\boldsymbol x_i)}\exp\bracka{\sum^N_{i=1}\boldsymbol \phi(\boldsymbol \theta)^T\boldsymbol T(\boldsymbol x_i)}
+    \end{equation*}
+\end{remark}
+
+\begin{definition}{\textbf{(Conjugate Prior)}}
+    The conjugate prior of the exponential family is the probability distribution of the form of:
+    \begin{equation*}
+        p(\boldsymbol \theta | \boldsymbol \tau, \nu) = f(\boldsymbol \tau, \nu) g(\boldsymbol \theta)^\nu \exp\Big( \boldsymbol \phi(\boldsymbol \theta)^T\boldsymbol \tau \Big)
+    \end{equation*}
+    where $\nu > 0$ and $\boldsymbol \tau \in \mathbb{R}^m$. It is designed so that the posterior given this prior will have the same distribution as the conjugate prior. 
+\end{definition}
+
+\begin{remark}
+    The conjugate prior allow use to find the posterior with ease as we don't have to find the normalization of the Bayes' theorem:
+    \begin{equation*}
+    \begin{aligned}
+        p(\boldsymbol \theta | \mathcal{D}) &\propto p(\mathcal{D}|\boldsymbol \theta)p(\boldsymbol \theta | \boldsymbol \tau, \nu) \propto g(\boldsymbol \theta)^{N+\nu}\exp\bracka{\boldsymbol \phi(\boldsymbol \theta)^T\bracka{\boldsymbol \tau + \sum^N_{i=1} \boldsymbol T(\boldsymbol x_i)}} \\ 
+        &= F\bracka{ \boldsymbol \tau + \sum^N_{i=1}T(\boldsymbol x_i), \ N+\nu  } g(\boldsymbol \theta)^{N+\nu}\exp\bracka{\boldsymbol \phi(\boldsymbol \theta)^T\bracka{\boldsymbol \tau + \sum^N_{i=1} \boldsymbol T(\boldsymbol x_i)}} 
+    \end{aligned}
+    \end{equation*}
+    And so we have $\boldsymbol \tau$ quantify the pseudo-observations via the sufficient statistics. Furthermore, $\nu$ is the pseudo-count of the pseudo-observation (can also be seen as the weight of prior belief). 
+\end{remark}
+
+\begin{remark}
+    Now, we have the following list of conjugate prior, where it is shown in the table below:
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Distribution}  & \textbf{Conjugate} & \textbf{Distribution (2)}  & \textbf{Conjugate (2)} \\
+        \midrule
+        Bernoulli & Beta & Multinormal (unknown $\boldsymbol \mu$) & Multinormal \\
+        Poisson & Gamma & Multinormal (unknown $\boldsymbol \Lambda = \boldsymbol\Sigma^{-1}$) & Wishart \\
+        Multinormal & Dirichlet & Multinormal (unknown $\boldsymbol \Lambda$) & Normal-Wishart \\
+        Normal (unknown $\mu$) & Normal  \\
+        Normal (unknown $\tau = \sigma^{-1}$) & Gamma \\
+        Normal (unknown $\mu, \tau$) & Normal-Gamma \\
+        \bottomrule
+    \end{tabular}
+    \end{table}    
+\end{remark}
+
+\begin{definition}{\textbf{(Normal-Gamma Distribution)}}
+    The Normal-Gamma is defined as:
+    \begin{equation*}
+        p(x, \tau | \mu,\lambda,\alpha,\beta) = \frac{\beta^\alpha\sqrt{\lambda}}{\Gamma(\alpha)\sqrt{2\pi}} \tau^{\alpha-1/2}\exp(-\beta\tau)\exp\bracka{-\frac{\lambda\tau(x-\mu)^2}{2}}
+    \end{equation*}
+    similarly the Normal-Wishart distribution is given by $\mathcal{N}(\boldsymbol \mu | \boldsymbol \mu_0, (\lambda\boldsymbol \Lambda)^{-1})\mathcal{W}(\boldsymbol \Lambda | \boldsymbol W, \nu)$, where $\mathcal{W}$ is the Wishart distribution, where we consider $(\boldsymbol \mu, \boldsymbol \Sigma) \sim \operatorname{NW}(\boldsymbol \mu_0, \lambda, \boldsymbol W, \mu)$, given as:
+    \begin{equation*}
+    \begin{aligned}
+        \mathcal{N}&(\boldsymbol \mu | \boldsymbol \mu_0, (\lambda\boldsymbol \Lambda)^{-1})\mathcal{W}(\boldsymbol \Lambda | \boldsymbol W, \nu) \\
+        &= B(\boldsymbol W, \nu)\abs{\boldsymbol \Lambda}^{(\nu-D-1)/2}\exp\bracka{-\cfrac{1}{2}\operatorname{Tr}(\boldsymbol W^{-1}\boldsymbol \Lambda)} \frac{1}{\sqrt{\abs{2\pi (\lambda\boldsymbol \Lambda)^{-1}}}} \exp\brackc{-\cfrac{\lambda}{2}(\boldsymbol \mu-\boldsymbol \mu_0)^T\boldsymbol \Lambda(\boldsymbol \mu-\boldsymbol \mu_0)} \\
+        &= \frac{B(\boldsymbol W, \nu)\abs{\boldsymbol \Lambda}^{(\nu-D-1)/2}}{\sqrt{\abs{2\pi (\lambda\boldsymbol \Lambda)^{-1}}}}\exp\bracka{-\frac{1}{2}\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big] - \frac{\lambda}{2} (\boldsymbol \mu-\boldsymbol \mu_0)^T\boldsymbol \Lambda (\boldsymbol \mu-\boldsymbol \mu_0)^T} \\
+    \end{aligned}
+    \end{equation*}
+\end{definition}
+
+\subsection{Everything You Always Wanted to Know About Gaussian But Were Afraid to Ask..}
+
+% \begin{proposition}
+%     Given the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$, we can show that for $\boldsymbol \Sigma \in \mathbb{S}_{+}^{D\times D}$ and $\boldsymbol \mu \in \mathbb{R}^d$:
+%     \begin{equation*}
+%         \sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_i - \boldsymbol \mu) = n(\bar{\boldsymbol x}-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\bar{\boldsymbol x} - \boldsymbol \mu) + \sum^N_{i=1}(\boldsymbol x_i - \bar{\boldsymbol x})^T\boldsymbol \Sigma^{-1}(\boldsymbol x_i - \bar{\boldsymbol x})
+%     \end{equation*}
+%     where $\bar{\boldsymbol x} = 1/n\sum^N_{i=1}\boldsymbol x_i$
+% \end{proposition}
+% \begin{proof}
+%     We consider the RHS first, as we have:
+%     \allowdisplaybreaks
+%     \begin{align*}
+%         n\Big[ \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol \mu &- 2\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol \mu + \bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\bar{\boldsymbol x} \Big] + \sum^N_{i=1} \boldsymbol x_i^T\boldsymbol \Sigma\boldsymbol x_i - 2\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + \bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\bar{\boldsymbol x} \\
+%         &= \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol \mu \Big) - 2n\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol \mu + n\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\bar{\boldsymbol x} - \sum^N_{i=1}2\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + n\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\bar{\boldsymbol x} \\
+%         &= \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol \mu \Big) - 2n\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol \mu + 2n\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\bar{\boldsymbol x} - \sum^N_{i=1}2\bar{\boldsymbol x}^T\boldsymbol \Sigma^{-1}\boldsymbol x_i \\
+%         &= \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol \mu \Big) - \sum^N_{i=1}2\boldsymbol x^T_i\boldsymbol \Sigma^{-1}\boldsymbol \mu \\
+%         &= \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Sigma^{-1}\boldsymbol x_i + \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol \mu - 2\boldsymbol x^T_i\boldsymbol \Sigma^{-1}\boldsymbol \mu \Big) = \sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_i - \boldsymbol \mu)
+%     \end{align*}
+% \end{proof}
+
+\begin{proposition}{\textbf{(Gaussian Integration)}}
+    We can show that:
+    \begin{equation*}
+        \int^\infty_{-\infty}\exp(-x^2)\dby x = \sqrt{\pi}
+    \end{equation*}
+\end{proposition}
+
+\begin{remark}{\textbf{(Shape of Gaussian)}}
+    Recalling the definition of multivariate Gaussian distribution:
+    \begin{equation*}
+        \cfrac{1}{\sqrt{\abs{2\pi \boldsymbol \Sigma}}}\exp\brackc{-\cfrac{1}{2}(\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu) }
+    \end{equation*}
+    where we will define the Mahalanobis distance of relating to the Gaussian to be $\Delta^2 = (\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu)$. Now, it is clear that the shape of the Gaussian depends on this value. Now, using the eigendecomposition on the covariance function, we have:
+    \begin{equation*}
+        \boldsymbol \Sigma^{-1} = \sum^D_{i=1}\frac{1}{\lambda_i}\boldsymbol u_i\boldsymbol u_i^T \implies \Delta^2 = \sum^D_{i=1}\frac{y_i^2}{\lambda_i}
+    \end{equation*}
+    where $(\lambda_i, \boldsymbol u_i)$ is the eigenvalue/eigenvector pair of $\boldsymbol \Sigma$, and $y_i = \boldsymbol u_i^T(\boldsymbol x-\boldsymbol \mu)$. Now for the full vector $\boldsymbol y$ is equal to $U(\boldsymbol x-\boldsymbol \mu)$. Therefore, the shape of Gaussian is charaterized as:
+    \begin{itemize}
+        \item Ellipsoids with the center at $\boldsymbol \mu$
+        \item Axis is in the direction of eigenvector $\boldsymbol u_i$.
+        \item Scaling of each direction is the eigenvector $\lambda_i$ associated with $\boldsymbol u_i$
+    \end{itemize}
+\end{remark}
+
+\begin{remark}{\textbf{(Normalizing Factor of Gaussian)}}
+    To show that the multivariate Gaussian indeed is normalized, we consider a change of coordinate to the eigen-basis consider above. To do this, we consider Jacobina matrix $\boldsymbol J$ as:
+    \begin{equation*}
+        J_{ij} = \frac{\partial x_i}{\partial y_i} = U_{ji}
+    \end{equation*}
+    Since $\boldsymbol U$ is orthonormal, we have: $|\boldsymbol J|^2 = |\boldsymbol U^T|^2 = |\boldsymbol U^T||\boldsymbol U| = |\boldsymbol U^T\boldsymbol U| = |\boldsymbol I| = 1$. Now, using the definition of determinant: $\abs{\boldsymbol \Sigma}^{1/2} = \prod^D_{i=1}\abs{\lambda_j}^{1/2}$. And, so one can perform the integration over as:
+    \begin{equation*}
+        \int p(\boldsymbol x)\dby\boldsymbol x = \int p(\boldsymbol y)|\boldsymbol J| \dby \boldsymbol y = \int \prod^D_{i=1} \frac{1}{\sqrt{2\pi\lambda_i}}\exp\brackc{-\frac{y_i^2}{2\lambda_i}}\dby \boldsymbol y = \prod^D_{i=1} \int \frac{1}{\sqrt{2\pi\lambda_i}}\exp\brackc{-\frac{y_i^2}{2\lambda_i}}\dby y_i = 1
+    \end{equation*}
+    The final equality integration follows from the Gaussian integration.
+\end{remark}
+
+\begin{proposition}
+    Consider the following multivariate Gaussian distribution:
+    \begin{equation*}
+        \begin{pmatrix}
+            \boldsymbol x_a \\ \boldsymbol x_b
+        \end{pmatrix} \sim \mathcal{N}\bracka{\begin{pmatrix}
+            \boldsymbol \mu_a  \\ \boldsymbol \mu_b
+        \end{pmatrix}, \begin{pmatrix}
+            \boldsymbol \Sigma_{aa} & \boldsymbol \Sigma_{ab} \\
+            \boldsymbol \Sigma_{ba} & \boldsymbol \Sigma_{bb} \\
+        \end{pmatrix}}
+    \end{equation*}
+    where $\boldsymbol \Lambda^{-1} = \boldsymbol \Sigma$, then we can show that:
+    \begin{equation*}
+        p(\boldsymbol x_a | \boldsymbol x_b) = \mathcal{N}(\boldsymbol x|\boldsymbol \mu_{a|b}, \Lambda_{aa}^{-1}) \qquad \text{ where } \qquad \boldsymbol \mu_{a|b} = \boldsymbol \mu_a - \boldsymbol \Lambda_{aa}^{-1}\boldsymbol \Lambda_{ab}(\boldsymbol x_b - \boldsymbol \mu_b)
+    \end{equation*}
+    One can simply the equaltion by consider the value $\boldsymbol K= \boldsymbol \Sigma_{ab}\boldsymbol \Sigma_{bb}^{-1}$ and since $\boldsymbol \Sigma_{ab} = \boldsymbol \Sigma_{ba}$, then we have:
+    \begin{equation*}
+    \begin{aligned}
+        &\boldsymbol \mu_{a|b} = \boldsymbol \mu_a + \boldsymbol K(\boldsymbol x_b - \boldsymbol \mu_b) \\ 
+        &\begin{aligned}[t]    
+            \boldsymbol \Sigma_{a|b} &= \boldsymbol \Sigma_{aa} - \boldsymbol K\boldsymbol \Sigma_{bb}\boldsymbol K^T \\
+            &= \boldsymbol \Sigma_{aa} - \boldsymbol \Sigma_{ab}\boldsymbol \Sigma_{bb}^{-1}\boldsymbol \Sigma_{ba}
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    The above equation follows from the block-matrix inverse. 
+\end{proposition}
+\begin{proof}
+    We will consider only the quadratic term inside Gaussian, as we have:
+    \begin{equation*}
+    \begin{aligned}
+        -\frac{1}{2}&(\boldsymbol x-\boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x-\boldsymbol \mu) =\\ 
+        &-\frac{1}{2}(\boldsymbol x_a-\boldsymbol \mu_a)^T\boldsymbol \Lambda_{aa}(\boldsymbol x_a - \boldsymbol \mu_a) - \frac{1}{2}(\boldsymbol x_a-\boldsymbol \mu_a)^T\boldsymbol \Lambda_{ab}(\boldsymbol x_b - \boldsymbol \mu_b) \\
+        &-\frac{1}{2}(\boldsymbol x_b-\boldsymbol \mu_b)^T\boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a) - \frac{1}{2}(\boldsymbol x_b-\boldsymbol \mu_b)^T\boldsymbol \Lambda_{bb}(\boldsymbol x_b - \boldsymbol \mu_b)
+    \end{aligned}
+    \end{equation*}
+    Now, we are interested to find the condition distribution as it will have the form of:
+    \begin{equation*}
+    \begin{aligned}
+        -\frac{1}{2}&(\boldsymbol x_{a} - \boldsymbol \mu_{a|b})^T\boldsymbol \Sigma_{a|b}^{-1}(\boldsymbol x_a - \boldsymbol \mu_{a|b}) = \underbrace{-\frac{1}{2}\boldsymbol x_a^T\boldsymbol \Sigma_{a|b}^{-1}\boldsymbol x_a}_{\circled{1}} + \underbrace{\boldsymbol x_a^T\boldsymbol \Sigma_{a|b}^{-1}\boldsymbol \mu_{a|b}}_{\circled{2}} + \text{ const }
+    \end{aligned}
+    \end{equation*}
+    Now, let's consider the term for full Gaussian that have the form that matches the condition distribution:
+    \begin{enumerate}
+        \item The first one is simple as we have: $-\frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a$, and so, one can conclude that $\boldsymbol \Sigma_{a|b}^{-1} = \boldsymbol \Lambda_{aa}$.
+        \item For the second term, we consider equation with $\boldsymbol x_a^T(\cdots)$, as we have (from term $2$ and $3$):
+        \begin{equation*}
+        \begin{aligned}
+            \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol x_b + \frac{1}{2} \boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b + \frac{1}{2}\boldsymbol \mu_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a - \frac{1}{2}\boldsymbol x_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a\\
+            &= \boldsymbol x_a^T\Big[ \boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol \Lambda_{ab}(\boldsymbol x_b - \boldsymbol \mu_b) \Big]
+        \end{aligned}
+        \end{equation*}
+        For the second equality, we use the fact that $\boldsymbol \Lambda_{ba}^T = \boldsymbol \Lambda_{ab}$. Now we simply apply the inverse of $\boldsymbol \Lambda_{aa}$ to get the mean, which means:
+        \begin{equation*}
+        \begin{aligned}
+            &\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_{a|b} = \boldsymbol x_a^T\Big[ \boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol \Lambda_{ab}(\boldsymbol x_b - \boldsymbol \mu_b) \Big]\\
+            \implies&\boldsymbol \mu_{a|b} = \boldsymbol \mu_a + \boldsymbol \Lambda_{aa}^{-1}\boldsymbol \Lambda_{ab}(\boldsymbol x_b-\boldsymbol \mu_b)
+        \end{aligned}
+        \end{equation*}
+        as required. 
+    \end{enumerate}
+    Please note that one can use the block inverse above to calculate $\boldsymbol \Lambda_{aa}$ and $\boldsymbol \Lambda_{ab}$ in terms of $\boldsymbol \Sigma$.
+\end{proof}
+
+\begin{proposition}
+    Consider the following multivariate Gaussian distribution:
+    \begin{equation*}
+        \begin{pmatrix}
+            \boldsymbol x_a \\ \boldsymbol x_b
+        \end{pmatrix} \sim \mathcal{N}\bracka{\begin{pmatrix}
+            \boldsymbol \mu_a  \\ \boldsymbol \mu_b
+        \end{pmatrix}, \begin{pmatrix}
+            \boldsymbol \Sigma_{aa} & \boldsymbol \Sigma_{ab} \\
+            \boldsymbol \Sigma_{ba} & \boldsymbol \Sigma_{bb} \\
+        \end{pmatrix}}
+    \end{equation*}
+    where $\boldsymbol \Lambda^{-1} = \boldsymbol \Sigma$, then we can show that: $p(\boldsymbol x_a) = \mathcal{N}(\boldsymbol x | \boldsymbol \mu_a, \boldsymbol \Sigma_{aa})$
+\end{proposition}
+\begin{proof}
+    We will use the full expansion of Gaussian like above proof. However, we will consider the term with $\boldsymbol x_b$, first as we have (similar to the conditional case):
+    \begin{equation*}
+    \begin{aligned}
+        -\frac{1}{2}\boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol x_b &+ \boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol \mu_b - \frac{1}{2}\boldsymbol x_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a + \frac{1}{2}\boldsymbol x^T_b\boldsymbol \Lambda_{ba}\boldsymbol \mu_a - \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol x_b + \frac{1}{2}\boldsymbol \mu_a^T\boldsymbol \Lambda_{ab}\boldsymbol x_b \\ 
+        &= -\frac{1}{2}\boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol x_b + \boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol \mu_b -\boldsymbol x_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a + \boldsymbol x^T_b\boldsymbol \Lambda_{ba}\boldsymbol \mu_a \\
+        &= -\frac{1}{2} \Big[ \boldsymbol x_b^T\boldsymbol \Lambda_{bb} \boldsymbol x_b + 2\boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol \Lambda_{bb}^{-1}\underbrace{\big( \boldsymbol \Lambda_{bb}\boldsymbol \mu_b - \boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a) \big)}_{\boldsymbol m} \Big] \\
+        &= -\frac{1}{2} \Big[ \boldsymbol x_b^T\boldsymbol \Lambda_{bb} \boldsymbol x_b - 2\boldsymbol x_b^T\boldsymbol \Lambda_{bb}\boldsymbol \Lambda_{bb}^{-1}\boldsymbol m + (\boldsymbol \Lambda_{bb}^{-1}\boldsymbol m)^T\boldsymbol \Lambda_{bb}(\boldsymbol \Lambda_{bb}^{-1}\boldsymbol m)  \Big] + \frac{1}{2}\boldsymbol m^T\boldsymbol \Lambda_{bb}^{-1}\boldsymbol m \\
+        &= -\frac{1}{2} (\boldsymbol x_b - \boldsymbol \Lambda_{bb}^{-1}\boldsymbol m)^T\boldsymbol \Lambda_{bb}(\boldsymbol x_b - \boldsymbol \Lambda_{bb}^{-1}\boldsymbol m) + \frac{1}{2}\boldsymbol m^T\boldsymbol \Lambda_{bb}^{-1}\boldsymbol m \\
+    \end{aligned} 
+    \end{equation*}
+    Now, we can integrate out the quantities (that depends on $\boldsymbol x_b$) i.e:
+    \begin{equation*}
+        \int\exp\brackc{-\frac{1}{2} (\boldsymbol x_b - \boldsymbol \Lambda_{bb}^{-1}\boldsymbol m)^T\boldsymbol \Lambda_{bb}(\boldsymbol x_b - \boldsymbol \Lambda_{bb}^{-1}\boldsymbol m)}\dby \boldsymbol x_b
+    \end{equation*}
+    Since it is a Gaussian integration, we didn't have to perform any thing further as this would yields similar value for normalization factor. Now, consider the vales related to $\boldsymbol x_a$ (without $\boldsymbol x_b$) and the leftout value from above:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{1}{2}\boldsymbol m^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol m &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b + \frac{1}{2}\boldsymbol \mu_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a \\
+        &= \begin{aligned}[t]
+            \frac{1}{2}\Big[  &\boldsymbol \Lambda_{bb}\boldsymbol \mu_b - \boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a) \Big]^T\boldsymbol\Lambda_{bb}^{-1}\Big[  \boldsymbol \Lambda_{bb}\boldsymbol \mu_b - \boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a) \Big] \\
+            &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b \\
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+            \frac{1}{2}\Big[&\boldsymbol \mu_b^T\boldsymbol \Lambda_{bb}\boldsymbol \mu_b - (\boldsymbol x_a - \boldsymbol \mu_a)^T\boldsymbol \Lambda_{ba}^T\boldsymbol \mu_b  \\
+            &-\boldsymbol \mu_b^T\boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a) + (\boldsymbol x_a - \boldsymbol \mu_a)^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}(\boldsymbol x_a - \boldsymbol \mu_a)\Big]  \\
+            &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b \\
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+            \frac{1}{2}\Big[&\boldsymbol \mu_b^T\boldsymbol \Lambda_{bb}\boldsymbol \mu_b - \boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol \mu_b + \boldsymbol \mu_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol \mu_b -\boldsymbol \mu_b^T\boldsymbol \Lambda_{ba}\boldsymbol x_a + \boldsymbol \mu_b^T\boldsymbol \Lambda_{ba}\boldsymbol \mu_a \\
+            &+ \boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol x_a - \boldsymbol \mu_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol x_a - \boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol \mu_a + \boldsymbol \mu_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol \mu_a \Big]  \\
+            &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b \\
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+            \frac{1}{2}\Big[& - 2\boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol \mu_b + \boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol x_a - 2\boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol \mu_a \Big]  \\
+            &- \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \boldsymbol x_a^T\boldsymbol \Lambda_{ab}\boldsymbol \mu_b + \text{ const } \\
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+           \frac{1}{2}&\boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol x_a - \boldsymbol x_a^T\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\boldsymbol \mu_a - \frac{1}{2}\boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Lambda_{aa}\boldsymbol \mu_a + \text{ const } \\
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+           -\frac{1}{2}&\boldsymbol x_a^T\Big[\boldsymbol \Lambda_{aa} - \boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba}\Big]\boldsymbol x_a + \boldsymbol x_a^T\Big[\boldsymbol \Lambda_{aa}-\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba} \Big]\boldsymbol \mu_a+ \text{ const } \\
+        \end{aligned} \\ 
+    \end{aligned}
+    \end{equation*}
+    Now, we can compare this to the form:
+    \begin{equation*}
+        -\frac{1}{2}(\boldsymbol x_a - \boldsymbol \mu_{a}^*)^T\boldsymbol \Sigma^{*}_a(\boldsymbol x_a - \boldsymbol \mu_a^*) = -\frac{1}{2}\boldsymbol x_a^T\boldsymbol \Sigma^*_a\boldsymbol x_a + \boldsymbol x_a^T\boldsymbol \Sigma_a^*\boldsymbol \mu_a^* + \text{ const }
+    \end{equation*}
+    and we have $\boldsymbol \Sigma^*_a$ (marginalized) is equal to $(\boldsymbol \Lambda_{aa}-\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba})^{-1}$, and so we have $\boldsymbol \mu^*_a = \boldsymbol \mu_a$. Furthermore, from the partition inverse of $(\boldsymbol \Lambda_{aa}-\boldsymbol \Lambda_{ba}^T\boldsymbol\Lambda_{bb}^{-1}\boldsymbol \Lambda_{ba})^{-1} = \boldsymbol \Sigma_{aa}$. Thus, we completed the proof.
+\end{proof}
+
+\begin{proposition}{\textbf{(Linear Gaussian Model)}}
+    Consider the following distributions:
+    \begin{equation*}
+        p(\boldsymbol x) = \mathcal{N}(\boldsymbol x | \boldsymbol \mu, \boldsymbol \Lambda^{-1}) \qquad p(\boldsymbol y|\boldsymbol x) = \mathcal{N}(\boldsymbol y | \boldsymbol A\boldsymbol x + \boldsymbol b, \boldsymbol L^{-1})
+    \end{equation*}
+    Now, we can show that the marginal distribution and the conditional distribution of $\boldsymbol x$ given $\boldsymbol y$ is given by:
+    \begin{equation*}
+        p(\boldsymbol y) = \mathcal{N}(\boldsymbol y |\boldsymbol A\boldsymbol \mu + \boldsymbol b, \boldsymbol L^{-1} + \boldsymbol A\boldsymbol \Lambda^{-1}\boldsymbol A^T) \qquad p(\boldsymbol x | \boldsymbol y) = \mathcal{N}\bracka{\boldsymbol x \left| \boldsymbol \Sigma\brackc{\boldsymbol A^T\boldsymbol L(\boldsymbol y - \boldsymbol b) + \boldsymbol \Lambda\boldsymbol \mu}, \boldsymbol \Sigma\right.}
+    \end{equation*}
+    where $\boldsymbol \Sigma = (\boldsymbol \Lambda + \boldsymbol A^T\boldsymbol L\boldsymbol A)^{-1}$
+\end{proposition}
+
+\begin{proof}
+    Let's consider the joint distribution first, where we denote $\boldsymbol z = \begin{pmatrix}\boldsymbol x \\ \boldsymbol y \end{pmatrix}$, and consider the inside of exponential as we have:
+    \begin{equation*}
+    \begin{aligned}
+        -\frac{1}{2}&(\boldsymbol x - \boldsymbol \mu)^T\boldsymbol \Lambda(\boldsymbol x - \boldsymbol \mu) - \frac{1}{2}(\boldsymbol y - \boldsymbol A\boldsymbol x - \boldsymbol b)^T\boldsymbol L(\boldsymbol y - \boldsymbol A\boldsymbol x - \boldsymbol b) + \text{ const } \\
+        &= \begin{aligned}[t]
+        -\frac{1}{2}\Big[ &\boldsymbol x^T\boldsymbol \Lambda\boldsymbol x - 2\boldsymbol x^T\boldsymbol \Lambda\boldsymbol \mu + \boldsymbol \mu^T\boldsymbol \Lambda\boldsymbol \mu \Big] \\
+        &- \frac{1}{2}\Big[ \boldsymbol y^T\boldsymbol L \boldsymbol y - \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol y - \boldsymbol b^T\boldsymbol L\boldsymbol y  -\boldsymbol y^T\boldsymbol L\boldsymbol A\boldsymbol x + \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol A\boldsymbol x + \boldsymbol b^T\boldsymbol L\boldsymbol A\boldsymbol x \\
+        &-\boldsymbol y^T\boldsymbol L\boldsymbol b + \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol b + \boldsymbol b^T\boldsymbol L\boldsymbol b\Big] + \text{ const }
+        \end{aligned} \\
+        &= \begin{aligned}[t]
+        -\frac{1}{2}\Big[ &\boldsymbol x^T\boldsymbol \Lambda\boldsymbol x - 2\boldsymbol x^T\boldsymbol \Lambda\boldsymbol \mu + \boldsymbol y^T\boldsymbol L \boldsymbol y - \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol y - \boldsymbol b^T\boldsymbol L\boldsymbol y   \\
+        &-\boldsymbol y^T\boldsymbol L\boldsymbol A\boldsymbol x + \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol A\boldsymbol x + \boldsymbol b^T\boldsymbol L\boldsymbol A\boldsymbol x -\boldsymbol y^T\boldsymbol L\boldsymbol b + \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol b \Big] + \text{ const }
+        \end{aligned} \\
+        &= \begin{aligned}[t]
+        -\frac{1}{2}\Big[&\boldsymbol x^T\Big(\boldsymbol \Lambda + \boldsymbol A^T \boldsymbol L\boldsymbol A\Big)\boldsymbol x 
+        + \boldsymbol y^T\boldsymbol L \boldsymbol y 
+        - \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol y 
+        -\boldsymbol y^T\boldsymbol L\boldsymbol A\boldsymbol x  \\
+        &- 2\boldsymbol x^T\boldsymbol \Lambda\boldsymbol \mu
+        - 2\boldsymbol b^T\boldsymbol L\boldsymbol y  
+        + 2\boldsymbol b^T\boldsymbol L\boldsymbol A\boldsymbol x \Big]
+        + \text{ const }
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+        -\frac{1}{2}&\boldsymbol x^T\Big(\boldsymbol \Lambda -\frac{1}{2} \boldsymbol A^T \boldsymbol L\boldsymbol A\Big)\boldsymbol x 
+        -\frac{1}{2} \boldsymbol y^T\boldsymbol L \boldsymbol y 
+        +\frac{1}{2} \boldsymbol x^T\boldsymbol A^T \boldsymbol L\boldsymbol y 
+        +\frac{1}{2}\boldsymbol y^T\boldsymbol L\boldsymbol A\boldsymbol x  \\
+        &+\boldsymbol x^T\boldsymbol \Lambda\boldsymbol \mu
+        +\boldsymbol b^T\boldsymbol L\boldsymbol y  
+        -\boldsymbol b^T\boldsymbol L\boldsymbol A\boldsymbol x
+        + \text{ const }
+        \end{aligned} \\ 
+        &= \begin{aligned}[t]
+        -\frac{1}{2}&
+        \begin{pmatrix}
+            \boldsymbol x \\\boldsymbol y
+        \end{pmatrix}^T
+        \begin{pmatrix}
+            \boldsymbol \Lambda + \boldsymbol A^T\boldsymbol L\boldsymbol A & - \boldsymbol A^T\boldsymbol L \\
+            -\boldsymbol L\boldsymbol A & \boldsymbol L
+        \end{pmatrix}
+        \begin{pmatrix}
+            \boldsymbol x \\\boldsymbol y
+        \end{pmatrix}
+        & + \begin{pmatrix}
+            \boldsymbol x \\\boldsymbol y
+        \end{pmatrix}^T
+        \begin{pmatrix}
+            \boldsymbol \Lambda \boldsymbol \mu - \boldsymbol A^T\boldsymbol L\boldsymbol b \\ \boldsymbol L\boldsymbol b
+        \end{pmatrix}
+        + \text{ const }
+        \end{aligned} \\ 
+    \end{aligned}
+    \end{equation*}
+    Now, using the same pattern matching, we can see that the covariance of $\boldsymbol z$ is equal to:
+    \begin{equation*}
+    \begin{pmatrix}
+        \boldsymbol \Lambda + \boldsymbol A^T\boldsymbol L\boldsymbol A & - \boldsymbol A^T\boldsymbol L \\
+        -\boldsymbol L\boldsymbol A & \boldsymbol L
+    \end{pmatrix}^{-1} = 
+    \begin{pmatrix}
+        \boldsymbol \Lambda^{-1} & \boldsymbol \Lambda^{-1}\boldsymbol A^T \\
+        \boldsymbol A\boldsymbol \Lambda^{-1} & \boldsymbol L^{-1} + \boldsymbol A\boldsymbol \Lambda^{-1}\boldsymbol A^T
+    \end{pmatrix} 
+    \end{equation*}
+    Similarly, the mean is equal to:
+    \begin{equation*}
+        \begin{pmatrix}
+            \boldsymbol \Lambda^{-1} & \boldsymbol \Lambda^{-1}\boldsymbol A^T \\
+            \boldsymbol A\boldsymbol \Lambda^{-1} & \boldsymbol L^{-1} + \boldsymbol A\boldsymbol \Lambda^{-1}\boldsymbol A^T
+        \end{pmatrix}
+        \begin{pmatrix}
+            \boldsymbol \Lambda \boldsymbol \mu - \boldsymbol A^T\boldsymbol L\boldsymbol b \\ \boldsymbol L\boldsymbol b
+        \end{pmatrix} = \begin{pmatrix}
+            \boldsymbol \mu \\ \boldsymbol A\boldsymbol \mu + \boldsymbol b
+        \end{pmatrix}
+    \end{equation*}
+    Now, we can use results above (conditional and marginalized) to get the result. 
+\end{proof}
+
+
+\begin{remark}{\textbf{(Conjugate Prior of Multinormal)}}
+    The proof follows from \href{https://stats.stackexchange.com/questions/153241/derivation-of-normal-wishart-posterior}{here}. We are now consider the likelihood of Multinormal distribution given the dataset:
+    \begin{equation*}
+    \begin{aligned}
+        \prod^N_{i=1} \frac{1}{\sqrt{\abs{2\pi \boldsymbol \Lambda^{-1}}}}&\exp\brackc{-\cfrac{1}{2}(\boldsymbol x_i-\boldsymbol \mu)^T\boldsymbol \Lambda(\boldsymbol x_i-\boldsymbol \mu)} \\
+        &= \frac{1}{\abs{2\pi\boldsymbol \Lambda^{-1}}^{N/2}} \exp\brackc{-\cfrac{1}{2}\sum^N_{i=1}(\boldsymbol x_i-\boldsymbol \mu)^T\boldsymbol \Lambda(\boldsymbol x_i-\boldsymbol \mu)} \\
+        &\propto \abs{\boldsymbol \Lambda}^{N/2} \exp\brackc{-\cfrac{1}{2}\sum^N_{i=1}(\boldsymbol x_i-\boldsymbol \mu)^T\boldsymbol \Lambda(\boldsymbol x_i-\boldsymbol \mu)} \\
+    \end{aligned}
+    \end{equation*}
+    Now, we will consider the Normal-Wishart distribution in the similar form as:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{B(\boldsymbol W, \nu)\abs{\boldsymbol \Lambda}^{(\nu-D-1)/2}}{\sqrt{\abs{2\pi (\lambda\boldsymbol \Lambda)^{-1}}}}&\exp\bracka{-\frac{1}{2}\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big] - \frac{\lambda}{2} (\boldsymbol \mu-\boldsymbol \mu_0)^T\boldsymbol \Lambda (\boldsymbol \mu-\boldsymbol \mu_0)^T} \\
+        &\propto \abs{\boldsymbol \Lambda}^{(\nu-D)/2}\exp\bracka{-\frac{1}{2}\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big]}  \exp\bracka{-\frac{\lambda}{2} (\boldsymbol \mu-\boldsymbol \mu_0)^T\boldsymbol \Lambda (\boldsymbol \mu-\boldsymbol \mu_0)^T} \\
+    \end{aligned}
+    \end{equation*}
+    Now, we simply have to multiply the conjugate prior and the normal distribution, which gives us:
+    \begin{equation*}
+    \begin{aligned}
+        &\begin{aligned}[t]
+            \abs{\boldsymbol \Lambda}^{N/2} &\exp\brackc{-\cfrac{1}{2}\sum^N_{i=1}(\boldsymbol x_i-\boldsymbol \mu)^T\boldsymbol \Lambda(\boldsymbol x_i-\boldsymbol \mu)} \\
+            &\abs{\boldsymbol \Lambda}^{(\nu-D)/2}\exp\bracka{-\frac{1}{2}\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big]}  \exp\bracka{-\frac{\lambda}{2} (\boldsymbol \mu-\boldsymbol \mu_0)^T\boldsymbol \Lambda (\boldsymbol \mu-\boldsymbol \mu_0)^T} \\
+        \end{aligned} \\
+        &= \begin{aligned}[t]
+            \abs{\boldsymbol \Lambda}^{(\nu-D + N)/2}&\exp\bracka{-\frac{1}{2}\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big]}  \\
+            &\exp\brackc{-\cfrac{1}{2}\brackb{\sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Lambda\boldsymbol x_i\Big) + N\boldsymbol \mu^T\boldsymbol \Lambda\boldsymbol \mu - 2N\bar{\boldsymbol x}^T\boldsymbol \Lambda\boldsymbol \mu}} \\
+            &\exp\brackc{-\cfrac{\lambda}{2}\Big[\boldsymbol \mu^T\boldsymbol \Lambda \boldsymbol \mu - 2\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu + \boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 \Big]} \\
+        \end{aligned}\\
+        &= \begin{aligned}[t]
+            \abs{\boldsymbol \Lambda}^{(\nu-D + N)/2}\exp\Bigg(-\cfrac{1}{2}\Bigg[\operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big] &+ \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Lambda\boldsymbol x_i\Big) + (N+\lambda)\boldsymbol \mu^T\boldsymbol \Lambda\boldsymbol \mu \\
+            &- 2(N\bar{\boldsymbol x}^T + \lambda\boldsymbol \mu_0^T)\boldsymbol \Lambda\boldsymbol \mu+ \lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0\Bigg]\Bigg) \\
+        \end{aligned}\\
+    \end{aligned} 
+    \end{equation*}
+    Let's consider exclusively for the expression in the square bracket:
+    \begin{equation*}
+    \begin{aligned}
+        \operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big] &+ \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Lambda\boldsymbol x_i\Big) + \lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 + (N+\lambda)\boldsymbol \mu^T\boldsymbol \Lambda\boldsymbol \mu- 2(N\bar{\boldsymbol x}^T + \lambda\boldsymbol \mu_0^T)\boldsymbol \Lambda\boldsymbol \mu  \\        
+        &= \begin{aligned}[t]
+            \operatorname{Tr}\Big[\boldsymbol W^{-1}\boldsymbol \Lambda \Big] &+ \textcolor{red}{\sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Lambda\boldsymbol x_i\Big)} + \textcolor{brown}{\lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 - \frac{1}{\lambda + N}(\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x})^T\boldsymbol \Lambda (\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x})} \\
+            &+ \textcolor{blue}{(N+\lambda)\boldsymbol \mu^T\boldsymbol \Lambda\boldsymbol \mu - 2\boldsymbol \mu^T\boldsymbol \Lambda(N\bar{\boldsymbol x} + \lambda\boldsymbol\mu_0)} \textcolor{blue}{+ \frac{1}{\lambda + N}(\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x})^T\boldsymbol \Lambda (\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x})}  \\        
+        \end{aligned}
+    \end{aligned}
+    \end{equation*}
+    Please note that the \textcolor{blue}{blue} part, whichis equal to:
+    \begin{equation*}
+        (N+\lambda)\bracka{\boldsymbol \mu - \frac{\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x}}{\lambda+N}}^T\boldsymbol\Lambda\bracka{\boldsymbol \mu - \frac{\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x}}{\lambda+N}}
+    \end{equation*}
+    Now for the \textcolor{red}{red} part, we consider adding and substracting $2N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x}$, which we have:
+    \begin{equation*}
+    \begin{aligned}
+        \sum^N_{i=1}\Big(\boldsymbol x_i^T\boldsymbol \Lambda\boldsymbol x_i\Big)&- 2\sum^N_{i=1}\boldsymbol x^T_i\Lambda\bar{\boldsymbol x} + \sum^N_{i=1}\bar{\boldsymbol x}\Lambda\bar{\boldsymbol x} + N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} \\ 
+        &= \sum^N_{i=1}\bracka{\boldsymbol x_i - \bar{\boldsymbol x}}^T\boldsymbol\Lambda\bracka{\boldsymbol x_i - \bar{\boldsymbol x}} + N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x}
+    \end{aligned}
+    \end{equation*}
+    For the \textcolor{brown}{brown} equation (together with $N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x}$), we have:
+    \begin{equation*}
+    \begin{aligned}
+        \lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 &- \frac{1}{\lambda + N}(\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x})^T\boldsymbol \Lambda (\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x}) + N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} \\
+        &= \lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0+ N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} - \frac{1}{\lambda + N}\Big[ \lambda^2\boldsymbol \mu_0^T\Lambda\boldsymbol \mu_0 + 2N\lambda\bar{\boldsymbol x}^T\boldsymbol\Lambda\boldsymbol\mu_0 + N^2\bar{\boldsymbol x}^T\boldsymbol \Lambda\bar{\boldsymbol x} \Big]\\
+        &= \frac{\lambda + N}{\lambda + N}\lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0+ \frac{\lambda + N}{\lambda + N}N\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} - \frac{1}{\lambda + N}\Big[ \lambda^2\boldsymbol \mu_0^T\Lambda\boldsymbol \mu_0 + 2N\lambda\bar{\boldsymbol x}^T\boldsymbol\Lambda\boldsymbol\mu_0 + N^2\bar{\boldsymbol x}^T\boldsymbol \Lambda\bar{\boldsymbol x} \Big]\\
+        &= \begin{aligned}[t]
+            \frac{1}{\lambda + N}&\Big[ \lambda^2\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 + N\lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 + N\lambda\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} +N^2\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} \Big] \\
+            &- \frac{1}{\lambda + N}\Big[ \lambda^2\boldsymbol \mu_0^T\Lambda\boldsymbol \mu_0 + 2N\lambda\bar{\boldsymbol x}^T\boldsymbol\Lambda\boldsymbol\mu_0 + N^2\bar{\boldsymbol x}^T\boldsymbol \Lambda\bar{\boldsymbol x} \Big]\\
+        \end{aligned} \\
+        &= \frac{1}{\lambda + N}\brackb{N\lambda\boldsymbol \mu_0^T\boldsymbol \Lambda\boldsymbol \mu_0 + N\lambda\bar{\boldsymbol x}^T\Lambda\bar{\boldsymbol x} + 2N\lambda\bar{\boldsymbol x}^T\boldsymbol\Lambda\boldsymbol\mu_0} \\
+        &= \frac{N\lambda}{\lambda + N}(\bar{\boldsymbol x} - \boldsymbol \mu_0)^T\boldsymbol \Lambda(\bar{\boldsymbol x} - \boldsymbol \mu_0) \\
+    \end{aligned}
+    \end{equation*}
+    Combining the first part (black, \textcolor{red}{red}, and \textcolor{brown}{brown}), and together with the trace trick:
+    \begin{equation*}
+        \operatorname{Tr}\bracka{\boldsymbol W^{-1}\boldsymbol \Lambda  + \sum^N_{i=1}\bracka{\boldsymbol x_i - \bar{\boldsymbol x}}\bracka{\boldsymbol x_i - \bar{\boldsymbol x}}^T\boldsymbol\Lambda + \frac{N\lambda}{\lambda + N}(\bar{\boldsymbol x} - \boldsymbol \mu_0)(\bar{\boldsymbol x} - \boldsymbol \mu_0)^T\boldsymbol\Lambda}
+    \end{equation*}
+    Now, the distribution becomes:
+    \begin{equation*}
+    \begin{aligned}
+        \abs{\boldsymbol \Lambda}^{(\nu-D + N)/2}\exp\Bigg(-\cfrac{1}{2}
+            \operatorname{Tr}&\bracka{\brackb{\boldsymbol W^{-1}  + \sum^N_{i=1}\bracka{\boldsymbol x_i - \bar{\boldsymbol x}}\bracka{\boldsymbol x_i - \bar{\boldsymbol x}}^T + \frac{N\lambda}{\lambda + N}(\bar{\boldsymbol x} - \boldsymbol \mu_0)(\bar{\boldsymbol x} - \boldsymbol \mu_0)^T}\boldsymbol\Lambda} \\ 
+        &- \frac{N+\lambda}{2} \bracka{\boldsymbol \mu - \frac{\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x}}{\lambda+N}}^T\boldsymbol\Lambda\bracka{\boldsymbol \mu - \frac{\lambda\boldsymbol \mu_0 + N\bar{\boldsymbol x}}{\lambda+N}} \Bigg) \\
+    \end{aligned}
+    \end{equation*}
+    Which is simply a Normal-Wishart Distribution as required.
+\end{remark}
+
+\begin{proposition}{\textbf{(Maximum Likelihood of Mean)}}
+   We can show that for Gaussian distribution, the maximum likelihood of $\boldsymbol \mu$, given the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$ is 
+   \begin{equation*}
+       \hat{\boldsymbol \mu}_\text{ML} = \frac{1}{N}\sum^N_{i=1}\boldsymbol x_i
+   \end{equation*} 
+\end{proposition}
+\begin{proof}
+    Starting with the log-likelihood to be:
+    \begin{equation*}
+        l(\boldsymbol \mu, \boldsymbol \Sigma) = \log \prod^N_{i=1} \mathcal{N}(\boldsymbol x_i|\boldsymbol \mu, \boldsymbol \Sigma) = -\frac{N}{2}\log\abs{2\pi\boldsymbol \Sigma} - \frac{1}{2}\sum^N_{i=1}(\boldsymbol x_n - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_n - \boldsymbol \mu)
+    \end{equation*}
+    And, so we can consider the derivative over $\boldsymbol \mu$ as:
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial (-l)}{\partial \boldsymbol \mu} 
+        &= \frac{\partial}{\partial \boldsymbol \mu}\brackb{\frac{N}{2}\log\abs{2\pi\boldsymbol \Sigma} + \frac{1}{2}\sum^N_{i=1}(\boldsymbol x_n - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_n - \boldsymbol \mu)} \\
+        &= \frac{1}{2}\sum^N_{i=1}\frac{\partial}{\partial \boldsymbol \mu}(\boldsymbol x_n - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_n - \boldsymbol \mu) \\
+        &= \frac{1}{2}\sum^N_{i=1}\bracka{\frac{\partial}{\partial \boldsymbol \mu}\Big[\boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol\mu\Big] - 2\frac{\partial}{\partial \boldsymbol \mu}\Big[ \boldsymbol \mu^T\boldsymbol \Sigma^{-1}\boldsymbol x_i  \Big]} = N\boldsymbol \Sigma^{-1} \boldsymbol \mu - \boldsymbol \Sigma^{-1}\sum_{i=1}^N\boldsymbol x_i \\
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative to zero and we yields the result.
+\end{proof}
+
+\begin{proposition}{\textbf{(Maximum Likelihood of Covariance)}}
+    We can show that for Gaussian distribution, the maximum likelihood of $\boldsymbol \Sigma$, given the dataset $\brackc{\boldsymbol x_i}^N_{i=1}$ is 
+   \begin{equation*}
+       \hat{\boldsymbol \Sigma}_\text{ML} = \frac{1}{N}\sum^N_{i=1}(\boldsymbol x_i - \boldsymbol \mu)(\boldsymbol x_i - \boldsymbol \mu)^T
+   \end{equation*} 
+\end{proposition}
+\begin{proof}
+    We consider the derivative over $\boldsymbol \Sigma^{-1}$ as (please note that we have to constraint of the covariance to be positive definite but it turn out we don't have to as the result already satisfies the constriant):
+    \begin{equation*}
+    \begin{aligned}
+        \frac{\partial (-l)}{\partial \boldsymbol \Sigma^{-1}} 
+        &= \frac{\partial}{\partial \boldsymbol \Sigma^{-1}}\brackb{\frac{N}{2}\log\abs{2\pi\boldsymbol \Sigma} + \frac{1}{2}\sum^N_{i=1}(\boldsymbol x_n - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_n - \boldsymbol \mu)} \\
+        &= -\frac{\partial}{\partial \boldsymbol \Sigma^{-1}}\brackb{\frac{N}{2}\log\abs{\boldsymbol \Sigma^{-1}}} + \frac{1}{2}\sum^N_{i=1}\frac{\partial}{\partial \boldsymbol \Sigma^{-1}}\brackb{(\boldsymbol x_n - \boldsymbol \mu)^T\boldsymbol \Sigma^{-1}(\boldsymbol x_n - \boldsymbol \mu)} \\
+        &= -\frac{N}{2}\boldsymbol \Sigma^T + \frac{1}{2}\sum^N_{i=1}(\boldsymbol x_n - \boldsymbol \mu)(\boldsymbol x_n - \boldsymbol \mu)^T \\
+    \end{aligned}
+    \end{equation*}
+    Setting the derivative to zero and we yields the result.
+\end{proof}
+
+\begin{definition}{ \textbf{(Linear Regression)}}
+    Now, given the data: $\mathcal{D}=\brackc{(\boldsymbol x_i, \boldsymbol y)}^N_{i=1}$. We have $\boldsymbol y_i$ is conditionally independent given $\boldsymbol x_i$. Now, we consider the supervised learning as we have a linear function $\boldsymbol x$ together with Gaussian noise:
+    \begin{equation*}
+        p(\boldsymbol y | \boldsymbol x, \boldsymbol W, \boldsymbol \Sigma_y) = \frac{1}{\sqrt{\abs{2\pi\boldsymbol \Sigma_y}}} \exp\brackc{-\frac{1}{2}(\boldsymbol y - \boldsymbol W\boldsymbol x)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y - \boldsymbol W\boldsymbol x)}
+    \end{equation*}
+\end{definition}
+
+\begin{proposition}{\textbf{(Maximum Likelihood of Linear Regression)}}
+    The maximum likelihood is given by the following:
+    \begin{equation*}
+        \hat{\boldsymbol W} = \sum^N_{i=1}\boldsymbol y_i\boldsymbol x_i^T\bracka{\sum^N_{i=1}\boldsymbol x_i\boldsymbol x_i^T}^{-1}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    Consider the log-likelihood of the linear regression:
+    \begin{equation*}
+    \begin{aligned}
+        l &= \log \prod^N_{i=1} \frac{1}{\sqrt{\abs{2\pi\boldsymbol \Sigma_y}}} \exp\brackc{-\frac{1}{2}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)} \\
+        &= \sum^N_{i=1} -\frac{1}{2}\log \abs{2\pi\boldsymbol \Sigma_y} -\frac{1}{2}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i) \\\
+        &= -\frac{N}{2}\log \abs{2\pi\boldsymbol \Sigma_y} -\frac{1}{2}\sum^N_{i=1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)
+    \end{aligned}
+    \end{equation*}
+    We consider the derivative, as we have:    
+    \allowdisplaybreaks
+    \begin{align*}
+        \frac{\partial (-l)}{\partial \boldsymbol W} &= \frac{\partial}{\partial \boldsymbol W} \brackb{ \frac{N}{2}\log \abs{2\pi\boldsymbol \Sigma_y} +\frac{1}{2}\sum^N_{i=1} (\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i) } \\ 
+        &= \frac{1}{2}\sum^N_{i=1}\frac{\partial}{\partial \boldsymbol W}\Big[(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i)^T\boldsymbol \Sigma_y^{-1}(\boldsymbol y_i - \boldsymbol W\boldsymbol x_i) \Big] \\
+        &= \frac{1}{2}\sum^N_{i=1}\frac{\partial}{\partial \boldsymbol W}\Big[ \boldsymbol y_i^T\boldsymbol \Sigma_y^{-1} \boldsymbol y_i + \boldsymbol x_i^T\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol W\boldsymbol x_i - 2\boldsymbol x_i^T\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol y_i \Big] \\
+        &= \frac{1}{2}\sum^N_{i=1}\brackb{ \frac{\partial}{\partial \boldsymbol W}\operatorname{Tr}[\boldsymbol x_i^T\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol W\boldsymbol x_i] - 2\frac{\partial}{\partial \boldsymbol W}\operatorname{Tr}[\boldsymbol x_i^T\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol y_i] } \\
+        &= \frac{1}{2}\sum^N_{i=1}\brackb{ \frac{\partial}{\partial \boldsymbol W}\operatorname{Tr}[\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol W\boldsymbol x_i\boldsymbol x_i^T] - 2\frac{\partial}{\partial \boldsymbol W}\operatorname{Tr}[\boldsymbol W^T\boldsymbol \Sigma_y^{-1}\boldsymbol y_i\boldsymbol x_i^T] } \\
+        &= \frac{1}{2}\sum^N_{i=1}\brackb{  2\boldsymbol\Sigma_y^{-1}\boldsymbol W\boldsymbol x_i\boldsymbol x_i^T - 2\boldsymbol \Sigma_y^{-1}\boldsymbol y_i\boldsymbol x_i^T } \\
+    \end{align*}
+    Please noted that we use the derivative of the trace above, and setting the derivative to zero and we have the answer as we wanted. 
+\end{proof}
+
+\begin{proposition}
+    The MAP estimate given prior over the weight $p(\boldsymbol w) = \mathcal{N}(\boldsymbol 0, \boldsymbol A^{-1})$ is:
+    \begin{equation*}
+        \boldsymbol w^\text{MAP} = \underbrace{\bracka{\boldsymbol A + \frac{\sum_{i=1}^N\boldsymbol x_i\boldsymbol x_i^T}{\sigma_y^2}}^{-1}}_{\boldsymbol \Sigma_w}\frac{\sum_{i=1}^N\boldsymbol y_i\boldsymbol x_i}{\sigma^2_y} = \bracka{A\sigma^2_y + \sum_{i=1}^N\boldsymbol x_i\boldsymbol x_i^T}^{-1}\sum^N_{i=1}y_i\boldsymbol x_i
+    \end{equation*}
+    We will denote the $ a $
+    Please note that we consider the prediction in one-dimensional, as we have
+    \begin{equation*}
+    \begin{aligned}
+        % &p(y | \boldsymbol x, \boldsymbol w, \sigma_y^2) = \mathcal{N}(\boldsymbol w^T\boldsymbol x_i, \sigma_y^2) \\
+        &p(\mathcal{D} | \brackc{\boldsymbol x_i}^N_{i=1}, \boldsymbol w, \sigma_y) = \frac{1}{\sqrt{2\pi\sigma^2_y}}\exp\brackc{-\frac{1}{2\sigma_y^2}\sum^N_{i=1} (y_i - \boldsymbol w^T\boldsymbol x_i)^2 }
+    \end{aligned}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    We start with the log-posterior on $\boldsymbol w$ is given as:
+    \begin{equation*}
+    \begin{aligned}
+        \log p(\boldsymbol w | \mathcal{D}, A, \sigma_y) &= \log p(\mathcal{D}|\brackc{\boldsymbol x_i}^N_{i=1}, \boldsymbol w, \sigma_y) + \log p(\boldsymbol w | A) + \text{ const } \\
+        &= -\frac{1}{2}\boldsymbol w^T\boldsymbol A\boldsymbol w - \frac{1}{2\sigma^2_y}\sum^N_{i=1}(y_i-\boldsymbol w^T\boldsymbol x_i)^2 + \text{ const } \\
+        &= -\frac{1}{2}\boldsymbol w^T\boldsymbol A\boldsymbol w - \frac{1}{2\sigma^2_y}\sum^N_{i=1}\Big[y_i^2-2y_i\boldsymbol w^T\boldsymbol x_i + (\boldsymbol w^T\boldsymbol x_i)^2\Big] + \text{ const } \\
+        &= -\frac{1}{2}\boldsymbol w^T\boldsymbol A\boldsymbol w - \frac{1}{2\sigma^2_y}\sum^N_{i=1} 2y_i\boldsymbol w^T\boldsymbol x_i - \frac{1}{2} \boldsymbol w^T\bracka{\sigma^{-2}_y\sum^N_{i=1}\boldsymbol x_i\boldsymbol x_i^T}\boldsymbol w + \text{ const } \\
+        &= -\frac{1}{2}\boldsymbol w^T\bracka{\boldsymbol A + \sigma^{-2}_y\sum^N_{i=1}\boldsymbol x_i\boldsymbol x_i^T}\boldsymbol w - \boldsymbol w^T\sum^N_{i=1} (y_i \boldsymbol x_i)\sigma^{-2}_y + \text{ const } \\
+        &= -\frac{1}{2}\boldsymbol w^T\boldsymbol \Sigma^{-1}_w\boldsymbol w - \boldsymbol w^T\boldsymbol \Sigma_w^{-1}\boldsymbol \Sigma_w\sum^N_{i=1} (y_i \boldsymbol x_i)\sigma^{-2}_y + \text{ const } \\
+        &= \log \ \mathcal{N}\bracka{\boldsymbol \Sigma_w\sum^N_{i=1} (y_i \boldsymbol x_i)\sigma^{-2}_y, \boldsymbol\Sigma_w}
+    \end{aligned}
+    \end{equation*}
+    As the Gaussian gives the maximum probability at its mean; therefore, we have completed the prove. 
+\end{proof}
+
+
+

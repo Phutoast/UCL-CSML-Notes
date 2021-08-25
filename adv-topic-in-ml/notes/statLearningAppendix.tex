@@ -1,0 +1,20 @@
+\section{Experimental Proof}
+
+\subsection{Projected Gradient Descent}
+
+\begin{lemma}
+    We would like to note that, for some $y\in \mathbb{R}^d$ and $x\in\Omega$
+    \begin{equation*}
+        \norm{\Pi_\Omega(y) - x}^2 \le \norm{y - x}^2 - \norm{y - \Pi_\Omega(y)}^2
+    \end{equation*}
+\end{lemma}
+
+\begin{remark}
+    The projected gradient descent can be splitted into $2$ parts:
+    \begin{equation*}
+    \begin{aligned}
+        &y_{t+1}= x_t - \gamma \nabla f(x_t) \\
+        &x_{t+1}= \Pi_\Omega(y_{t+1})
+    \end{aligned}
+    \end{equation*}
+\end{remark}
